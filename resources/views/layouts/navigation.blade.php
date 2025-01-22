@@ -31,7 +31,7 @@
                         {{ __('Category') }}
                     </x-nav-link>
 
-                    <x-nav-link href="admin/user" :active="request()->routeIs('admin.User')">
+                    <x-nav-link href="user" :active="request()->routeIs('admin.user.user')">
                         {{ __('User') }}
                     </x-nav-link>
                     @endif
@@ -143,7 +143,7 @@
                 {{ __('Category') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="admin/user" :active="request()->routeIs('admin.User')">
+            <x-responsive-nav-link href="user" :active="request()->routeIs('admin.user.user')">
                 {{ __('User') }}
             </x-responsive-nav-link>
             @endif
