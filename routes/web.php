@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\User\UserAdminController;
 use App\Http\Controllers\Hotel\HotelController;
 use App\Http\Controllers\Resto\RestoController;
 use App\Http\Controllers\ProfileController;
@@ -38,6 +39,7 @@ route::middleware(['auth', 'userMiddleware'])->group(function () {
 route::middleware(['auth', 'adminMiddleware'])->group(function () {
 
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/user', [UserAdminController::class, 'index'])->name('admin.user');
 
 });
 

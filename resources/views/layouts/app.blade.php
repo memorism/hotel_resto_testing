@@ -14,12 +14,11 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script>
-            // Ketika pengguna menutup tab atau keluar dari halaman
             window.addEventListener('beforeunload', function (event) {
-                // Kirim request untuk logout pengguna
                 navigator.sendBeacon('/logout');
             });
         </script>
+        
         
     </head>
     <body class="font-sans antialiased">
