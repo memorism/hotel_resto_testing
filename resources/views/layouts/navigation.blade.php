@@ -47,11 +47,12 @@
                         {{ __('Hotel Rooms') }}
                     </x-nav-link>
 
-                    <x-nav-link href="revenue" :active="request()->routeIs('Hotel.User')">
-                        {{ __('Revenue') }}
+                    <x-nav-link href="databooking" :active="request()->routeIs('hotel.databooking.index')">
+                        {{ __('Data Booking') }}
                     </x-nav-link>
 
-                    <x-nav-link href="booking" :active="request()->routeIs('hotel.book')">
+
+                    <x-nav-link href="booking" :active="request()->routeIs('hotel.booking.booking')">
                         {{ __('Booking') }}
                     </x-nav-link>
                     @endif
@@ -163,11 +164,11 @@
                 {{ __('Hotel Rooms') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="Hotel/revenue" :active="request()->routeIs('Hotel.User')">
-                {{ __('Revenue') }}
+            <x-responsive-nav-link href="databooking" :active="request()->routeIs('hotel.databooking.index')">
+                {{ __('Data Booking') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="booking" :active="request()->routeIs('hotel.booking')">
+            <x-responsive-nav-link href="booking" :active="request()->routeIs('hotel.booking.booking')">
                 {{ __('Booking') }}
             </x-responsive-nav-link>
             @endif

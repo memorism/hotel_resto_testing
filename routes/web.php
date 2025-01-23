@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Hotel\BookingController;
 use App\Http\Controllers\Hotel\HotelController;
 use App\Http\Controllers\Hotel\roomsController;
+use App\Http\Controllers\Hotel\UploadOrderController;
 use App\Http\Controllers\Resto\RestoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\UserController;
@@ -67,6 +68,8 @@ route::middleware(['auth', 'hotelMiddleware'])->group(function () {
     Route::get('/hotel/booking', [BookingController::class, 'index'])->name('hotel.booking.booking');
     Route::get('/hotel/booking/{id}', [BookingController::class, 'show']);
     Route::delete('/hotel/booking/{id}', [BookingController::class, 'destroy'])->name('hotel.booking.destroy');
+    // route data booking
+    Route::get('/hotel/databooking', [UploadOrderController::class,'index' ])->name('hotel.databooking.index');
 
 
 });

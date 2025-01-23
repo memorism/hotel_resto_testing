@@ -13,11 +13,16 @@ class Booking extends Model {
         'type_of_meal_plan', 'required_car_parking_space', 'room_type_reserved', 'lead_time',
         'arrival_year', 'arrival_month', 'arrival_date', 'market_segment_type', 'repeated_guest',
         'no_of_previous_cancellations', 'no_of_previous_bookings_not_canceled', 'avg_price_per_room',
-        'no_of_special_requests', 'booking_status'
+        'no_of_special_requests', 'booking_status', 'upload_order_id'
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class); // Menghubungkan dengan model User
+    }
+
+    public function uploadOrder()
+    {
+        return $this->belongsTo(UploadOrder::class, 'upload_order_id');
     }
 }
