@@ -65,11 +65,16 @@ route::middleware(['auth', 'hotelMiddleware'])->group(function () {
     Route::get('/hotel/dashboard', [HotelController::class, 'index'])->name('hotel.dashboard');
     // route rooms
     Route::get('/hotel/rooms', [roomsController::class, 'index'])->name('hotel.rooms.rooms');
+    // route booking
     Route::get('/hotel/booking', [BookingController::class, 'index'])->name('hotel.booking.booking');
     Route::get('/hotel/booking/{id}', [BookingController::class, 'show']);
     Route::delete('/hotel/booking/{id}', [BookingController::class, 'destroy'])->name('hotel.booking.destroy');
+    
     // route data booking
     Route::get('/hotel/databooking', [UploadOrderController::class,'index' ])->name('hotel.databooking.index');
-
-
+    Route::get('/hotel/databooking/create', [UploadOrderController::class, 'create'])->name('hotel.databooking.create');
+    Route::get('/hotel/databooking/{id}', [UploadOrderController::class, 'show']);
+    Route::delete('/hotel/databooking/{id}', [UploadOrderController::class, 'destroy'])->name('hotel.databooking.destroy');
+    Route::post('/hotel/databooking', [UploadOrderController::class, 'store'])->name('hotel.databooking.store');
+    Route::post('/hotel/databooking/store-import', [UploadOrderController::class, 'storeAndImport'])->name('hotel.databooking.storeImport');
 });

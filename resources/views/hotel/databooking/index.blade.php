@@ -4,7 +4,7 @@
             <h2 class="fw-semibold fs-4 text-dark">
                 {{ __('Data Hotel') }}
             </h2>
-            <a href="" class="btn btn-primary">
+            <a href="{{ route('hotel.databooking.create') }}" class="btn btn-primary">
                 Tambah Data
             </a>
         </div>
