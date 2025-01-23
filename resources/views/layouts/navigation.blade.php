@@ -39,16 +39,20 @@
                     {{-- Hotel links --}}
 
                     @if  (Auth::user()->usertype == 'hotel')
-                    <x-nav-link href="Hotel/Dashboard" :active="request()->routeIs('Hotel.product')">
+                    <x-nav-link href="dashboard" :active="request()->routeIs('hotel.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link href="Hotel/room" :active="request()->routeIs('Hotel.category')">
+                    <x-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
                         {{ __('Hotel Rooms') }}
                     </x-nav-link>
 
-                    <x-nav-link href="Hotel/revenue" :active="request()->routeIs('Hotel.User')">
+                    <x-nav-link href="revenue" :active="request()->routeIs('Hotel.User')">
                         {{ __('Revenue') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="booking" :active="request()->routeIs('hotel.book')">
+                        {{ __('Booking') }}
                     </x-nav-link>
                     @endif
 
@@ -151,16 +155,20 @@
             {{-- Hotel links --}}
 
             @if  (Auth::user()->usertype == 'hotel')
-            <x-responsive-nav-link href="Hotel/Dashboard" :active="request()->routeIs('Hotel.product')">
+            <x-responsive-nav-link href="dashboard" :active="request()->routeIs('hotel.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="Hotel/room" :active="request()->routeIs('Hotel.category')">
+            <x-responsive-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
                 {{ __('Hotel Rooms') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="Hotel/revenue" :active="request()->routeIs('Hotel.User')">
                 {{ __('Revenue') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="booking" :active="request()->routeIs('hotel.booking')">
+                {{ __('Booking') }}
             </x-responsive-nav-link>
             @endif
 
