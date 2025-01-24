@@ -39,7 +39,7 @@
                     {{-- Hotel links --}}
 
                     @if  (Auth::user()->usertype == 'hotel')
-                    <x-nav-link href="dashboard" :active="request()->routeIs('hotel.dashboard')">
+                    <x-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
@@ -47,12 +47,12 @@
                         {{ __('Hotel Rooms') }}
                     </x-nav-link>
 
-                    <x-nav-link href="databooking" :active="request()->routeIs('hotel.databooking.index')">
+                    <x-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
                         {{ __('Data Booking') }}
                     </x-nav-link>
 
 
-                    <x-nav-link href="booking" :active="request()->routeIs('hotel.booking.booking')">
+                    <x-nav-link href="{{ route('hotel.booking.booking') }}" :active="request()->routeIs('hotel.booking.booking')">
                         {{ __('Booking') }}
                     </x-nav-link>
                     @endif
@@ -156,7 +156,7 @@
             {{-- Hotel links --}}
 
             @if  (Auth::user()->usertype == 'hotel')
-            <x-responsive-nav-link href="dashboard" :active="request()->routeIs('hotel.dashboard')">
+            <x-responsive-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
@@ -164,11 +164,11 @@
                 {{ __('Hotel Rooms') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="databooking" :active="request()->routeIs('hotel.databooking.index')">
+            <x-responsive-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
                 {{ __('Data Booking') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="booking" :active="request()->routeIs('hotel.booking.booking')">
+            <x-responsive-nav-link href="{{ route('hotel.booking.booking') }}" :active="request()->routeIs('hotel.booking.booking')">
                 {{ __('Booking') }}
             </x-responsive-nav-link>
             @endif

@@ -104,9 +104,21 @@ class BookingController extends Controller
         return redirect()->route('hotel.booking.booking')->with('success', 'Booking updated successfully.');
     }
 
-    public function destroy(Booking $booking)
+    public function destroy($id)
     {
+        $booking = Booking::findOrFail($id);
+        
+        // Menghapus data booking
         $booking->delete();
+    
+        // Jika request datang menggunakan AJAX
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+    
+        // Jika request bukan AJAX, lakukan redirect biasa
         return redirect()->route('hotel.booking.booking')->with('success', 'Booking deleted successfully.');
     }
+    
+    
 }

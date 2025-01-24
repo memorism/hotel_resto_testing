@@ -76,10 +76,11 @@
                                             <div class="flex justify-center gap-2">
                                                 <!-- Tombol View -->
                                                 {{-- {{ route('hotel.databooking.show', $uploadOrder->id) }} --}}
-                                                <a href=""
+                                                <a href="{{ route('hotel.databooking.viewUploadOrder', $uploadOrder->id) }}"
                                                     class="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-md hover:bg-blue-600 text-decoration-none">
                                                     View
                                                 </a>
+                                                                                              
 
                                                 <!-- Tombol Update -->
                                                 {{-- {{ route('hotel.databooking.edit', $uploadOrder->id) }} --}}

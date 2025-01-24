@@ -120,4 +120,28 @@ class UploadOrderController extends Controller
 
         return redirect()->route('hotel.databooking.index')->with('success', 'Upload Order deleted successfully!');
     }
+
+    public function viewUploadOrder($id, Request $request)
+    {
+        // Cari UploadOrder berdasarkan ID
+        $uploadOrder = UploadOrder::findOrFail($id);
+
+        // Ambil parameter perPage dan search dari request
+        $perPage = $request->input('perPage', 10); // Default: 10
+        $search = $request->input('search'); // Ambil keyword pencarian
+
+        // Query untuk mengambil data bookings yang berhubungan dengan upload order
+        $bookingsQuery = Booking::where('upload_order_id', $uploadOrder->id);
+
+        // Jika ada keyword pencarian, tambahkan ke query
+        if ($search) {
+            $bookingsQuery->where('booking_id', 'LIKE', "%$search%");
+        }
+
+        // Paginate hasil query
+        $bookings = $bookingsQuery->paginate($perPage);
+
+        // Tampilkan view dengan data UploadOrder dan Booking
+        return view('hotel.databooking.view-upload-order', compact('uploadOrder', 'bookings', 'search'));
+    }
 }

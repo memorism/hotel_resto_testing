@@ -47,7 +47,7 @@ route::middleware(['auth', 'adminMiddleware'])->group(function () {
     Route::get('/admin/user/create', [UserAdminController::class, 'create'])->name('admin.user.create');
     Route::post('/admin/user', [UserAdminController::class, 'store'])->name('admin.user.store');
     Route::delete('/admin/user/{id}', [UserAdminController::class, 'destroy'])->name('admin.user.destroy');
-    
+
 
 
 });
@@ -69,12 +69,14 @@ route::middleware(['auth', 'hotelMiddleware'])->group(function () {
     Route::get('/hotel/booking', [BookingController::class, 'index'])->name('hotel.booking.booking');
     Route::get('/hotel/booking/{id}', [BookingController::class, 'show']);
     Route::delete('/hotel/booking/{id}', [BookingController::class, 'destroy'])->name('hotel.booking.destroy');
-    
+
     // route data booking
-    Route::get('/hotel/databooking', [UploadOrderController::class,'index' ])->name('hotel.databooking.index');
+    Route::get('/hotel/databooking', [UploadOrderController::class, 'index'])->name('hotel.databooking.index');
     Route::get('/hotel/databooking/create', [UploadOrderController::class, 'create'])->name('hotel.databooking.create');
     Route::get('/hotel/databooking/{id}', [UploadOrderController::class, 'show']);
     Route::delete('/hotel/databooking/{id}', [UploadOrderController::class, 'destroy'])->name('hotel.databooking.destroy');
     Route::post('/hotel/databooking', [UploadOrderController::class, 'store'])->name('hotel.databooking.store');
     Route::post('/hotel/databooking/store-import', [UploadOrderController::class, 'storeAndImport'])->name('hotel.databooking.storeImport');
+    Route::get('/hotel/databooking/{id}/view-upload-order', [UploadOrderController::class, 'viewUploadOrder'])->name('hotel.databooking.viewUploadOrder');
+
 });
