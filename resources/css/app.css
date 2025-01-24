@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Membuat tabel dapat digulir ke samping */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table thead {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 10;
+}
+
+/* Agar tabel dapat digulir ke samping */
+.overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Sticky Action Column */
+th.sticky, td.sticky {
+    position: sticky;
+    right: 0;
+    background-color: #fff;
+    z-index: 20;
+}
+

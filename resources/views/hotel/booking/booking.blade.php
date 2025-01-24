@@ -41,26 +41,59 @@
                         </div>
 
                         {{-- Tabel --}}
-                        <table class="min-w-full border divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="text-center px-4 py-2">No</th>
-                                    <th class="text-center px-4 py-2">Booking ID</th>
-                                    <th class="text-center px-4 py-2">No. of Adults</th>
-                                    <th class="text-center px-4 py-2">No. of Children</th>
-                                    <th class="text-center px-4 py-2">Lead Time</th>
-                                    <th class="text-center px-4 py-2">Booking Status</th>
-                                    <th class="text-center px-4 py-2">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($bookings as $index => $booking)
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full border divide-y divide-gray-200 table-auto">
+                                <thead class="bg-gray-50 sticky top-0 z-10">
+                                    <tr>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">No</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">File Name</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Booking ID</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">No. of Adults</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">No. of Children</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">No. of Weekend Nights</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">No. of Week Nights</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Type of Meal Plan</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Required Car Parking Space</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Room Type Reserved</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Lead Time</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Arrival Year</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Arrival Month</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Arrival Date</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Market Segment Type</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Repeated Guest</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">No. of Previous Cancellations</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">No. of Previous Bookings Not Canceled</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Avg Price Per Room</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">No. of Special Requests</th>
+                                        <th class="text-center px-4 py-2" style="white-space: nowrap;">Booking Status</th>
+                                        <th class="text-center px-4 py-2 sticky right-0 bg-white" style="white-space: nowrap;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($bookings as $index => $booking)
                                     <tr>
                                         <td class="text-center px-4 py-2">{{ $index + 1 }}</td>
+                                        <td class="text-center px-4 py-2">
+                                            {{ $booking->uploadOrder->file_name }}
+                                        </td>                                        
                                         <td class="text-center px-4 py-2">{{ $booking->booking_id }}</td>
                                         <td class="text-center px-4 py-2">{{ $booking->no_of_adults }}</td>
                                         <td class="text-center px-4 py-2">{{ $booking->no_of_children }}</td>
-                                        <td class="text-center px-4 py-2">{{ $booking->lead_time }} days</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->no_of_weekend_nights }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->no_of_week_nights }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->type_of_meal_plan }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->required_car_parking_space }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->room_type_reserved }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->lead_time }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->arrival_year }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->arrival_month }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->arrival_date }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->market_segment_type }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->repeated_guest }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->no_of_previous_cancellations }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->no_of_previous_bookings_not_canceled }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->avg_price_per_room }}</td>
+                                        <td class="text-center px-4 py-2">{{ $booking->no_of_special_requests }}</td>
                                         <td class="text-center px-4 py-2">
                                             @if($booking->booking_status == 'Canceled')
                                                 <span class="px-2 py-1 bg-red-500 text-white rounded-md">Canceled</span>
@@ -68,21 +101,20 @@
                                                 <span class="px-2 py-1 bg-green-500 text-white rounded-md">Confirmed</span>
                                             @endif
                                         </td>
-                                        <td class="text-center px-4 py-2">
-                                            <form action="{{ route('hotel.booking.destroy', $booking->id) }}" method="POST"
-                                                class="inline">
+                                        <td class="text-center px-4 py-2 sticky right-0 bg-white">
+                                            <form action="{{ route('hotel.booking.destroy', $booking->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit"
-                                                    class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600">
+                                                <button type="submit" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600">
                                                     Delete
                                                 </button>
                                             </form>
                                         </td>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
 
                         {{-- Pagination Links --}}
                         {{ $bookings->links() }}

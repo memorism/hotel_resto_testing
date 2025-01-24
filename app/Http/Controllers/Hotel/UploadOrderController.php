@@ -13,14 +13,23 @@ use Maatwebsite\Excel\Facades\Excel;
 class UploadOrderController extends Controller
 {
     // Menampilkan daftar upload orders untuk user
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil semua upload order yang terkait dengan user yang sedang login
-        $user = auth()->user();
-        $uploadOrders = UploadOrder::where('user_id', $user->id)->get();
+        $perPage = $request->input('per_page', 10); // Default: 10
+        $search = $request->input('search'); // Ambil keyword pencarian
 
-        return view('hotel.databooking.index', compact('uploadOrders'));
+        $query = UploadOrder::where('user_id', auth()->id());
+
+        // Jika ada keyword pencarian, tambahkan ke query
+        if ($search) {
+            $query->where('file_name', 'LIKE', "%$search%");
+        }
+
+        $uploadOrders = $query->paginate($perPage);
+
+        return view('hotel.databooking.index', compact('uploadOrders', 'search'));
     }
+
 
     // Menampilkan halaman untuk membuat upload order baru
     public function create()
@@ -48,29 +57,30 @@ class UploadOrderController extends Controller
 
 
     public function storeAndImport(Request $request)
-{
-    // Validasi input
-    $request->validate([
-        'file_name'   => 'required|string|max:255',
-        'description' => 'required|string',
-        'file'        => 'required|mimes:xlsx,xls|max:2048',
-    ]);
+    {
 
-    // Simpan UploadOrder
-    $uploadOrder = UploadOrder::create([
-        'user_id'     => auth()->id(), // Pastikan user_id masuk ke tabel upload_orders
-        'file_name'   => $request->file_name,
-        'description' => $request->description,
-    ]);
+        // Validasi input
+        $request->validate([
+            'file_name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'file' => 'required|mimes:xlsx,xls|max:2048',
+        ]);
 
-    // Debugging: Cek apakah user_id tersimpan dengan benar
-    \Log::info('UploadOrder Created: ', $uploadOrder->toArray());
+        // Simpan UploadOrder
+        $uploadOrder = UploadOrder::create([
+            'user_id' => auth()->id(), // Pastikan user_id masuk ke tabel upload_orders
+            'file_name' => $request->file_name,
+            'description' => $request->description,
+        ]);
 
-    // Import Data Excel ke dalam tabel bookings
-    Excel::import(new BookingsImport($uploadOrder->id, auth()->id()), $request->file('file'));
+        // Debugging: Cek apakah user_id tersimpan dengan benar
+        \Log::info('UploadOrder Created: ', $uploadOrder->toArray());
 
-    return redirect()->route('hotel.databooking.index')->with('success', 'Data booking berhasil disimpan dan file Excel berhasil diimport!');
-}
+        // Import Data Excel ke dalam tabel bookings
+        Excel::import(new BookingsImport($uploadOrder->id, auth()->id()), $request->file('file'));
+
+        return redirect()->route('hotel.databooking.index')->with('success', 'Data booking berhasil disimpan dan file Excel berhasil diimport!');
+    }
 
 
     // Menampilkan detail upload order
@@ -110,15 +120,4 @@ class UploadOrderController extends Controller
 
         return redirect()->route('hotel.databooking.index')->with('success', 'Upload Order deleted successfully!');
     }
-    public function import_excel()
-    {
-        return view('import_excel');
-
-    }
-    public function import_excel_post(Request $request)
-    {
-        dd($request->all());
-    }
-
-
 }
