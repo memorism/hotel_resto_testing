@@ -19,7 +19,7 @@
                     {{-- admin links --}}
 
                     @if  (Auth::user()->usertype == 'admin')
-                    <x-nav-link href="dashboard" :active="request()->routeIs('admin.dashboard')">
+                    <x-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
@@ -39,16 +39,21 @@
                     {{-- Hotel links --}}
 
                     @if  (Auth::user()->usertype == 'hotel')
-                    <x-nav-link href="Hotel/Dashboard" :active="request()->routeIs('Hotel.product')">
+                    <x-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link href="Hotel/room" :active="request()->routeIs('Hotel.category')">
+                    {{-- <x-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
                         {{ __('Hotel Rooms') }}
+                    </x-nav-link> --}}
+
+                    <x-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
+                        {{ __('Data Booking') }}
                     </x-nav-link>
 
-                    <x-nav-link href="Hotel/revenue" :active="request()->routeIs('Hotel.User')">
-                        {{ __('Revenue') }}
+
+                    <x-nav-link href="{{ route('hotel.booking.booking') }}" :active="request()->routeIs('hotel.booking.booking')">
+                        {{ __('Booking') }}
                     </x-nav-link>
                     @endif
 
@@ -131,7 +136,7 @@
             {{-- admin links --}}
 
             @if  (Auth::user()->usertype == 'admin')
-            <x-responsive-nav-link href="dashboard" :active="request()->routeIs('admin.dashboard')">
+            <x-responsive-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
@@ -151,16 +156,20 @@
             {{-- Hotel links --}}
 
             @if  (Auth::user()->usertype == 'hotel')
-            <x-responsive-nav-link href="Hotel/Dashboard" :active="request()->routeIs('Hotel.product')">
+            <x-responsive-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="Hotel/room" :active="request()->routeIs('Hotel.category')">
+            {{-- <x-responsive-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
                 {{ __('Hotel Rooms') }}
+            </x-responsive-nav-link> --}}
+
+            <x-responsive-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
+                {{ __('Data Booking') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="Hotel/revenue" :active="request()->routeIs('Hotel.User')">
-                {{ __('Revenue') }}
+            <x-responsive-nav-link href="{{ route('hotel.booking.booking') }}" :active="request()->routeIs('hotel.booking.booking')">
+                {{ __('Booking') }}
             </x-responsive-nav-link>
             @endif
 
