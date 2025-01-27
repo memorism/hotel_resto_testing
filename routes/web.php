@@ -63,12 +63,19 @@ route::middleware(['auth', 'restoMiddleware'])->group(function () {
 route::middleware(['auth', 'hotelMiddleware'])->group(function () {
 
     Route::get('/hotel/dashboard', [HotelController::class, 'index'])->name('hotel.dashboard');
+
     // route rooms
     Route::get('/hotel/rooms', [roomsController::class, 'index'])->name('hotel.rooms.rooms');
+
     // route booking
     Route::get('/hotel/booking', [BookingController::class, 'index'])->name('hotel.booking.booking');
-    Route::get('/hotel/booking/{id}', [BookingController::class, 'show']);
+    Route::get('/hotel/booking/create', [BookingController::class, 'create'])->name('hotel.booking.create');
+    Route::post('/hotel/booking', [BookingController::class, 'store'])->name('hotel.booking.store');
+    Route::get('/hotel/booking/{booking}/edit', [BookingController::class, 'edit'])->name('hotel.booking.edit');
+    Route::put('/hotel/booking/{booking}', [BookingController::class, 'update'])->name('hotel.booking.update');
+    Route::get('/hotel/booking/{id}', [BookingController::class, 'show'])->name('hotel.booking.show'); // Tambahkan nama route
     Route::delete('/hotel/booking/{id}', [BookingController::class, 'destroy'])->name('hotel.booking.destroy');
+
 
     // route data booking
     Route::get('/hotel/databooking', [UploadOrderController::class, 'index'])->name('hotel.databooking.index');
@@ -78,5 +85,7 @@ route::middleware(['auth', 'hotelMiddleware'])->group(function () {
     Route::post('/hotel/databooking', [UploadOrderController::class, 'store'])->name('hotel.databooking.store');
     Route::post('/hotel/databooking/store-import', [UploadOrderController::class, 'storeAndImport'])->name('hotel.databooking.storeImport');
     Route::get('/hotel/databooking/{id}/view-upload-order', [UploadOrderController::class, 'viewUploadOrder'])->name('hotel.databooking.viewUploadOrder');
+    Route::get('/hotel/databooking/{id}/edit', [UploadOrderController::class, 'edit'])->name('hotel.databooking.edit');
+    Route::put('/hotel/databooking/{id}', [UploadOrderController::class, 'update'])->name('hotel.databooking.update');
 
 });

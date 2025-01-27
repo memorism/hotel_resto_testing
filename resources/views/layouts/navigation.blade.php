@@ -19,7 +19,7 @@
                     {{-- admin links --}}
 
                     @if  (Auth::user()->usertype == 'admin')
-                    <x-nav-link href="dashboard" :active="request()->routeIs('admin.dashboard')">
+                    <x-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
@@ -43,9 +43,9 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
+                    {{-- <x-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
                         {{ __('Hotel Rooms') }}
-                    </x-nav-link>
+                    </x-nav-link> --}}
 
                     <x-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
                         {{ __('Data Booking') }}
@@ -136,7 +136,7 @@
             {{-- admin links --}}
 
             @if  (Auth::user()->usertype == 'admin')
-            <x-responsive-nav-link href="dashboard" :active="request()->routeIs('admin.dashboard')">
+            <x-responsive-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
@@ -160,9 +160,9 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
+            {{-- <x-responsive-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
                 {{ __('Hotel Rooms') }}
-            </x-responsive-nav-link>
+            </x-responsive-nav-link> --}}
 
             <x-responsive-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
                 {{ __('Data Booking') }}

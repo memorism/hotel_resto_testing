@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Imports\BookingsImport;
 use Maatwebsite\Excel\Facades\Excel;
+use ConsoleTVs\Charts\Facades\Charts;
 
 
 class UploadOrderController extends Controller
@@ -94,26 +95,53 @@ class UploadOrderController extends Controller
     // Menampilkan halaman edit upload order
     public function edit($id)
     {
-        $uploadOrder = UploadOrder::findOrFail($id);
+        // Pastikan hanya user yang memiliki upload order yang bisa mengedit
+        $uploadOrder = UploadOrder::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
 
-        // return view('upload_orders.edit', compact('uploadOrder'));
+        return view('hotel.databooking.edit', compact('uploadOrder'));
     }
+
 
     // Menyimpan perubahan upload order
     public function update(Request $request, $id)
     {
+        // Validasi input dari form
         $validated = $request->validate([
-            'upload_order' => 'required|integer',
+            'file_name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'file' => 'nullable|mimes:xlsx,xls|max:2048', // File bersifat opsional
         ]);
 
-        $uploadOrder = UploadOrder::findOrFail($id);
-        $uploadOrder->upload_order = $validated['upload_order'];
-        $uploadOrder->save();
+        // Cari UploadOrder berdasarkan ID dan pastikan hanya pemiliknya yang bisa mengedit
+        $uploadOrder = UploadOrder::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
 
-        return redirect()->route('hotel.databooking.index')->with('success', 'Upload Order updated successfully!');
+        // Perbarui data UploadOrder
+        $uploadOrder->file_name = $validated['file_name'];
+        $uploadOrder->description = $validated['description'];
+
+        // Jika ada file baru diupload, update file dan import ulang datanya
+        if ($request->hasFile('file')) {
+            // Simpan nama file baru
+            $file = $request->file('file');
+            $newFileName = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('uploads', $newFileName, 'public');
+
+            // Update nama file di database
+            $uploadOrder->file_name = $newFileName;
+            $uploadOrder->save();
+
+            // Hapus semua booking lama yang terkait dengan UploadOrder ini
+            Booking::where('upload_order_id', $uploadOrder->id)->delete();
+
+            // Import data baru dari file Excel yang diupload
+            Excel::import(new BookingsImport($uploadOrder->id, auth()->id()), $file);
+        } else {
+            $uploadOrder->save();
+        }
+
+        return redirect()->route('hotel.databooking.index')->with('success', 'Upload Order berhasil diperbarui!');
     }
 
-    // Menghapus upload order
     public function destroy($id)
     {
         $uploadOrder = UploadOrder::findOrFail($id);

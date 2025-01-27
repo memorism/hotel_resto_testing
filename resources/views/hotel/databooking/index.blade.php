@@ -22,7 +22,6 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="overflow-hidden overflow-x-auto border-b border-gray-200 bg-white p-6">
                     <div class="mb-4 flex justify-between">
-                        <!-- Dropdown untuk memilih jumlah data -->
                         <div class="flex justify-between items-center mb-4">
                             <label for="per_page" class="mr-2">Tampilkan</label>
                             <select name="per_page" id="per_page" class="form-select form-select-sm"
@@ -83,8 +82,7 @@
                                                                                               
 
                                                 <!-- Tombol Update -->
-                                                {{-- {{ route('hotel.databooking.edit', $uploadOrder->id) }} --}}
-                                                <a href=""
+                                                <a href="{{ route('hotel.databooking.edit', $uploadOrder->id) }}"
                                                     class="px-3 py-1 bg-yellow-500 text-white text-sm font-semibold rounded-md hover:bg-yellow-600 text-decoration-none">
                                                     Update
                                                 </a>

@@ -118,32 +118,26 @@
                                             @endif
                                         </td>
                                         <td class="text-center px-4 py-2 sticky right-0 bg-white">
-                                            <!-- Tombol View -->
-                                            {{-- {{ route('hotel.databooking.show', $uploadOrder->id) }} --}}
                                             <div class="flex justify-center gap-2">
-
-                                                <a href=""
-                                                    class="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-md hover:bg-blue-600 text-decoration-none">
-                                                    View
-                                                </a>
-
 
                                                 <!-- Tombol Update -->
                                                 {{-- {{ route('hotel.databooking.edit', $uploadOrder->id) }} --}}
-                                                <a href=""
+                                                <a href="{{ route('hotel.booking.edit', $booking->id) }}"
                                                     class="px-3 py-1 bg-yellow-500 text-white text-sm font-semibold rounded-md hover:bg-yellow-600 text-decoration-none">
                                                     Update
                                                 </a>
-                                                <form action="{{ route('hotel.booking.destroy', $booking->id) }}"
-                                                    method="POST" class="inline">
+
+                                                <!-- Tombol Delete -->
+                                                <form method="POST"
+                                                    action="{{ route('hotel.booking.destroy', $booking->id) }}"
+                                                    style="display:inline;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="button"
-                                                        class="delete-btn px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600">
+                                                    <button type="submit"
+                                                        class="px-3 py-1 bg-red-500 text-white text-sm font-semibold rounded-md hover:bg-red-600">
                                                         Delete
                                                     </button>
                                                 </form>
-                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -156,7 +150,9 @@
                         {{ $bookings->links() }}
                     </div>
 
-                    <a href="{{ route('hotel.databooking.index') }}" class="btn btn-secondary mt-4">Back to List</a>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ route('hotel.databooking.index') }}" class="btn btn-secondary mt-4">Back to List</a>
+                    </div>
                 </div>
             </div>
         </div>
