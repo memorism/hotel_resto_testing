@@ -5,6 +5,7 @@ namespace App\Charts;
 
 use ConsoleTVs\Charts\Classes\Chartjs\Chart;
 use App\Models\Booking;
+use Illuminate\Support\Facades\Auth;
 
 class BookingChart extends Chart
 {
@@ -41,8 +42,8 @@ class BookingChart extends Chart
 
     private function getUserData()
     {
-        $userId = auth()->id();
-        return Booking::where('user_id', $userId)->get();
+        $userId = Auth::id(); // Dapatkan user_id yang sedang login
+        return Booking::where('user_id', $userId)->get(); // Ambil data hanya untuk user yang sedang login
     }
 
     // 1️⃣ Booking Status Distribution (Pie Chart)

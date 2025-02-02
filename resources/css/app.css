@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /* Membuat tabel dapat digulir ke samping */
 table {
     width: 100%;

@@ -9,7 +9,6 @@ class HotelController extends Controller
 {
     public function index(BookingChart $bookingChart)
     {
-        // Mengambil data chart yang dibutuhkan dari objek $bookingChart
         $occupancyData = $bookingChart->occupancyChart;
 
         return view('hotel.dashboard', [
