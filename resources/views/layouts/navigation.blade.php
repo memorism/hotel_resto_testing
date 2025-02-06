@@ -59,16 +59,16 @@
 
                     {{-- Resto links --}}
                     @if  (Auth::user()->usertype == 'resto')
-                    <x-nav-link href="/Dashboard" :active="request()->routeIs('Hotel.product')">
+                    <x-nav-link href="{{ route('resto.dashboard')}}" :active="request()->routeIs('resto.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link href="Resto/room" :active="request()->routeIs('Hotel.category')">
-                        {{ __('Table Resto') }}
+                    <x-nav-link href="{{ route('resto.dataorders.index')}} " :active="request()->routeIs('resto.dataorders.index')">
+                        {{ __('Data') }}
                     </x-nav-link>
 
-                    <x-nav-link href="Resto/revenue" :active="request()->routeIs('Hotel.User')">
-                        {{ __('Revenue') }}
+                    <x-nav-link href="{{ route('resto.orders.index')}}" :active="request()->routeIs('resto.orders.index')">
+                        {{ __('Data Pemesanan') }}
                     </x-nav-link>
                     @endif
 
@@ -176,17 +176,21 @@
             {{-- Resto links --}}
 
             @if  (Auth::user()->usertype == 'resto')
-            <x-responsive-nav-link href="/Dashboard" :active="request()->routeIs('Hotel.product')">
+            <x-responsive-nav-link href="{{ route('resto.dashboard')}}" :active="request()->routeIs('resto.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="Resto/room" :active="request()->routeIs('Hotel.category')">
-                {{ __('Table Resto') }}
+            <x-responsive-nav-link href="{{ route('resto.dataorders.index')}} " :active="request()->routeIs('resto.dataorders.index')">
+                {{ __('Data') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="Resto/revenue" :active="request()->routeIs('Hotel.User')">
-                {{ __('Revenue') }}
+            <x-responsive-nav-link href="{{ route('resto.orders.index')}}" :active="request()->routeIs('resto.orders.index')">
+                {{ __('Data Pemesanan') }}
             </x-responsive-nav-link>
+
+            {{-- <x-responsive-nav-link href="Resto/revenue" :active="request()->routeIs('Hotel.User')">
+                {{ __('Revenue') }}
+            </x-responsive-nav-link> --}}
             @endif
         </div>
 

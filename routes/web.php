@@ -8,9 +8,11 @@ use App\Http\Controllers\Hotel\roomsController;
 use App\Http\Controllers\Hotel\UploadOrderController;
 use App\Http\Controllers\Resto\RestoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Resto\RestoOrderController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Resto\ExcelUploadController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -57,6 +59,24 @@ route::middleware(['auth', 'restoMiddleware'])->group(function () {
 
     Route::get('/resto/dashboard', [RestoController::class, 'index'])->name('resto.dashboard');
 
+    //route order
+    Route::get('/resto/order', [RestoOrderController::class, 'index'])->name('resto.orders.index');
+    Route::get('/resto/order/create', [RestoOrderController::class, 'create'])->name('resto.orders.create');
+    Route::post('/resto/order', [RestoOrderController::class, 'store'])->name('resto.orders.store');
+    Route::get('/resto/order/{booking}/edit', [RestoOrderController::class, 'edit'])->name('resto.orders.edit');
+    Route::put('/resto/order/{booking}', [RestoOrderController::class, 'update'])->name('resto.orders.update');
+    Route::get('/resto/order/{id}', [RestoOrderController::class, 'show'])->name('resto.orders.show');
+    Route::delete('/resto/order/{id}', [RestoOrderController::class, 'destroy'])->name('resto.orders.destroy');
+
+    //route upload
+
+    Route::get('/resto/uploads', [ExcelUploadController::class, 'index'])->name('resto.dataorders.index');
+    Route::get('/resto/uploads/create', [ExcelUploadController::class, 'create'])->name('resto.dataorders.create');
+    Route::post('/resto/uploads', [ExcelUploadController::class, 'store'])->name('resto.dataorders.store');
+    // routes/web.php
+    Route::get('resto/dataorders/{uploadId}', [ExcelUploadController::class, 'show'])->name('resto.dataorders.show');
+
+
 });
 
 // hotel route
@@ -73,7 +93,7 @@ route::middleware(['auth', 'hotelMiddleware'])->group(function () {
     Route::post('/hotel/booking', [BookingController::class, 'store'])->name('hotel.booking.store');
     Route::get('/hotel/booking/{booking}/edit', [BookingController::class, 'edit'])->name('hotel.booking.edit');
     Route::put('/hotel/booking/{booking}', [BookingController::class, 'update'])->name('hotel.booking.update');
-    Route::get('/hotel/booking/{id}', [BookingController::class, 'show'])->name('hotel.booking.show'); // Tambahkan nama route
+    Route::get('/hotel/booking/{id}', [BookingController::class, 'show'])->name('hotel.booking.show');
     Route::delete('/hotel/booking/{id}', [BookingController::class, 'destroy'])->name('hotel.booking.destroy');
 
 
