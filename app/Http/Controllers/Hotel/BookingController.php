@@ -15,6 +15,7 @@ class BookingController extends Controller
         $userId = auth()->id();
 
         $perPage = $request->get('perPage', 10);
+        $perPage = ($perPage === 'semua') ? Booking::where('user_id', $userId)->count() : (int) $perPage;
 
         $search = $request->get('search', '');
 

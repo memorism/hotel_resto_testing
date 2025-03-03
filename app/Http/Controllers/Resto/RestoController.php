@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers\Resto;
 
-use App\Http\Controllers\Controller;
+use App\Charts\RestoChart;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class RestoController extends Controller
 {
     public function index()
     {
-        return view('resto.dashboard');
+        $chart = new RestoChart();
+
+        return view('resto.dashboard', [
+            'totalSalesChart'         => $chart->totalSalesChart(),
+            'itemSalesChart'          => $chart->itemSalesChart(),
+            'revenueByItemTypeChart'  => $chart->revenueByItemTypeChart(),
+            'orderByTransactionTypeChart' => $chart->orderByTransactionTypeChart(),
+        ]);
     }
 }

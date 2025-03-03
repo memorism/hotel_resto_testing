@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Hotel\BookingController;
 use App\Http\Controllers\Hotel\HotelController;
+use App\Http\Controllers\Hotel\OkupansiController;
 use App\Http\Controllers\Hotel\roomsController;
 use App\Http\Controllers\Hotel\UploadOrderController;
 use App\Http\Controllers\Resto\RestoController;
@@ -50,6 +51,8 @@ route::middleware(['auth', 'adminMiddleware'])->group(function () {
     Route::post('/admin/user', [UserAdminController::class, 'store'])->name('admin.user.store');
     Route::delete('/admin/user/{id}', [UserAdminController::class, 'destroy'])->name('admin.user.destroy');
 
+    Route::get('/admin/user', [UserAdminController::class, 'index'])->name('admin.user.user');
+
 
 
 });
@@ -83,9 +86,7 @@ route::middleware(['auth', 'restoMiddleware'])->group(function () {
 route::middleware(['auth', 'hotelMiddleware'])->group(function () {
 
     Route::get('/hotel/dashboard', [HotelController::class, 'index'])->name('hotel.dashboard');
-
-    // route rooms
-    Route::get('/hotel/rooms', [roomsController::class, 'index'])->name('hotel.rooms.rooms');
+    Route::get('/hotel/okupansi', [OkupansiController::class, 'index'])->name('hotel.okupansi');    // route rooms
 
     // route booking
     Route::get('/hotel/booking', [BookingController::class, 'index'])->name('hotel.booking.booking');

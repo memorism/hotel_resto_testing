@@ -23,13 +23,13 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link href="admin/product" :active="request()->routeIs('admin.product')">
-                        {{ __('Product') }}
+                    {{-- <x-nav-link href="{{ route('admin.hotel') }}" :active="request()->routeIs('admin.hotel')">
+                        {{ __('Hotel') }}
                     </x-nav-link>
 
-                    <x-nav-link href="admin/category" :active="request()->routeIs('admin.category')">
-                        {{ __('Category') }}
-                    </x-nav-link>
+                    <x-nav-link href="{{ route('admin.resto') }}" :active="request()->routeIs('admin.resto')">
+                        {{ __('Restaurant') }}
+                    </x-nav-link> --}}
 
                     <x-nav-link href="user" :active="request()->routeIs('admin.user.user')">
                         {{ __('User') }}
@@ -39,21 +39,21 @@
                     {{-- Hotel links --}}
 
                     @if  (Auth::user()->usertype == 'hotel')
+                    <x-nav-link href="{{ route('hotel.okupansi') }}" :active="request()->routeIs('hotel.okupansi')">
+                        {{ __('Okupansi') }}
+                    </x-nav-link>
+                    
                     <x-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    {{-- <x-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
-                        {{ __('Hotel Rooms') }}
-                    </x-nav-link> --}}
-
                     <x-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
-                        {{ __('Data Booking') }}
+                        {{ __('Data Unggah') }}
                     </x-nav-link>
 
 
                     <x-nav-link href="{{ route('hotel.booking.booking') }}" :active="request()->routeIs('hotel.booking.booking')">
-                        {{ __('Booking') }}
+                        {{ __('Data Keseluruhan') }}
                     </x-nav-link>
                     @endif
 
@@ -140,13 +140,13 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="admin/product" :active="request()->routeIs('admin.product')">
-                {{ __('Product') }}
+            {{-- <x-responsive-nav-link href="{{ route('admin.hotel') }}" :active="request()->routeIs('admin.hotel')">
+                {{ __('Hotel') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="admin/category" :active="request()->routeIs('admin.category')">
-                {{ __('Category') }}
-            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('admin.resto') }}" :active="request()->routeIs('admin.resto')">
+                {{ __('Restaurant') }}
+            </x-responsive-nav-link> --}}
 
             <x-responsive-nav-link href="user" :active="request()->routeIs('admin.user.user')">
                 {{ __('User') }}
@@ -156,20 +156,20 @@
             {{-- Hotel links --}}
 
             @if  (Auth::user()->usertype == 'hotel')
+            <x-responsive-nav-link href="{{ route('hotel.okupansi') }}" :active="request()->routeIs('hotel.okupansi')">
+                {{ __('Okupansi') }}
+            </x-responsive-nav-link>
+            
             <x-responsive-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            {{-- <x-responsive-nav-link href="rooms" :active="request()->routeIs('hotel.rooms.rooms')">
-                {{ __('Hotel Rooms') }}
-            </x-responsive-nav-link> --}}
-
             <x-responsive-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
-                {{ __('Data Booking') }}
+                {{ __('Data Unggah') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('hotel.booking.booking') }}" :active="request()->routeIs('hotel.booking.booking')">
-                {{ __('Booking') }}
+                {{ __('Data Keseluruhan') }}
             </x-responsive-nav-link>
             @endif
 
