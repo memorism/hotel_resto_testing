@@ -34,8 +34,7 @@
                         <div class="flex items-center">
                             <form action="{{ route('resto.orders.index') }}" method="GET">
                                 <input type="text" name="search" id="search" class="form-input form-input-sm"
-                                    placeholder="Search..."
-                                    value="{{ request('search') }}">
+                                    placeholder="Search..." value="{{ request('search') }}">
                                 <button type="submit" class="btn btn-primary btn-sm ml-2">Search</button>
                             </form>
 
@@ -49,6 +48,7 @@
                             <thead class="bg-gray-50 sticky top-0 z-10">
                                 <tr>
                                     <th class="text-center px-4 py-2">No</th>
+                                    <th class="text-center px-4 py-2">Nama File</th>
                                     <th class="text-center px-4 py-2">Diterima Oleh</th>
                                     <th class="text-center px-4 py-2">Tanggal</th>
                                     <th class="text-center px-4 py-2">Waktu</th>
@@ -66,6 +66,9 @@
                                 @foreach ($orders as $order)
                                     <tr>
                                         <td class="text-center px-4 py-2">{{ $loop->iteration }}</td>
+                                        <td class="text-center px-4 py-2">
+                                            {{ $order->excelUpload ? $order->excelUpload->file_name : 'Tidak Ada File' }}
+                                        </td>
                                         <td class="text-center px-4 py-2">{{ $order->received_by }}</td>
                                         <td class="text-center px-4 py-2">{{ $order->order_date }}</td>
                                         <td class="text-center px-4 py-2">{{ $order->time_order }}</td>

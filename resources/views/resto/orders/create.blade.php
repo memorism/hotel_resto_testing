@@ -11,6 +11,18 @@
                 <div class="p-6 text-gray-900">
                     <form action="{{ route('resto.orders.store') }}" method="POST">
                         @csrf
+
+                        <!-- Dropdown untuk memilih file -->
+                        <div class="mb-3">
+                            <label for="excel_upload_id" class="form-label">Pilih File</label>
+                            <select name="excel_upload_id" id="excel_upload_id" class="form-control" required>
+                                <option value="">Pilih File</option>
+                                @foreach ($uploads as $upload)
+                                    <option value="{{ $upload->id }}">{{ $upload->file_name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="mb-3">
                             <label for="order_date" class="form-label">Tanggal Order</label>
                             <input type="date" name="order_date" id="order_date" class="form-control" required>

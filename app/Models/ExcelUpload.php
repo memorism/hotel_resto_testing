@@ -17,5 +17,9 @@ class ExcelUpload extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function restoOrders()
+    {
+        return $this->hasMany(RestoOrder::class, 'excel_upload_id');
+    }
 }
 

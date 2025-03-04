@@ -7,6 +7,7 @@ use App\Http\Controllers\Hotel\HotelController;
 use App\Http\Controllers\Hotel\OkupansiController;
 use App\Http\Controllers\Hotel\roomsController;
 use App\Http\Controllers\Hotel\UploadOrderController;
+use App\Http\Controllers\resto\OccupancyController;
 use App\Http\Controllers\Resto\RestoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Resto\RestoOrderController;
@@ -61,13 +62,14 @@ route::middleware(['auth', 'adminMiddleware'])->group(function () {
 route::middleware(['auth', 'restoMiddleware'])->group(function () {
 
     Route::get('/resto/dashboard', [RestoController::class, 'index'])->name('resto.dashboard');
+    Route::get('/resto/okupansi', [OccupancyController::class, 'index'])->name('resto.okupansi');    
 
     //route order
     Route::get('/resto/order', [RestoOrderController::class, 'index'])->name('resto.orders.index');
     Route::get('/resto/order/create', [RestoOrderController::class, 'create'])->name('resto.orders.create');
     Route::post('/resto/order', [RestoOrderController::class, 'store'])->name('resto.orders.store');
-    Route::get('/resto/order/{booking}/edit', [RestoOrderController::class, 'edit'])->name('resto.orders.edit');
-    Route::put('/resto/order/{booking}', [RestoOrderController::class, 'update'])->name('resto.orders.update');
+    Route::get('/resto/order/{order}/edit', [RestoOrderController::class, 'edit'])->name('resto.orders.edit');
+    Route::put('/resto/order/{order}/update', [RestoOrderController::class, 'update'])->name('resto.orders.update');
     Route::get('/resto/order/{id}', [RestoOrderController::class, 'show'])->name('resto.orders.show');
     Route::delete('/resto/order/{id}', [RestoOrderController::class, 'destroy'])->name('resto.orders.destroy');
 
@@ -75,7 +77,11 @@ route::middleware(['auth', 'restoMiddleware'])->group(function () {
 
     Route::get('/resto/uploads', [ExcelUploadController::class, 'index'])->name('resto.dataorders.index');
     Route::get('/resto/uploads/create', [ExcelUploadController::class, 'create'])->name('resto.dataorders.create');
-    Route::post('/resto/uploads', [ExcelUploadController::class, 'store'])->name('resto.dataorders.store');
+    Route::post('/resto/uploads/store', [ExcelUploadController::class, 'store'])->name('resto.dataorders.store');
+    Route::get('/resto/{uploadId}/view', [ExcelUploadController::class, 'show'])->name('resto.dataorders.show');
+    Route::get('/resto/{uploadId}/edit', [ExcelUploadController::class, 'edit'])->name('resto.dataorders.edit');
+    Route::post('/resto/{uploadId}/update', [ExcelUploadController::class, 'update'])->name('resto.dataorders.update');
+    Route::delete('/resto/{uploadId}/delete', [ExcelUploadController::class, 'destroy'])->name('resto.dataorders.destroy');    
     // routes/web.php
     Route::get('resto/dataorders/{uploadId}', [ExcelUploadController::class, 'show'])->name('resto.dataorders.show');
 

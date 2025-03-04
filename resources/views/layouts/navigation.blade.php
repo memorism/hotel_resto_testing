@@ -63,12 +63,16 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
+                    <x-nav-link href="{{ route('resto.okupansi')}}" :active="request()->routeIs('resto.okupansi')">
+                        {{ __('Okupansi') }}
+                    </x-nav-link>
+
                     <x-nav-link href="{{ route('resto.dataorders.index')}} " :active="request()->routeIs('resto.dataorders.index')">
-                        {{ __('Data') }}
+                        {{ __('Data Unggah') }}
                     </x-nav-link>
 
                     <x-nav-link href="{{ route('resto.orders.index')}}" :active="request()->routeIs('resto.orders.index')">
-                        {{ __('Data Pemesanan') }}
+                        {{ __('Data Keseluruhan') }}
                     </x-nav-link>
                     @endif
 
@@ -96,9 +100,9 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
-                        <x-dropdown-link :href="url('/')">
-                            {{ __('Home') }}
-                        </x-dropdown-link>
+                        {{-- <x-dropdown-link :href="url('/')">
+                            {{ __('Home') }}aA 
+                        </x-dropdown-link> --}}
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -180,12 +184,16 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
+            <x-responsive-nav-link href="{{ route('resto.okupansi')}}" :active="request()->routeIs('resto.okupansi')">
+                {{ __('Okupansi') }}
+            </x-responsive-nav-link>
+
             <x-responsive-nav-link href="{{ route('resto.dataorders.index')}} " :active="request()->routeIs('resto.dataorders.index')">
-                {{ __('Data') }}
+                {{ __('Data Unggah') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('resto.orders.index')}}" :active="request()->routeIs('resto.orders.index')">
-                {{ __('Data Pemesanan') }}
+                {{ __('Data Keseluruhan') }}
             </x-responsive-nav-link>
 
             {{-- <x-responsive-nav-link href="Resto/revenue" :active="request()->routeIs('Hotel.User')">
@@ -206,9 +214,9 @@
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="url('/')">
+                {{-- <x-responsive-nav-link :href="url('/')">
                     {{ __('Home') }}
-                </x-responsive-nav-link>
+                </x-responsive-nav-link> --}}
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

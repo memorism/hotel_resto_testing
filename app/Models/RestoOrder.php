@@ -10,9 +10,18 @@ class RestoOrder extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'order_date', 'time_order', 'item_name', 'item_type', 
-        'item_price', 'quantity', 'transaction_amount', 'transaction_type', 
-        'received_by', 'type_of_order', 'excel_upload_id'
+        'user_id',
+        'order_date',
+        'time_order',
+        'item_name',
+        'item_type',
+        'item_price',
+        'quantity',
+        'transaction_amount',
+        'transaction_type',
+        'received_by',
+        'type_of_order',
+        'excel_upload_id'
     ];
 
     // Relasi dengan User
@@ -24,6 +33,6 @@ class RestoOrder extends Model
     // Relasi dengan ExcelUpload
     public function excelUpload()
     {
-        return $this->belongsTo(ExcelUpload::class);
+        return $this->belongsTo(ExcelUpload::class, 'excel_upload_id');
     }
 }

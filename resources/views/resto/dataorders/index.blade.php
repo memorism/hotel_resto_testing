@@ -6,7 +6,7 @@
             </h2>
             <div>
                 <a href="{{ route('resto.dataorders.create') }}" class="btn btn-primary">Upload File</a>
-                <a href="{{ asset('storage/templates/resto_orders_template.xlsx') }}" class="btn btn-info px-4" download>Download Template Excel</a>
+                <a href="{{ asset('storage/resto_orders_template.xlsx') }}" class="btn btn-info px-4" download>Download Template Excel</a>
             </div>
         </div>
     </x-slot>
@@ -33,7 +33,13 @@
                                     <td class="text-center px-4 py-2">{{ $upload->description }}</td>
                                     <td class="text-center px-4 py-2">{{ $upload->created_at->format('Y-m-d H:i:s') }}</td>
                                     <td class="text-center px-4 py-2">
-                                        <a href="{{ route('resto.dataorders.show', $upload) }}" class="btn btn-info btn-sm">View Details</a>
+                                        <a href="{{ route('resto.dataorders.show', $upload->id) }}" class="btn btn-info btn-sm">View</a>
+                                        <a href="{{ route('resto.dataorders.edit', $upload->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        <form action="{{ route('resto.dataorders.destroy', $upload->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus file ini?');">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach

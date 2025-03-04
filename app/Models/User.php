@@ -58,4 +58,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(RestoOrder::class);
     }
+    
+    public function excelUploads()
+    {
+        return $this->hasMany(ExcelUpload::class);
+    }
 }
