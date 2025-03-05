@@ -39,12 +39,13 @@
                     {{-- Hotel links --}}
 
                     @if  (Auth::user()->usertype == 'hotel')
-                    <x-nav-link href="{{ route('hotel.okupansi') }}" :active="request()->routeIs('hotel.okupansi')">
-                        {{ __('Okupansi') }}
-                    </x-nav-link>
-                    
+                                        
                     <x-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                         {{ __('Dashboard') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('hotel.okupansi') }}" :active="request()->routeIs('hotel.okupansi')">
+                        {{ __('Okupansi') }}
                     </x-nav-link>
 
                     <x-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
@@ -160,12 +161,13 @@
             {{-- Hotel links --}}
 
             @if  (Auth::user()->usertype == 'hotel')
-            <x-responsive-nav-link href="{{ route('hotel.okupansi') }}" :active="request()->routeIs('hotel.okupansi')">
-                {{ __('Okupansi') }}
-            </x-responsive-nav-link>
-            
+
             <x-responsive-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('hotel.okupansi') }}" :active="request()->routeIs('hotel.okupansi')">
+                {{ __('Okupansi') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
