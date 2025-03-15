@@ -33,16 +33,16 @@ class BookingController extends Controller
     {
         // Ambil file yang diupload oleh pengguna yang login
         $fileNames = UploadOrder::where('user_id', auth()->id())->pluck('file_name', 'file_name');
-        
+
         return view('hotel.booking.create', compact('fileNames'));
     }
 
     public function store(Request $request)
     {
-        // Validasi data yang diterima
+        
         $validated = $request->validate([
             'booking_id' => 'required|string|max:255',
-            'file_name' => 'required|string|max:255', // file_name yang dipilih
+            'file_name' => 'required|string|max:255', 
             'no_of_adults' => 'required|integer',
             'no_of_children' => 'required|integer',
             'no_of_weekend_nights' => 'required|integer',
@@ -63,43 +63,25 @@ class BookingController extends Controller
             'booking_status' => 'required|string|max:255',
         ]);
 
-        // Pastikan file yang dipilih milik pengguna yang sedang login
+        // 🔹 **Cari UploadOrder berdasarkan file_name yang dipilih**
         $file = UploadOrder::where('user_id', auth()->id())
-                            ->where('file_name', $validated['file_name'])
-                            ->first();
+            ->where('file_name', $validated['file_name'])
+            ->first();
 
+        // 🔹 **Jika file_name tidak ditemukan, kembalikan error**
         if (!$file) {
-            return redirect()->back()->with('error', 'File yang dipilih tidak valid atau tidak milik Anda.');
+            return redirect()->back()->with('error', 'File yang dipilih tidak valid atau tidak ada.');
         }
 
-        // Simpan data booking dan nama file yang dipilih
-        Booking::create([
-            'booking_id' => $validated['booking_id'],
-            'file_name' => $validated['file_name'], // Nama file yang dipilih
-            'no_of_adults' => $validated['no_of_adults'],
-            'no_of_children' => $validated['no_of_children'],
-            'no_of_weekend_nights' => $validated['no_of_weekend_nights'],
-            'no_of_week_nights' => $validated['no_of_week_nights'],
-            'type_of_meal_plan' => $validated['type_of_meal_plan'],
-            'required_car_parking_space' => $validated['required_car_parking_space'],
-            'room_type_reserved' => $validated['room_type_reserved'],
-            'lead_time' => $validated['lead_time'],
-            'arrival_year' => $validated['arrival_year'],
-            'arrival_month' => $validated['arrival_month'],
-            'arrival_date' => $validated['arrival_date'],
-            'market_segment_type' => $validated['market_segment_type'],
-            'repeated_guest' => $validated['repeated_guest'],
-            'no_of_previous_cancellations' => $validated['no_of_previous_cancellations'],
-            'no_of_previous_bookings_not_canceled' => $validated['no_of_previous_bookings_not_canceled'],
-            'avg_price_per_room' => $validated['avg_price_per_room'],
-            'no_of_special_requests' => $validated['no_of_special_requests'],
-            'booking_status' => $validated['booking_status'],
-            'user_id' => auth()->id(), // Menambahkan user_id yang sesuai dengan pengguna yang login
-        ]);
+        // 🔹 **Pastikan upload_order_id selalu ada**
+        $validated['upload_order_id'] = $file->id;
+        $validated['user_id'] = auth()->id();
 
-        return redirect()->route('hotel.booking.booking')->with('success', 'Booking created successfully!');
+        // 🔹 **Simpan Booking**
+        Booking::create($validated);
+
+        return redirect()->route('hotel.booking.booking')->with('success', 'Booking berhasil dibuat!');
     }
-
 
 
     public function show($id)
@@ -160,7 +142,6 @@ class BookingController extends Controller
         if (!$file) {
             return redirect()->back()->with('error', 'File yang dipilih tidak valid atau tidak milik Anda.');
         }
-
         // Update data booking
         $booking->update([
             'booking_id' => $validated['booking_id'],

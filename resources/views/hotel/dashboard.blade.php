@@ -8,7 +8,27 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-
+                <!-- 🔹 Filter Form -->
+                <form method="GET" action="{{ route('hotel.dashboard') }}" class="mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-gray-700">Tanggal Mulai:</label>
+                            <input type="date" name="start_date" class="w-full p-2 border rounded"
+                                value="{{ request('start_date') }}">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700">Tanggal Akhir:</label>
+                            <input type="date" name="end_date" class="w-full p-2 border rounded"
+                                value="{{ request('end_date') }}">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit"
+                                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                Filter
+                            </button>
+                        </div>
+                    </div>
+                </form>
                 <!-- 🔹 Ringkasan Keuangan -->
                 <div class="grid grid-cols-1 md:grid-cols-6 gap-6 mb-6">
                     <div class="bg-blue-100 p-4 rounded-lg text-center">

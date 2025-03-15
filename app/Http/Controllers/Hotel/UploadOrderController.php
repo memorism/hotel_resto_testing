@@ -60,28 +60,26 @@ class UploadOrderController extends Controller
 
     public function storeAndImport(Request $request)
     {
-
         // Validasi input
         $request->validate([
             'file_name' => 'required|string|max:255',
             'description' => 'required|string',
-            'file' => 'required|mimes:xlsx,xls|max:2048',
+            'file' => 'nullable|mimes:xlsx,xls|max:2048', // File tidak wajib diunggah
         ]);
 
         // Simpan UploadOrder
         $uploadOrder = UploadOrder::create([
-            'user_id' => auth()->id(), // Pastikan user_id masuk ke tabel upload_orders
+            'user_id' => auth()->id(),
             'file_name' => $request->file_name,
             'description' => $request->description,
         ]);
 
-        // Debugging: Cek apakah user_id tersimpan dengan benar
-        \Log::info('UploadOrder Created: ', $uploadOrder->toArray());
+        // Jika ada file yang diunggah, lakukan import data
+        if ($request->hasFile('file')) {
+            Excel::import(new BookingsImport($uploadOrder->id, auth()->id()), $request->file('file'));
+        }
 
-        // Import Data Excel ke dalam tabel bookings
-        Excel::import(new BookingsImport($uploadOrder->id, auth()->id()), $request->file('file'));
-
-        return redirect()->route('hotel.databooking.index')->with('success', 'Data booking berhasil disimpan dan file Excel berhasil diimport!');
+        return redirect()->route('hotel.databooking.index')->with('success', 'Upload order berhasil disimpan' . ($request->hasFile('file') ? ' dan file Excel berhasil diimport!' : '!'));
     }
 
 
@@ -105,23 +103,22 @@ class UploadOrderController extends Controller
     // Menyimpan perubahan upload order
     public function update(Request $request, $id)
     {
-        // Validasi input dari form
+        // Validasi input
         $validated = $request->validate([
             'file_name' => 'required|string|max:255',
             'description' => 'required|string',
-            'file' => 'nullable|mimes:xlsx,xls|max:2048', // File bersifat opsional
+            'file' => 'nullable|mimes:xlsx,xls|max:2048',
         ]);
 
-        // Cari UploadOrder berdasarkan ID dan pastikan hanya pemiliknya yang bisa mengedit
+        // Cari UploadOrder berdasarkan ID
         $uploadOrder = UploadOrder::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
 
-        // Perbarui data UploadOrder
+        // Update data UploadOrder
         $uploadOrder->file_name = $validated['file_name'];
         $uploadOrder->description = $validated['description'];
 
         // Jika ada file baru diupload, update file dan import ulang datanya
         if ($request->hasFile('file')) {
-            // Simpan nama file baru
             $file = $request->file('file');
             $newFileName = time() . '_' . $file->getClientOriginalName();
             $file->storeAs('uploads', $newFileName, 'public');

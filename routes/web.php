@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\admin\AdminHotelController;
+use App\Http\Controllers\admin\AdminOkupansiHotelController;
+use App\Http\Controllers\admin\AdminOkupansiRestoController;
+use App\Http\Controllers\Admin\AdminRestoController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Hotel\BookingController;
 use App\Http\Controllers\Hotel\HotelController;
@@ -46,13 +50,20 @@ route::middleware(['auth', 'userMiddleware'])->group(function () {
 route::middleware(['auth', 'adminMiddleware'])->group(function () {
 
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard/resto', [AdminRestoController::class, 'index'])->name('admin.resto');
+    Route::get('/admin/dashboard/hotel', [AdminHotelController::class, 'index'])->name('admin.hotel');
+    Route::get('/admin/okupansi/resto', [AdminOkupansiRestoController::class, 'index'])->name('admin.okupansiresto');
+    Route::get('/admin/okupansi/hotel', [AdminOkupansiHotelController::class, 'index'])->name('admin.okupansihotel');
     // route user
     Route::get('/admin/user', [UserAdminController::class, 'index'])->name('admin.user.user');
     Route::get('/admin/user/create', [UserAdminController::class, 'create'])->name('admin.user.create');
     Route::post('/admin/user', [UserAdminController::class, 'store'])->name('admin.user.store');
     Route::delete('/admin/user/{id}', [UserAdminController::class, 'destroy'])->name('admin.user.destroy');
+    Route::get('/admin/user/logo/{id}', [UserAdminController::class, 'showLogo'])->name('admin.user.logo');
+    Route::get('/admin/edit/{id}', [UserAdminController::class, 'edit'])->name('admin.user.edit'); 
+    Route::put('/admin/update/{id}', [UserAdminController::class, 'update'])->name('admin.user.update'); 
+    
 
-    Route::get('/admin/user', [UserAdminController::class, 'index'])->name('admin.user.user');
 
 
 
@@ -62,7 +73,7 @@ route::middleware(['auth', 'adminMiddleware'])->group(function () {
 route::middleware(['auth', 'restoMiddleware'])->group(function () {
 
     Route::get('/resto/dashboard', [RestoController::class, 'index'])->name('resto.dashboard');
-    Route::get('/resto/okupansi', [OccupancyController::class, 'index'])->name('resto.okupansi');    
+    Route::get('/resto/okupansi', [OccupancyController::class, 'index'])->name('resto.okupansi');
 
     //route order
     Route::get('/resto/order', [RestoOrderController::class, 'index'])->name('resto.orders.index');
@@ -81,7 +92,7 @@ route::middleware(['auth', 'restoMiddleware'])->group(function () {
     Route::get('/resto/{uploadId}/view', [ExcelUploadController::class, 'show'])->name('resto.dataorders.show');
     Route::get('/resto/{uploadId}/edit', [ExcelUploadController::class, 'edit'])->name('resto.dataorders.edit');
     Route::post('/resto/{uploadId}/update', [ExcelUploadController::class, 'update'])->name('resto.dataorders.update');
-    Route::delete('/resto/{uploadId}/delete', [ExcelUploadController::class, 'destroy'])->name('resto.dataorders.destroy');    
+    Route::delete('/resto/{uploadId}/delete', [ExcelUploadController::class, 'destroy'])->name('resto.dataorders.destroy');
     // routes/web.php
     Route::get('resto/dataorders/{uploadId}', [ExcelUploadController::class, 'show'])->name('resto.dataorders.show');
 

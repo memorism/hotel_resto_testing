@@ -21,6 +21,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col" class="text-center px-4 py-2">No</th>
+                                    <th scope="col" class="text-center px-4 py-2">Logo</th>
                                     <th scope="col" class="text-center px-4 py-2">Nama Pengguna</th>
                                     <th scope="col" class="text-center px-4 py-2">Email Pengguna</th>
                                     <th scope="col" class="text-center px-4 py-2">Tipe User</th>
@@ -32,6 +33,13 @@
                                 @foreach($users as $user)
                                     <tr>
                                         <td class="text-center px-4 py-2">{{ $loop->iteration }}</td>
+                                        <td class="text-center px-4 py-2">
+                                            @if($user->logo)
+                                                <img src="{{ asset('storage/' . $user->logo) }}" width="50" alt="User Logo">
+                                            @else
+                                                <span>Tidak ada logo</span>
+                                            @endif
+                                        </td>
                                         <td class="text-center px-4 py-2">{{ $user->name }}</td>
                                         <td class="text-center px-4 py-2">{{ $user->email }}</td>
                                         <td class="text-center px-4 py-2">
@@ -42,20 +50,30 @@
                                             @elseif($user->usertype == 'hotel')
                                                 Hotel
                                             @else
-                                                {{ ucfirst($user->usertype) }} <!-- Jika ada tipe user lain yang belum ditangani -->
+                                                {{ ucfirst($user->usertype) }}
+                                                <!-- Jika ada tipe user lain yang belum ditangani -->
                                             @endif
                                         </td>
-                                                                                <td class="text-center px-4 py-2">{{ $user->created_at->format('H:i:s | d M Y ') }}</td>
-                                        <td class="text-center px-4 py-2">
-                                            <form method="POST" action="{{ route('admin.user.destroy', $user->id) }}" style="display:inline;">
+                                        <td class="text-center px-4 py-2">{{ $user->created_at->format('H:i:s | d M Y ') }}
+                                        </td>
+                                        <td class="text-center px-4 py-2 flex justify-center space-x-2">
+                                            <!-- Tombol Edit -->
+                                            <a href="{{ route('admin.user.edit', $user->id) }}" 
+                                               class="px-4 py-2 bg-yellow-500 text-white font-semibold rounded-md hover:bg-yellow-600">
+                                                Edit
+                                            </a>
+                                        
+                                            <!-- Tombol Hapus -->
+                                            <form method="POST" action="{{ route('admin.user.destroy', $user->id) }}" 
+                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
                                                 @csrf
-                                                @method('DELETE') <!-- Menandakan metode DELETE -->
-                                                <button type="submit"
-                                                    class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600">
-                                                    {{ __('Delete') }}
+                                                @method('DELETE')
+                                                <button type="submit" 
+                                                        class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600">
+                                                    Hapus
                                                 </button>
                                             </form>
-                                        </td>
+                                        </td>                                        
                                     </tr>
                                 @endforeach
                             </tbody>
