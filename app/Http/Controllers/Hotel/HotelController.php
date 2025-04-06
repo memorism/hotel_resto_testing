@@ -15,9 +15,14 @@ class HotelController extends Controller
     public function index(Request $request)
     {
         $userId = Auth::id();
+        $user = Auth::user();
 
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+        $daysInRange = $start->diffInDays($end) + 1;
 
         $query = Booking::where('user_id', $userId);
 
@@ -26,24 +31,35 @@ class HotelController extends Controller
                 Carbon::parse($startDate)->format('Y'),
                 Carbon::parse($endDate)->format('Y')
             ])
-            ->whereBetween('arrival_month', [
-                Carbon::parse($startDate)->format('m'),
-                Carbon::parse($endDate)->format('m')
-            ])
-            ->whereBetween('arrival_date', [
-                Carbon::parse($startDate)->format('d'),
-                Carbon::parse($endDate)->format('d')
-            ]);
+                ->whereBetween('arrival_month', [
+                    Carbon::parse($startDate)->format('m'),
+                    Carbon::parse($endDate)->format('m')
+                ])
+                ->whereBetween('arrival_date', [
+                    Carbon::parse($startDate)->format('d'),
+                    Carbon::parse($endDate)->format('d')
+                ]);
         }
 
         $bookings = $query->get();
 
         // 1️⃣ Key Metrics
-        $totalRevenue = $bookings->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room);
+        $totalRevenue = $bookings->where('booking_status', 'Not_Canceled')
+            ->sum(function ($booking) {
+                $nights = $booking->no_of_weekend_nights + $booking->no_of_week_nights;
+                $price = $booking->avg_price_per_room;
+                return $nights * $price;
+            });
         $totalExpenses = 0; // Dummy data, bisa diambil dari database
         $profit = $totalRevenue - $totalExpenses;
-        $revPAR = ($bookings->count() > 0) ? $totalRevenue / $bookings->count() : 0;
-        $adr = ($bookings->count() > 0) ? $totalRevenue / $bookings->sum('no_of_week_nights') : 0;
+        $totalNightsSold = $bookings->where('booking_status', 'Not_Canceled')
+            ->sum(fn($b) => $b->no_of_weekend_nights + $b->no_of_week_nights);
+        $roomsSold = $bookings->where('booking_status', 'Not_Canceled')->count();
+        $adr = ($roomsSold > 0) ? $totalRevenue / $roomsSold : 0;
+        $totalRooms = $user->rooms()->sum('total_rooms');
+        $revPAR = ($totalRooms > 0 && $daysInRange > 0)
+            ? ($totalRevenue / ($totalRooms * $daysInRange))
+            : 0;
         $cancellationLoss = $bookings->where('booking_status', 'Canceled')->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room);
 
         // 2️⃣ Pendapatan Per Bulan

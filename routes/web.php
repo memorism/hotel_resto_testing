@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Hotel\BookingController;
 use App\Http\Controllers\Hotel\HotelController;
 use App\Http\Controllers\Hotel\OkupansiController;
+use App\Http\Controllers\hotel\RoomController;
 use App\Http\Controllers\Hotel\roomsController;
 use App\Http\Controllers\Hotel\UploadOrderController;
 use App\Http\Controllers\resto\OccupancyController;
@@ -125,5 +126,16 @@ route::middleware(['auth', 'hotelMiddleware'])->group(function () {
     Route::get('/hotel/databooking/{id}/view-upload-order', [UploadOrderController::class, 'viewUploadOrder'])->name('hotel.databooking.viewUploadOrder');
     Route::get('/hotel/databooking/{id}/edit', [UploadOrderController::class, 'edit'])->name('hotel.databooking.edit');
     Route::put('/hotel/databooking/{id}', [UploadOrderController::class, 'update'])->name('hotel.databooking.update');
+
+
+    //route Kamar
+    Route::get('/hotel/kamar', [RoomController::class, 'index'])->name('hotel.rooms.rooms');
+    Route::get('/hotel/kamar/create', [RoomController::class, 'create'])->name('hotel.rooms.create');
+    Route::get('/hotel/kamar/{room}', [RoomController::class, 'show']);
+    Route::delete('/hotel/kamar/{room}', [RoomController::class, 'destroy'])->name('hotel.rooms.destroy');
+    Route::post('/hotel/kamar', [RoomController::class, 'store'])->name('hotel.rooms.store');
+    Route::get('/hotel/kamar/{room}/edit', [RoomController::class, 'edit'])->name('hotel.rooms.edit');
+    Route::put('/hotel/kamar/{room}', [RoomController::class, 'update'])->name('hotel.rooms.update');
+
 
 });

@@ -30,51 +30,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Form Filter berdasarkan User --}}
-            <div class="mt-8">
-                <form method="GET" action="{{ route('admin.dashboard') }}">
-                    <div class="flex items-center space-x-4">
-                        <select name="user_id" class="border px-4 py-2 rounded-md">
-                            <option value="">All Users</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}" {{ $selectedUserId == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md">Filter</button>
-                    </div>
-                </form>
-            </div>
-
-            {{-- Menampilkan Chart --}}
-            <div class="mt-8">
-                <div>
-                    {!! $chart->bookingStatusChart->script() !!}
-                    {!! $chart->bookingStatusChart->container() !!}
-                </div>
-                <div>
-                    {!! $chart->typeMealChart->script() !!}
-                    {!! $chart->typeMealChart->container() !!}
-                </div>
-                <div>
-                    {!! $chart->arrivalYearChart->script() !!}
-                    {!! $chart->arrivalYearChart->container() !!}
-                </div>
-                <div>
-                    {!! $chart->arrivalMonthChart->script() !!}
-                    {!! $chart->arrivalMonthChart->container() !!}
-                </div>
-                <div>
-                    {!! $chart->roomTypeChart->script() !!}
-                    {!! $chart->roomTypeChart->container() !!}
-                </div>
-                <div>
-                    {!! $chart->marketSegmentChart->script() !!}
-                    {!! $chart->marketSegmentChart->container() !!}
-                </div>
-            </div>
         </div>
     </div>
 </x-app-layout>

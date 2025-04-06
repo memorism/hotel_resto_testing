@@ -29,6 +29,7 @@
                         </div>
                     </div>
                 </form>
+
                 <!-- 🔹 Ringkasan Key Metrics -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                     <div class="bg-blue-100 p-4 rounded-lg text-center">
@@ -60,7 +61,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Okupansi Berdasarkan Hari Kedatangan</h4>
+                        <h4 class="text-md font-semibold mb-2">Tren Harian</h4>
                         <div class="chart-container">
                             <canvas id="weekdayOccupancyChart"></canvas>
                         </div>
@@ -74,30 +75,38 @@
                     </div>
 
                     <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Okupansi Berdasarkan Segmentasi Pasar</h4>
+                        <h4 class="text-md font-semibold mb-2">Segmentasi Pasar</h4>
                         <div class="chart-container">
                             <canvas id="segmentChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Rasio Pembatalan per Bulan</h4>
+                    {{-- <div class="bg-white p-4 shadow-md rounded-lg">
+                        <h4 class="text-md font-semibold mb-2">Rasio Pembatalan Bulanan</h4>
                         <div class="chart-container">
                             <canvas id="cancellationChart"></canvas>
                         </div>
-                    </div>
+                    </div> --}}
 
 
                     <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Okupansi Berdasarkan Tipe Kamar</h4>
+                        <h4 class="text-md font-semibold mb-2">Tipe Kamar Terisi</h4>
                         <div class="chart-container">
                             <canvas id="roomTypeDistribution"></canvas>
                         </div>
                     </div>
 
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="font-semibold text-gray-700 mb-2">Tingkat Okupansi & Jumlah Booking per Bulan</h4>
+                        <div class="chart-container">
+                            <canvas id="ratioCancel"></canvas>
+                        </div>
+                    </div>
+
+
                     <div class="bg-white p-4 shadow-md rounded-lg">
                         <div class="text-md font-semibold mb-2">
-                            <h4 class="text-md font-semibold mb-2">Tren Okupansi Bulanan</h4>
+                            <h4 class="text-md font-semibold mb-2">Okupansi per Bulan (%)</h4>
                             <div class="chart-container">
                                 <canvas id="monthlyOccupancy"></canvas>
                             </div>
@@ -111,7 +120,7 @@
                         </div>
                     </div>
                     <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Tren Okupansi Berdasarkan Jumlah Malam Menginap</h4>
+                        <h4 class="text-md font-semibold mb-2">Hari Kerja vs Akhir pekan</h4>
                         <div class="chart-container">
                             <canvas id="stayDurationTrend"></canvas>
                         </div>
@@ -153,16 +162,16 @@
 
         // Grafik 1️⃣ Okupansi Berdasarkan Hari Kedatangan
         createChart(
-            document.getElementById('weekdayOccupancyChart').getContext('2d'), 'bar',
+            document.getElementById('weekdayOccupancyChart').getContext('2d'), 'line',
             {!! json_encode(array_keys($weekdayOccupancy)) !!}, {!! json_encode(array_values($weekdayOccupancy)) !!},
-            ['#3498db'], 'Hari Kedatangan', 'Jumlah Reservasi', 'Okupansi per Hari'
+            ['#3498db'], 'Tanggal', 'Jumlah Reservasi', 'Jumlah Reservasi'
         );
 
         // Grafik 2️⃣ Rata-rata Lama Menginap per Bulan
         createChart(
-            document.getElementById('avgStayChart').getContext('2d'), 'line',
+            document.getElementById('avgStayChart').getContext('2d'), 'bar',
             {!! json_encode(array_keys($avgStayPerMonth)) !!}, {!! json_encode(array_values($avgStayPerMonth)) !!},
-            ['#2ecc71'], 'Bulan Kedatangan', 'Rata-rata Lama Menginap (Malam)', 'Lama Menginap Rata-rata'
+            ['#2ecc71'], 'Bulan', 'Rata-rata Lama Menginap (Malam)', 'Rata-rata Lama Menginap (Malam)'
         );
 
         // Grafik 3️⃣ Okupansi Berdasarkan Segmentasi Pasar
@@ -170,21 +179,21 @@
             document.getElementById('segmentChart').getContext('2d'), 'pie',
             {!! json_encode(array_keys($topMarketSegments)) !!}, {!! json_encode(array_values($topMarketSegments)) !!},
             ['#e74c3c', '#f39c12', '#9b59b6', '#3498db', '#2ecc71'],
-            'Segmentasi Pasar', 'Jumlah Reservasi', 'Okupansi per Segmentasi Pasar'
+            'Segmentasi Pasar', 'Jumlah Reservasi', 'Sejumlah'
         );
 
         // Grafik 4️⃣ Rasio Pembatalan per Bulan
-        createChart(
-            document.getElementById('cancellationChart').getContext('2d'), 'line',
-            {!! json_encode(array_keys($cancellationRatio)) !!}, {!! json_encode(array_values($cancellationRatio)) !!},
-            ['#e74c3c'], 'Bulan Kedatangan', 'Rasio Pembatalan', 'Persentase Pembatalan per Bulan'
-        );
+        // createChart(
+        //     document.getElementById('cancellationChart').getContext('2d'), 'line',
+        //     {!! json_encode(array_keys($cancellationRatio)) !!}, {!! json_encode(array_values($cancellationRatio)) !!},
+        //     ['#e74c3c'], 'Bulan Kedatangan', 'Rasio Pembatalan', 'Persentase Pembatalan per Bulan'
+        // );
 
         // Grafik 4️⃣ Okupansi Berdasarkan Tipe Kamar
         createChart(
             document.getElementById('roomTypeDistribution').getContext('2d'), 'bar',
             {!! json_encode(array_keys($roomTypeDistributionData)) !!}, {!! json_encode(array_values($roomTypeDistributionData)) !!},
-            ['purple', 'yellow', 'cyan', 'pink'], 'Tipe Kamar', 'Jumlah Reservasi', 'Okupansi per Tipe Kamar'
+            ['purple', 'yellow', 'cyan', 'pink'], 'Tipe Kamar', 'Jumlah Reservasi', 'Jumlah Reservasi'
         );
 
         createChart(
@@ -199,7 +208,7 @@
                 labels: {!! json_encode(array_keys($occupancyRatePerMonth)) !!},
                 datasets: [
                     {
-                        label: 'Rasio Okupansi (%)',
+                        label: 'Rasio Pemesanan (%)',
                         data: {!! json_encode(array_values($occupancyRatePerMonth)) !!},
                         borderColor: 'rgba(54, 162, 235, 1)',
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
@@ -225,7 +234,7 @@
                     y: {
                         beginAtZero: true,
                         position: 'left',
-                        title: { display: true, text: 'Rasio Okupansi (%)' }
+                        title: { display: true, text: 'Rasio Pemasanan (%)' }
                     },
                     y1: {
                         beginAtZero: true,
@@ -236,6 +245,56 @@
                 }
             }
         });
+
+        const ctxMulti = document.getElementById('ratioCancel').getContext('2d');
+        new Chart(ctxMulti, {
+            data: {
+                labels: {!! json_encode(array_keys($monthlyOccupancy)) !!},
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Jumlah Booking',
+                        data: {!! json_encode(array_values($monthlyOccupancy)) !!},
+                        backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'line',
+                        label: 'Tingkat Okupansi (%)',
+                        data: {!! json_encode(array_values($occupancyRatePerMonth)) !!},
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Jumlah Booking' },
+                        position: 'left'
+                    },
+                    y1: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Okupansi (%)' },
+                        position: 'right',
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+
 
         // Grafik 3️⃣ Tren Okupansi Berdasarkan Jumlah Malam Menginap
         new Chart(document.getElementById('stayDurationTrend').getContext('2d'), {

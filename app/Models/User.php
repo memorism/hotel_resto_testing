@@ -59,9 +59,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(RestoOrder::class);
     }
-    
+
     public function excelUploads()
     {
         return $this->hasMany(ExcelUpload::class);
+    }
+
+    public function rooms()
+    {
+        return $this->hasMany(\App\Models\Room::class, 'user_id');
     }
 }

@@ -51,6 +51,10 @@
                             {{ __('Okupansi') }}
                         </x-nav-link>
 
+                        <x-nav-link href="{{ route('hotel.rooms.rooms') }}" :active="request()->routeIs('hotel.rooms.rooms')">
+                            {{ __('Kamar') }}
+                        </x-nav-link>
+
                         <x-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
                             {{ __('Data Unggah') }}
                         </x-nav-link>
@@ -162,6 +166,10 @@
 
                 <x-responsive-nav-link href="{{ route('hotel.okupansi') }}" :active="request()->routeIs('hotel.okupansi')">
                     {{ __('Okupansi') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('hotel.rooms.rooms') }}" :active="request()->routeIs('hotel.rooms.rooms')">
+                    {{ __('Kamar') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
