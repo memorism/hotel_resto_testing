@@ -70,7 +70,7 @@
                         </x-nav-link>
 
                         <x-nav-link href="{{ route('resto.okupansi') }}" :active="request()->routeIs('resto.okupansi')">
-                            {{ __('Okupansi') }}
+                            {{ __('Statistik') }}
                         </x-nav-link>
 
                         <x-nav-link href="{{ route('resto.dataorders.index') }}" :active="request()->routeIs('resto.dataorders.index')">
@@ -187,7 +187,7 @@
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('resto.okupansi') }}" :active="request()->routeIs('resto.okupansi')">
-                    {{ __('Okupansi') }}
+                    {{ __('Statistik') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('resto.dataorders.index') }}" :active="request()->routeIs('resto.dataorders.index')">
