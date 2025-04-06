@@ -20,88 +20,91 @@ class RestoController extends Controller
 
         $query = RestoOrder::where('user_id', $userId);
 
-        // Terapkan filter tanggal hanya jika tanggal diberikan
         if ($startDate && $endDate) {
             $query->whereBetween('order_date', [$startDate, $endDate]);
         }
 
-        // 1️⃣ Total Penjualan
-        $totalSales = $query->count();
-
-        // 2️⃣ Total Pendapatan
+        // Key Metrics
+        $totalTransactions = $query->count();
         $totalRevenue = $query->sum(DB::raw('quantity * item_price'));
+        $averageTransactionValue = $totalTransactions > 0 ? $totalRevenue / $totalTransactions : 0;
 
-        // 3️⃣ Rata-rata Order Value
-        $averageOrderValue = $totalSales > 0 ? $totalRevenue / $totalSales : 0;
+        // Line Chart – Pendapatan per bulan
+        $monthlyRevenue = clone $query;
+        $monthlyRevenue = $monthlyRevenue->selectRaw("DATE_FORMAT(order_date, '%Y-%m') as month, SUM(quantity * item_price) as total_revenue")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($item) {
+                $item->total_revenue = (int) $item->total_revenue;
+                return $item;
+            });
 
-        // 4️⃣ Profit & Loss (Contoh: total revenue - 30% operational cost)
-        $profitLoss = $totalRevenue - ($totalRevenue * 0.3);
-
-        // 5️⃣ Target Pencapaian (Asumsikan target bulanan Rp 100 Juta)
-        $targetAchievement = ($totalRevenue / 100000000) * 100;
-
-        // 6️⃣ Tren Pendapatan Harian
-        $revenueTrend = clone $query;
-        $revenueTrend = $revenueTrend->select(
-            DB::raw("DATE(order_date) as date"),
-            DB::raw("SUM(quantity * item_price) as total_revenue")
-        )
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get();
-
-        // 7️⃣ Profit & Loss Harian (Misal, 70% dari pendapatan sebagai laba bersih)
-        $profitLossTrend = clone $query;
-        $profitLossTrend = $profitLossTrend->select(
-            DB::raw("DATE(order_date) as date"),
-            DB::raw("SUM(quantity * item_price * 0.7) as profit_or_loss")
-        )
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get();
-
-        // 8️⃣ Distribusi Metode Pembayaran
-        $paymentMethods = clone $query;
-        $paymentMethods = $paymentMethods->select(
-            'transaction_type',
-            DB::raw("COUNT(id) as total_payments")
-        )
+        // Pie Chart – Metode Pembayaran
+        $paymentDistribution = clone $query;
+        $paymentDistribution = $paymentDistribution->select('transaction_type', DB::raw('SUM(quantity * item_price) as total_revenue'))
             ->groupBy('transaction_type')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->total_revenue = (int) $item->total_revenue;
+                return $item;
+            });
 
-        // 9️⃣ Pendapatan Berdasarkan Jenis Menu
+        // Pie Chart – Berdasarkan item_type
         $revenueByItemType = clone $query;
-        $revenueByItemType = $revenueByItemType->select(
-            'item_type',
-            DB::raw("SUM(quantity * item_price) as total_revenue")
-        )
+        $revenueByItemType = $revenueByItemType->select('item_type', DB::raw('SUM(quantity * item_price) as total_revenue'))
             ->groupBy('item_type')
+            ->get()
+            ->map(function ($item) {
+                $item->total_revenue = (int) $item->total_revenue;
+                return $item;
+            });
+
+        // Bar Chart – Berdasarkan type_of_order
+        $revenueByOrderType = clone $query;
+        $revenueByOrderType = $revenueByOrderType->select('type_of_order', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('type_of_order')
+            ->get()
+            ->map(function ($item) {
+                $item->total_revenue = (int) $item->total_revenue;
+                return $item;
+            });
+
+        // Bar Chart – Top 5 menu paling banyak dibeli
+        $top5Items = clone $query;
+        $top5Items = $top5Items->select('item_name', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('item_name')
+            ->orderByDesc('total_revenue')
+            ->limit(5)
             ->get();
 
-        // 🔟 Biaya Operasional vs Pendapatan
-        $costVsRevenue = clone $query;
-        $costVsRevenue = $costVsRevenue->select(
-            DB::raw("DATE(order_date) as date"),
-            DB::raw("SUM(quantity * item_price) as total_revenue"),
-            DB::raw("SUM(quantity * item_price * 0.3) as total_cost") // Asumsikan 30% biaya operasional
-        )
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
+        // Bar Chart – Top 5 menu paling jarang dibeli
+        $least5Items = clone $query;
+        $least5Items = $least5Items->select('item_name', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('item_name')
+            ->orderBy('total_revenue')
+            ->limit(5)
+            ->get();
+
+        // Bar Chart – Berdasarkan received_by
+        $revenueByReceiver = clone $query;
+        $revenueByReceiver = $revenueByReceiver->select('received_by', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('received_by')
             ->get();
 
         return view('resto.dashboard', compact(
-            'totalSales',
-            'totalRevenue',
-            'averageOrderValue',
-            'profitLoss',
-            'targetAchievement',
-            'revenueTrend',
-            'profitLossTrend',
-            'paymentMethods',
-            'revenueByItemType',
-            'costVsRevenue',
             'startDate',
-            'endDate'
+            'endDate',
+            'totalTransactions',
+            'totalRevenue',
+            'averageTransactionValue',
+            'monthlyRevenue',
+            'paymentDistribution',
+            'revenueByItemType',
+            'revenueByOrderType',
+            'top5Items',
+            'least5Items',
+            'revenueByReceiver'
         ));
     }
 }

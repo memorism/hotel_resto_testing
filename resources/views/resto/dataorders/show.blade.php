@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('File Upload Details') }}
+                {{ __('Detail File Upload') }}
             </h2>
         </div>
     </x-slot>
@@ -12,15 +12,15 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-lg font-semibold">
-                        File Name: {{ $upload->file_name }}
+                        Nama File: {{ $upload->file_name }}
                     </h3>
                     <ul class="mt-2 text-gray-700">
-                        <li><strong>Uploaded By:</strong> {{ $upload->user->name }}</li>
-                        <li><strong>Upload Date:</strong> {{ $upload->created_at->format('Y-m-d H:i:s') }}</li>
-                        <li><strong>Description:</strong> {{ $upload->description ?? 'No description provided' }}</li>
+                        <li><strong>Diunggah oleh:</strong> {{ $upload->user->name }}</li>
+                        <li><strong>Tanggal Unggah:</strong> {{ $upload->created_at->format('Y-m-d H:i:s') }}</li>
+                        <li><strong>Deskripsi:</strong> {{ $upload->description ?? 'Tidak ada deskripsi' }}</li>
                     </ul>
 
-                    <h3 class="mt-6 text-lg font-semibold">Related Orders</h3>
+                    <h3 class="mt-6 text-lg font-semibold">Data Pesanan Terkait</h3>
                     @if ($orders->isEmpty())
                         <p class="mt-2">No data found for this file.</p>
                     @else
@@ -97,7 +97,7 @@
                                                         style="display:inline;">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Yakin hapus?')">Hapus</button>
+                                                            onclick="return confirm('Apakah Anda Yakin Untuk di hapus?')">Hapus</button>
                                                     </form>
                                                 </div>
                                             </td>

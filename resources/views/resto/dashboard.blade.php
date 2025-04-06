@@ -1,56 +1,48 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Finance Restoran') }}
+        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+            {{ __('📊 Dashboard Keuangan Restoran') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+    <div class="py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow rounded-lg p-6">
                 <!-- 🔹 Filter Form -->
-                <form method="GET" action="{{ route('resto.dashboard') }}" class="mb-4">
+                <form method="GET" action="{{ route('resto.dashboard') }}" class="mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-gray-700">Tanggal Mulai:</label>
-                            <input type="date" name="start_date" class="w-full p-2 border rounded"
+                            <label class="block text-gray-700 font-medium">Tanggal Mulai:</label>
+                            <input type="date" name="start_date" class="w-full p-2 border rounded focus:ring focus:ring-blue-200"
                                 value="{{ request('start_date') }}">
                         </div>
                         <div>
-                            <label class="block text-gray-700">Tanggal Akhir:</label>
-                            <input type="date" name="end_date" class="w-full p-2 border rounded"
+                            <label class="block text-gray-700 font-medium">Tanggal Akhir:</label>
+                            <input type="date" name="end_date" class="w-full p-2 border rounded focus:ring focus:ring-blue-200"
                                 value="{{ request('end_date') }}">
                         </div>
                         <div class="flex items-end">
                             <button type="submit"
-                                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                Filter
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold">
+                                Filter Data
                             </button>
                         </div>
                     </div>
                 </form>
 
                 <!-- 🔹 Ringkasan Keuangan -->
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
-                    <div class="bg-blue-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Total Penjualan</h4>
-                        <p class="text-2xl font-bold">{{ number_format($totalSales) }}</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Total Transaksi</h4>
+                        <p class="text-2xl font-bold text-blue-800">{{ number_format($totalTransactions ?? 0) }}</p>
                     </div>
-                    <div class="bg-green-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Total Pendapatan</h4>
-                        <p class="text-2xl font-bold">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Total Pendapatan</h4>
+                        <p class="text-2xl font-bold text-green-800">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</p>
                     </div>
-                    <div class="bg-yellow-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Rata-rata Order Value</h4>
-                        <p class="text-2xl font-bold">Rp {{ number_format($averageOrderValue, 0, ',', '.') }}</p>
-                    </div>
-                    <div class="bg-red-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Profit / Loss</h4>
-                        <p class="text-2xl font-bold">Rp {{ number_format($profitLoss, 0, ',', '.') }}</p>
-                    </div>
-                    <div class="bg-purple-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Target Pencapaian</h4>
-                        <p class="text-2xl font-bold">{{ number_format($targetAchievement, 2) }}%</p>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Rata-rata Pembelian</h4>
+                        <p class="text-2xl font-bold text-yellow-800">Rp {{ number_format($averageTransactionValue ?? 0, 0, ',', '.') }}</p>
                     </div>
                 </div>
 
@@ -61,148 +53,147 @@
                         height: 300px;
                     }
                 </style>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Tren Pendapatan Harian</h4>
-                        @if(count($revenueTrend) > 0)
-                            <div class="chart-container">
-                                <canvas id="revenueTrendChart"></canvas>
-                            </div>
-                        @else
-                            <p class="text-gray-500">Tidak ada data pendapatan tersedia.</p>
-                        @endif
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="font-semibold mb-2">Pendapatan per Bulan</h4>
+                        <div class="chart-container">
+                        <canvas id="monthlyRevenueChart"></canvas>
+                        </div>
                     </div>
-
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Profit & Loss</h4>
-                        @if(count($profitLossTrend) > 0)
-                            <div class="chart-container">
-                                <canvas id="profitLossChart"></canvas>
-                            </div>
-                        @else
-                            <p class="text-gray-500">Tidak ada data Profit & Loss tersedia.</p>
-                        @endif
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="font-semibold mb-2">Metode Pembayaran</h4>
+                        <div class="chart-container">
+                        <canvas id="paymentDistributionChart"></canvas>
+                        </div>
                     </div>
-
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Distribusi Metode Pembayaran</h4>
-                        @if(count($paymentMethods) > 0)
-                            <div class="chart-container">
-                                <canvas id="paymentMethodChart"></canvas>
-                            </div>
-                        @else
-                            <p class="text-gray-500">Tidak ada data metode pembayaran.</p>
-                        @endif
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="font-semibold mb-2">Pendapatan per Item Type</h4>
+                        <div class="chart-container">
+                        <canvas id="revenueByItemTypeChart"></canvas>
+                        </div>
                     </div>
-
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Pendapatan Berdasarkan Jenis Menu</h4>
-                        @if(count($revenueByItemType) > 0)
-                            <div class="chart-container">
-                                <canvas id="revenueByItemTypeChart"></canvas>
-                            </div>
-                        @else
-                            <p class="text-gray-500">Tidak ada data pendapatan per jenis menu.</p>
-                        @endif
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="font-semibold mb-2">Pendapatan per Tipe Order</h4>
+                        <div class="chart-container">
+                        <canvas id="revenueByOrderTypeChart"></canvas>
+                        </div>
                     </div>
-
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Biaya Operasional vs Pendapatan</h4>
-                        @if(count($costVsRevenue) > 0)
-                            <div class="chart-container">
-                                <canvas id="costVsRevenueChart"></canvas>
-                            </div>
-                        @else
-                            <p class="text-gray-500">Tidak ada data biaya operasional.</p>
-                        @endif
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="font-semibold mb-2">Top 5 Menu Terlaris</h4>
+                        <div class="chart-container">
+                        <canvas id="top5ItemsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="font-semibold mb-2">Top 5 Menu Paling Jarang Dibeli</h4>
+                        <div class="chart-container">
+                        <canvas id="least5ItemsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="font-semibold mb-2">Pendapatan Berdasarkan Penerima Order</h4>
+                        <div class="chart-container">
+                        <canvas id="revenueByReceiverChart"></canvas>
+                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            function createChart(ctx, type, labels, data, colors, xLabel, yLabel, chartLabel) {
-                if (!ctx) return; // Cegah error jika canvas tidak ditemukan
-                return new Chart(ctx, {
+            function renderChart(id, type, labels, data, label, xLabel, yLabel, colors) {
+                const ctx = document.getElementById(id);
+                if (!ctx) return;
+                const maxY = Math.max(...data);
+                const step = Math.ceil(maxY / 5 / 1000) * 1000 || 1000;
+
+                new Chart(ctx.getContext('2d'), {
                     type: type,
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: chartLabel,
+                            label: label,
                             data: data,
                             backgroundColor: colors,
                             borderColor: colors,
-                            borderWidth: 1
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: {
+                        scales: type === 'pie' ? {} : {
                             x: { title: { display: true, text: xLabel } },
-                            y: { title: { display: true, text: yLabel } }
+                            y: {
+                                beginAtZero: true,
+                                stepSize: step,
+                                title: { display: true, text: yLabel },
+                                ticks: {
+                                    callback: value => 'Rp ' + value.toLocaleString('id-ID')
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { enabled: true }
                         }
                     }
                 });
             }
 
-            @if(count($revenueTrend) > 0)
-                createChart(
-                    document.getElementById('revenueTrendChart').getContext('2d'),
-                    'line',
-                    {!! json_encode($revenueTrend->pluck('date')->toArray()) !!},
-                    {!! json_encode($revenueTrend->pluck('total_revenue')->toArray()) !!},
-                    ['#2ecc71'], 'Tanggal', 'Total Pendapatan', 'Tren Pendapatan'
-                );
-            @endif
+            renderChart(
+                'monthlyRevenueChart', 'line',
+                {!! json_encode($monthlyRevenue->pluck('month')) !!},
+                {!! json_encode($monthlyRevenue->pluck('total_revenue')->map(fn($v) => (int)$v)) !!},
+                'Pendapatan per Bulan', 'Bulan', 'Pendapatan', '#2ecc71'
+            );
 
-            @if(count($profitLossTrend) > 0)
-                createChart(
-                    document.getElementById('profitLossChart').getContext('2d'),
-                    'bar',
-                    {!! json_encode($profitLossTrend->pluck('date')->toArray()) !!},
-                    {!! json_encode($profitLossTrend->pluck('profit_or_loss')->toArray()) !!},
-                    ['#e74c3c'], 'Tanggal', 'Profit / Loss', 'Profit & Loss Harian'
-                );
-            @endif
+            renderChart(
+                'paymentDistributionChart', 'pie',
+                {!! json_encode($paymentDistribution->pluck('transaction_type')) !!},
+                {!! json_encode($paymentDistribution->pluck('total_revenue')->map(fn($v) => (int)$v)) !!},
+                'Metode Pembayaran', '', '', ['#f39c12', '#3498db', '#9b59b6']
+            );
 
-            @if(count($paymentMethods) > 0)
-                createChart(
-                    document.getElementById('paymentMethodChart').getContext('2d'),
-                    'pie',
-                    {!! json_encode($paymentMethods->pluck('transaction_type')->toArray()) !!},
-                    {!! json_encode($paymentMethods->pluck('total_payments')->toArray()) !!},
-                    ['#f39c12', '#3498db', '#9b59b6'],
-                    'Metode Pembayaran', 'Jumlah Transaksi', 'Distribusi Metode Pembayaran'
-                );
-            @endif
+            renderChart(
+                'revenueByItemTypeChart', 'pie',
+                {!! json_encode($revenueByItemType->pluck('item_type')) !!},
+                {!! json_encode($revenueByItemType->pluck('total_revenue')->map(fn($v) => (int)$v)) !!},
+                'Pendapatan per Item Type', '', '', ['#9b59b6', '#1abc9c', '#34495e']
+            );
 
-            @if(count($revenueByItemType) > 0)
-                createChart(
-                    document.getElementById('revenueByItemTypeChart').getContext('2d'),
-                    'bar',
-                    {!! json_encode($revenueByItemType->pluck('item_type')->toArray()) !!},
-                    {!! json_encode($revenueByItemType->pluck('total_revenue')->toArray()) !!},
-                    ['#9b59b6'], 'Jenis Item', 'Pendapatan (Rp)', 'Pendapatan Berdasarkan Jenis Menu'
-                );
-            @endif
+            renderChart(
+                'revenueByOrderTypeChart', 'bar',
+                {!! json_encode($revenueByOrderType->pluck('type_of_order')) !!},
+                {!! json_encode($revenueByOrderType->pluck('total_revenue')->map(fn($v) => (int)$v)) !!},
+                'Pendapatan per Tipe Order', 'Tipe Order', 'Pendapatan', '#3498db'
+            );
 
-            @if(count($costVsRevenue) > 0)
-                createChart(
-                    document.getElementById('costVsRevenueChart').getContext('2d'),
-                    'bar',
-                    {!! json_encode($costVsRevenue->pluck('date')->toArray()) !!},
-                    {!! json_encode($costVsRevenue->pluck('total_cost')->toArray()) !!},
-                    ['#e67e22'], 'Tanggal', 'Biaya Operasional (Rp)', 'Biaya Operasional vs Pendapatan'
-                );
-            @endif
+            renderChart(
+                'top5ItemsChart', 'bar',
+                {!! json_encode($top5Items->pluck('item_name')) !!},
+                {!! json_encode($top5Items->pluck('total_revenue')->map(fn($v) => (int)$v)) !!},
+                'Top 5 Menu Terlaris', 'Menu', 'Pendapatan', '#1abc9c'
+            );
+
+            renderChart(
+                'least5ItemsChart', 'bar',
+                {!! json_encode($least5Items->pluck('item_name')) !!},
+                {!! json_encode($least5Items->pluck('total_revenue')->map(fn($v) => (int)$v)) !!},
+                'Top 5 Menu Paling Jarang Dibeli', 'Menu', 'Pendapatan', '#e74c3c'
+            );
+
+            renderChart(
+                'revenueByReceiverChart', 'bar',
+                {!! json_encode($revenueByReceiver->pluck('received_by')) !!},
+                {!! json_encode($revenueByReceiver->pluck('total_revenue')->map(fn($v) => (int)$v)) !!},
+                'Pendapatan Berdasarkan Penerima Order', 'Penerima', 'Pendapatan', '#8e44ad'
+            );
         });
     </script>
-
 </x-app-layout>
