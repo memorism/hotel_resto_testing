@@ -28,11 +28,11 @@
                 </form>
 
                 <!-- 🔹 Ringkasan Keuangan -->
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                     @php
                         $cards = [
                             ['label' => 'Total Pendapatan', 'value' => $totalRevenue, 'bg' => 'bg-blue-100'],
-                            ['label' => 'Total Biaya Operasional', 'value' => $totalExpenses, 'bg' => 'bg-red-100'],
+                            // ['label' => 'Total Biaya Operasional', 'value' => $totalExpenses, 'bg' => 'bg-red-100'],
                             ['label' => 'Keuntungan Bersih', 'value' => $profit, 'bg' => 'bg-green-100'],
                             ['label' => 'RevPAR', 'value' => $revPAR, 'bg' => 'bg-yellow-100'],
                             ['label' => 'ADR', 'value' => $adr, 'bg' => 'bg-purple-100'],
@@ -81,12 +81,12 @@
                             <canvas id="monthlyRevenueChart"></canvas>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-md">
+                    {{-- <div class="bg-white p-4 rounded-lg shadow-md">
                         <h4 class="text-md font-semibold mb-2">Biaya Operasional vs Pendapatan</h4>
                         <div class="chart-container">
                             <canvas id="expensesVsRevenueChart"></canvas>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="bg-white p-4 rounded-lg shadow-md">
                         <h4 class="text-md font-semibold mb-2">Pendapatan Berdasarkan Segmen Pasar</h4>
                         <div class="chart-container">
@@ -131,11 +131,11 @@
             '#3498db', 'Bulan', 'Pendapatan (Rp)', 'Pendapatan Per Bulan'
         );
 
-        createChart(
-            document.getElementById('expensesVsRevenueChart').getContext('2d'), 'line',
-            {!! json_encode(array_keys($monthlyExpenses)) !!}, {!! json_encode(array_values($monthlyExpenses)) !!},
-            '#e74c3c', 'Bulan', 'Biaya Operasional (Rp)', 'Biaya vs Pendapatan'
-        );
+        // createChart(
+        //     document.getElementById('expensesVsRevenueChart').getContext('2d'), 'line',
+        //     {!! json_encode(array_keys($monthlyExpenses)) !!}, {!! json_encode(array_values($monthlyExpenses)) !!},
+        //     '#e74c3c', 'Bulan', 'Biaya Operasional (Rp)', 'Biaya vs Pendapatan'
+        // );
 
         createChart(
             document.getElementById('marketSegmentRevenueChart').getContext('2d'), 'pie',

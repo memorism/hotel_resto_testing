@@ -11,71 +11,80 @@ use Carbon\Carbon;
 class AdminHotelController extends Controller
 {
     public function index(Request $request)
-    {
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $hotelId = $request->input('hotel_id');
+{
+    $startDate = $request->input('start_date');
+    $endDate = $request->input('end_date');
+    $hotelId = $request->input('hotel_id');
 
-        // Query data booking
-        $query = Booking::query();
+    $start = $startDate ? Carbon::parse($startDate) : null;
+    $end = $endDate ? Carbon::parse($endDate) : null;
+    $daysInRange = ($start && $end) ? $start->diffInDays($end) + 1 : 1;
 
-        if ($startDate && $endDate) {
-            $startDate = Carbon::parse($startDate)->format('Y-m-d');
-            $endDate = Carbon::parse($endDate)->format('Y-m-d');
+    $query = Booking::query();
 
-            // Gabungkan arrival_year, arrival_month, arrival_date ke format tanggal
-            $query->whereRaw("STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') BETWEEN ? AND ?", [$startDate, $endDate]);
-        }
-
-        if ($hotelId) {
-            $query->where('user_id', $hotelId);
-        }
-
-        $bookings = $query->get();
-
-        // 1️⃣ Key Metrics
-        $totalRevenue = $bookings->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room);
-        $totalExpenses = 0; // Dummy data, bisa diambil dari database
-        $profit = $totalRevenue - $totalExpenses;
-        $revPAR = ($bookings->count() > 0) ? $totalRevenue / $bookings->count() : 0;
-        $adr = ($bookings->count() > 0) ? $totalRevenue / $bookings->sum('no_of_week_nights') : 0;
-        $cancellationLoss = $bookings->where('booking_status', 'Canceled')->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room);
-
-        // 2️⃣ Pendapatan Per Bulan
-        $monthlyRevenue = $bookings->groupBy('arrival_month')->map(fn($row) => $row->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room))->toArray();
-        ksort($monthlyRevenue);
-
-        // 3️⃣ Biaya Operasional vs Pendapatan (Dummy Data)
-        $monthlyExpenses = array_fill_keys(array_keys($monthlyRevenue), rand(5000000, 20000000));
-
-        // 4️⃣ Pendapatan Berdasarkan Segmen Pasar
-        $marketSegmentRevenue = $bookings->groupBy('market_segment_type')->map(fn($row) => $row->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room))->toArray();
-        $marketSegmentBookings = $bookings->groupBy('market_segment_type')->map(fn($row) => count($row))->toArray();
-
-        // 5️⃣ Top Performing Rooms
-        $roomRevenue = $bookings->groupBy('room_type_reserved')->map(fn($row) => $row->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room))->toArray();
-        $roomBookings = $bookings->groupBy('room_type_reserved')->map(fn($row) => count($row))->toArray();
-
-        // Ambil daftar hotel berdasarkan usertype = "hotel"
-        $hotels = User::where('usertype', 'hotel')->get();
-
-        return view('admin.hotel', [
-            'hotels' => $hotels,
-            'totalRevenue' => $totalRevenue,
-            'totalExpenses' => $totalExpenses,
-            'profit' => $profit,
-            'revPAR' => $revPAR,
-            'adr' => $adr,
-            'cancellationLoss' => $cancellationLoss,
-            'monthlyRevenue' => $monthlyRevenue,
-            'monthlyExpenses' => $monthlyExpenses,
-            'roomRevenue' => $roomRevenue,
-            'roomBookings' => $roomBookings,
-            'marketSegmentRevenue' => $marketSegmentRevenue,
-            'marketSegmentBookings' => $marketSegmentBookings,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'hotelId' => $hotelId
+    if ($start && $end) {
+        $query->whereRaw("STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') BETWEEN ? AND ?", [
+            $start->format('Y-m-d'), $end->format('Y-m-d')
         ]);
     }
+
+    if ($hotelId) {
+        $query->where('user_id', $hotelId);
+    }
+
+    $bookings = $query->get();
+
+    $totalRooms = $hotelId
+        ? \App\Models\Room::where('user_id', $hotelId)->sum('total_rooms')
+        : \App\Models\Room::sum('total_rooms');
+
+    $totalRevenue = $bookings->where('booking_status', 'Not_Canceled')->sum(function ($booking) {
+        $nights = $booking->no_of_weekend_nights + $booking->no_of_week_nights;
+        return $nights * $booking->avg_price_per_room;
+    });
+
+    $totalExpenses = 0; // Dummy
+    $profit = $totalRevenue - $totalExpenses;
+
+    $totalNightsSold = $bookings->where('booking_status', 'Not_Canceled')->sum(fn($b) => $b->no_of_weekend_nights + $b->no_of_week_nights);
+    $roomsSold = $bookings->where('booking_status', 'Not_Canceled')->count();
+    $adr = $roomsSold > 0 ? $totalRevenue / $roomsSold : 0;
+
+    $revPAR = ($totalRooms > 0 && $daysInRange > 0)
+        ? ($totalRevenue / ($totalRooms * $daysInRange))
+        : 0;
+
+    $cancellationLoss = $bookings->where('booking_status', 'Canceled')->sum(fn($booking) =>
+        ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room
+    );
+
+    $monthlyRevenue = $bookings->groupBy('arrival_month')->map(fn($row) =>
+        $row->sum(fn($b) => ($b->no_of_weekend_nights + $b->no_of_week_nights) * $b->avg_price_per_room)
+    )->toArray();
+    ksort($monthlyRevenue);
+
+    $monthlyExpenses = array_fill_keys(array_keys($monthlyRevenue), 0); // Dummy
+
+    $marketSegmentRevenue = $bookings->groupBy('market_segment_type')->map(fn($row) =>
+        $row->sum(fn($b) => ($b->no_of_weekend_nights + $b->no_of_week_nights) * $b->avg_price_per_room)
+    )->toArray();
+
+    $marketSegmentBookings = $bookings->groupBy('market_segment_type')->map(fn($row) => count($row))->toArray();
+
+    $roomRevenue = $bookings->groupBy('room_type_reserved')->map(fn($row) =>
+        $row->sum(fn($b) => ($b->no_of_weekend_nights + $b->no_of_week_nights) * $b->avg_price_per_room)
+    )->toArray();
+
+    $roomBookings = $bookings->groupBy('room_type_reserved')->map(fn($row) => count($row))->toArray();
+
+    $hotels = User::where('usertype', 'hotel')->get();
+
+    return view('admin.hotel', compact(
+        'hotels', 'totalRevenue', 'totalExpenses', 'profit', 'revPAR', 'adr', 'cancellationLoss',
+        'monthlyRevenue', 'monthlyExpenses', 'roomRevenue', 'roomBookings',
+        'marketSegmentRevenue', 'marketSegmentBookings',
+        'startDate', 'endDate', 'hotelId'
+    ));
+}
+
 }

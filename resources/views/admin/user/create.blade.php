@@ -57,7 +57,7 @@
 
                     <!-- Upload Logo -->
                     <div class="mb-4">
-                        <x-input-label for="logo" :value="__('Unggah Logo')" />
+                        <x-input-label for="logo" :value="__('Unggah Logo (PNG)')" />
                         <input id="logo" type="file" name="logo"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200"
                             accept="image/*" />

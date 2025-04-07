@@ -39,46 +39,71 @@
                     </div>
                 </form>
 
-                <!-- 🔹 Ringkasan Data -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-white">
-                    <div class="bg-blue-500 p-4 rounded-lg shadow">
-                        <h5 class="text-lg font-semibold">Total Pendapatan</h5>
-                        <p class="text-2xl">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
-                    </div>
-                    <div class="bg-green-500 p-4 rounded-lg shadow">
-                        <h5 class="text-lg font-semibold">Profit</h5>
-                        <p class="text-2xl">Rp {{ number_format($profit, 0, ',', '.') }}</p>
-                    </div>
-                    <div class="bg-yellow-500 p-4 rounded-lg shadow">
-                        <h5 class="text-lg font-semibold">RevPAR</h5>
-                        <p class="text-2xl">Rp {{ number_format($revPAR, 0, ',', '.') }}</p>
-                    </div>
-                    <div class="bg-red-500 p-4 rounded-lg shadow">
-                        <h5 class="text-lg font-semibold">ADR</h5>
-                        <p class="text-2xl">Rp {{ number_format($adr, 0, ',', '.') }}</p>
+                <!-- 🔹 Ringkasan Keuangan -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                    @php
+                        $cards = [
+                            ['label' => 'Total Pendapatan', 'value' => $totalRevenue, 'bg' => 'bg-blue-100'],
+                            // ['label' => 'Total Biaya Operasional', 'value' => $totalExpenses, 'bg' => 'bg-red-100'],
+                            ['label' => 'Keuntungan Bersih', 'value' => $profit, 'bg' => 'bg-green-100'],
+                            ['label' => 'RevPAR', 'value' => $revPAR, 'bg' => 'bg-yellow-100'],
+                            ['label' => 'ADR', 'value' => $adr, 'bg' => 'bg-purple-100'],
+                            ['label' => 'Kerugian Akibat Pembatalan', 'value' => $cancellationLoss, 'bg' => 'bg-gray-100 text-red-500']
+                        ];
+                    @endphp
+
+                    @foreach ($cards as $card)
+                        <div class="{{ $card['bg'] }} p-4 rounded-lg text-center shadow">
+                            <h4 class="text-sm font-semibold text-gray-700">{{ $card['label'] }}</h4>
+                            <p class="text-xl font-bold">Rp{{ number_format($card['value'], 0, ',', '.') }}</p>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- 🔹 Tabel Kamar dengan Pendapatan Tertinggi -->
+                <div class="bg-white p-4 rounded-lg shadow-md mb-8">
+                    <h4 class="text-lg font-semibold mb-4 text-gray-800">Top Performing Rooms</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm border border-gray-200">
+                            <thead class="bg-gray-100 text-gray-700">
+                                <tr>
+                                    <th class="px-4 py-2 border">Tipe Kamar</th>
+                                    <th class="px-4 py-2 border">Jumlah Reservasi</th>
+                                    <th class="px-4 py-2 border">Total Pendapatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($roomRevenue as $roomType => $revenue)
+                                    <tr class="text-center">
+                                        <td class="px-4 py-2 border">{{ $roomType }}</td>
+                                        <td class="px-4 py-2 border">{{ $roomBookings[$roomType] ?? 0 }}</td>
+                                        <td class="px-4 py-2 border">Rp{{ number_format($revenue, 0, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- 🔹 Semua Grafik -->
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Pendapatan Bulanan</h3>
-                        <canvas id="revenueChart"></canvas>
+                <!-- 🔹 Grafik Keuangan -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <h4 class="text-md font-semibold mb-2">Pendapatan Per Bulan</h4>
+                        <div class="chart-container">
+                            <canvas id="monthlyRevenueChart"></canvas>
+                        </div>
                     </div>
-
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Pendapatan vs Biaya</h3>
-                        <canvas id="expenseChart"></canvas>
-                    </div>
-
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Pendapatan Berdasarkan Segmen Pasar</h3>
-                        <canvas id="marketSegmentChart"></canvas>
-                    </div>
-
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Pendapatan Berdasarkan Tipe Kamar</h3>
-                        <canvas id="roomChart"></canvas>
+                    {{-- <div class="bg-white p-4 rounded-lg shadow-md">
+                        <h4 class="text-md font-semibold mb-2">Biaya Operasional vs Pendapatan</h4>
+                        <div class="chart-container">
+                            <canvas id="expensesVsRevenueChart"></canvas>
+                        </div>
+                    </div> --}}
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <h4 class="text-md font-semibold mb-2">Pendapatan Berdasarkan Segmen Pasar</h4>
+                        <div class="chart-container">
+                            <canvas id="marketSegmentRevenueChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -86,73 +111,57 @@
         </div>
     </div>
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // 1️⃣ Grafik Pendapatan Bulanan
-        new Chart(document.getElementById('revenueChart').getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode(array_keys($monthlyRevenue)) !!},
-                datasets: [{
-                    label: 'Pendapatan Bulanan',
-                    data: {!! json_encode(array_values($monthlyRevenue)) !!},
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            }
-        });
-
-        // 2️⃣ Grafik Pendapatan vs Biaya Operasional
-        new Chart(document.getElementById('expenseChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: {!! json_encode(array_keys($monthlyRevenue)) !!},
-                datasets: [
-                    {
-                        label: 'Pendapatan',
-                        data: {!! json_encode(array_values($monthlyRevenue)) !!},
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+        function createChart(ctx, type, labels, data, colors, xLabel, yLabel, chartLabel) {
+            return new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: chartLabel,
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors,
                         borderWidth: 1
-                    },
-                    {
-                        label: 'Biaya Operasional',
-                        data: {!! json_encode(array_values($monthlyExpenses)) !!},
-                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: xLabel } },
+                        y: { title: { display: true, text: yLabel } }
                     }
-                ]
-            }
-        });
+                }
+            });
+        }
 
-        // 3️⃣ Grafik Pendapatan Berdasarkan Segmen Pasar
-        new Chart(document.getElementById('marketSegmentChart').getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: {!! json_encode(array_keys($marketSegmentRevenue)) !!},
-                datasets: [{
-                    label: 'Pendapatan',
-                    data: {!! json_encode(array_values($marketSegmentRevenue)) !!},
-                    backgroundColor: ['red', 'blue', 'green', 'yellow', 'purple']
-                }]
-            }
-        });
+        createChart(
+            document.getElementById('monthlyRevenueChart').getContext('2d'), 'bar',
+            {!! json_encode(array_keys($monthlyRevenue)) !!}, {!! json_encode(array_values($monthlyRevenue)) !!},
+            '#3498db', 'Bulan', 'Pendapatan (Rp)', 'Pendapatan Per Bulan'
+        );
 
-        // 4️⃣ Grafik Pendapatan Berdasarkan Tipe Kamar
-        new Chart(document.getElementById('roomChart').getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: {!! json_encode(array_keys($roomRevenue)) !!},
-                datasets: [{
-                    label: 'Pendapatan Kamar',
-                    data: {!! json_encode(array_values($roomRevenue)) !!},
-                    backgroundColor: ['orange', 'blue', 'green', 'red', 'purple']
-                }]
-            }
-        });
+        // createChart(
+        //     document.getElementById('expensesVsRevenueChart').getContext('2d'), 'line',
+        //     {!! json_encode(array_keys($monthlyExpenses)) !!}, {!! json_encode(array_values($monthlyExpenses)) !!},
+        //     '#e74c3c', 'Bulan', 'Biaya Operasional (Rp)', 'Biaya vs Pendapatan'
+        // );
+
+        createChart(
+            document.getElementById('marketSegmentRevenueChart').getContext('2d'), 'pie',
+            {!! json_encode(array_keys($marketSegmentRevenue)) !!}, {!! json_encode(array_values($marketSegmentRevenue)) !!},
+            ['#1abc9c', '#3498db', '#9b59b6', '#f1c40f', '#e74c3c'],
+            'Segmen Pasar', 'Pendapatan (Rp)', 'Pendapatan Berdasarkan Segmen Pasar'
+        );
     </script>
+
+    <style>
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
 
 </x-app-layout>

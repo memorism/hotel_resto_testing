@@ -41,52 +41,96 @@ class AdminOkupansiRestoController extends Controller
 
         $orders = $query->get();
 
-        // 1️⃣ **Total Transaksi**
-        $totalTransactions = $orders->count();
+        // Key Metrics
+        $bestItem = clone $query;
+        $bestItem = $bestItem->select('item_name', DB::raw('SUM(quantity) as total_quantity'))
+            ->groupBy('item_name')
+            ->orderByDesc('total_quantity')
+            ->first();
 
-        // 2️⃣ **Tren Jumlah Transaksi Harian**
-        $transactionTrends = $orders->groupBy('order_date')->map(fn($row) => count($row))->toArray();
+        $mostOrderType = clone $query;
+        $mostOrderType = $mostOrderType->select('type_of_order', DB::raw('COUNT(*) as total_orders'))
+            ->groupBy('type_of_order')
+            ->orderByDesc('total_orders')
+            ->first();
 
-        // 3️⃣ **Waktu Tersibuk (Peak Hours)**
-        $peakHours = $orders->groupBy(fn($order) => Carbon::parse($order->time_order)->format('H'))
-            ->map(fn($row) => count($row))
-            ->sortDesc() // Sort agar nilai terbesar berada di urutan pertama
-            ->toArray();
+        $busiestHour = clone $query;
+        $busiestHour = $busiestHour->select(DB::raw('HOUR(time_order) as hour'), DB::raw('COUNT(*) as total_orders'))
+            ->groupBy(DB::raw('HOUR(time_order)'))
+            ->orderByDesc('total_orders')
+            ->first();
 
-        $mostBusyHour = !empty($peakHours) ? array_key_first($peakHours) . ":00" : '-';
+        $busiestDay = clone $query;
+        $busiestDay = $busiestDay->select(DB::raw('DAYNAME(order_date) as day'), DB::raw('COUNT(*) as total_orders'))
+            ->groupBy(DB::raw('DAYNAME(order_date)'))
+            ->orderByDesc('total_orders')
+            ->first();
 
-        // 4️⃣ **Hari Tersibuk dalam Seminggu**
-        $peakDays = $orders->groupBy(fn($order) => Carbon::parse($order->order_date)->format('l'))
-            ->map(fn($row) => count($row))
-            ->sortDesc() // Sort agar nilai terbesar berada di urutan pertama
-            ->toArray();
+        // Grafik
+        $visitorsPerMonth = clone $query;
+        $visitorsPerMonth = $visitorsPerMonth->select(DB::raw("DATE_FORMAT(order_date, '%Y-%m') as month"), DB::raw('COUNT(*) as total'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
 
-        $mostBusyDay = !empty($peakDays) ? array_key_first($peakDays) : '-';
+        $peakHours = clone $query;
+        $peakHours = $peakHours->select(DB::raw('HOUR(time_order) as hour'), DB::raw('COUNT(*) as total_orders'))
+            ->groupBy(DB::raw('HOUR(time_order)'))
+            ->orderBy(DB::raw('HOUR(time_order)'))
+            ->get();
 
-        // 5️⃣ **Distribusi Jenis Pesanan (Dine-in vs Take-away)**
-        $orderTypes = $orders->groupBy('type_of_order')
-            ->map(fn($row) => count($row))
-            ->toArray();
+        $orderTypeDistribution = clone $query;
+        $orderTypeDistribution = $orderTypeDistribution->select('type_of_order', DB::raw('COUNT(*) as total'))
+            ->groupBy('type_of_order')
+            ->get();
 
-        // 6️⃣ **Popularitas Menu (Top 10 menu yang paling sering dipesan)**
-        $menuPopularity = $orders->groupBy('item_name')
-            ->map(fn($row) => $row->sum('quantity'))
-            ->sortDesc()
-            ->take(10)
-            ->toArray();
+        $menuPopularity = clone $query;
+        $menuPopularity = $menuPopularity->select('item_name', DB::raw('SUM(quantity) as total_sold'))
+            ->groupBy('item_name')
+            ->orderByDesc('total_sold')
+            ->get();
 
-        return view('admin.okupansiresto', compact(
-            'restos',
-            'totalTransactions',
-            'transactionTrends',
-            'peakHours',
-            'mostBusyHour',
-            'peakDays',
-            'mostBusyDay',
-            'orderTypes',
-            'menuPopularity',
-            'startDate',
-            'endDate'
-        ));
+        $transactionByItemType = clone $query;
+        $transactionByItemType = $transactionByItemType->select('item_type', DB::raw('COUNT(*) as total_transactions'))
+            ->groupBy('item_type')
+            ->orderByDesc('total_transactions')
+            ->get();
+
+        // Hari Tersibuk dari jumlah pengunjung (solusi baru: group by tanggal lalu map DAYNAME)
+        $peakDays = clone $query;
+        $peakDays = $peakDays->select(DB::raw('DATE(order_date) as full_date'))
+            ->get()
+            ->groupBy(function ($item) {
+                return date('l', strtotime($item->full_date));
+            })
+            ->map(function ($group, $day) {
+                return (object) [
+                    'day' => $day,
+                    'total' => $group->count(),
+                ];
+            })
+            ->sortBy(function ($item) {
+                $daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                return array_search($item->day, $daysOrder);
+            })
+            ->values();
+
+            return view('admin.okupansiresto', compact(
+                'startDate',
+                'endDate',
+                'restoId',
+                'restos',
+                'bestItem',
+                'mostOrderType',
+                'busiestHour',
+                'busiestDay',
+                'visitorsPerMonth',
+                'peakHours',
+                'orderTypeDistribution',
+                'menuPopularity',
+                'transactionByItemType',
+                'peakDays'
+            ));
+            
     }
 }

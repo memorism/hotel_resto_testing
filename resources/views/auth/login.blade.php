@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-md" >
+    <div >
         <div>
             <!-- Judul / Logo -->
             <div class="mb-6 text-center">

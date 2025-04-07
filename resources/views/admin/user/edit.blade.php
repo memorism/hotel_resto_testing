@@ -50,16 +50,13 @@
                     <!-- Tipe User -->
                     <div class="mb-4">
                         <x-input-label for="usertype" :value="__('Tipe User')" />
-                        <select name="usertype" id="usertype" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm">
-                            <option value="admin" {{ $user->usertype == 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="resto" {{ $user->usertype == 'resto' ? 'selected' : '' }}>Restaurant</option>
-                            <option value="hotel" {{ $user->usertype == 'hotel' ? 'selected' : '' }}>Hotel</option>
-                        </select>
+                        <input type="text" name="usertype" id="usertype" class="form-control"
+                                    value="{{ $user->usertype}}" readonly>
                     </div>
 
                     <!-- Upload Logo -->
                     <div class="mb-4">
-                        <x-input-label for="logo" :value="__('Unggah Logo Baru (Opsional)')" />
+                        <x-input-label for="logo" :value="__('Unggah Logo Baru (PNG)')" />
                         <input id="logo" type="file" name="logo"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200"
                             accept="image/*" />

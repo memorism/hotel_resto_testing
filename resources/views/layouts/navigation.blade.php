@@ -20,18 +20,23 @@
                         <x-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
+
                         <x-nav-link href="{{ route('admin.okupansiresto') }}" :active="request()->routeIs('admin.okupansiresto')">
-                            {{ __('Okupansi Resto') }}
+                            {{ __('Statistik Restaurant') }}
                         </x-nav-link>
+
+                        <x-nav-link href="{{ route('admin.resto') }}" :active="request()->routeIs('admin.resto')">
+                            {{ __('Keuangan Restaurant') }}
+                        </x-nav-link>
+
                         <x-nav-link href="{{ route('admin.okupansihotel') }}" :active="request()->routeIs('admin.okupansihotel')">
                             {{ __('Okupansi Hotel') }}
                         </x-nav-link>
+
                         <x-nav-link href="{{ route('admin.hotel') }}" :active="request()->routeIs('admin.hotel')">
-                            {{ __('Dashboard Hotel') }}
+                            {{ __('Keuangan Hotel') }}
                         </x-nav-link>
-                        <x-nav-link href="{{ route('admin.resto') }}" :active="request()->routeIs('admin.resto')">
-                            {{ __('Dashboard Restaurant') }}
-                        </x-nav-link>
+
                         <x-nav-link href="{{ route('admin.user.user') }}" :active="request()->routeIs('admin.user.user')">
                             {{ __('User') }}
                         </x-nav-link>
@@ -120,7 +125,11 @@
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('admin.okupansiresto') }}" :active="request()->routeIs('admin.okupansiresto')">
-                    {{ __('Okupansi Resto') }}
+                    {{ __('Statistik Restaurant') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('admin.resto') }}" :active="request()->routeIs('admin.resto')">
+                    {{ __('Keuangan Restaurant') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('admin.okupansihotel') }}" :active="request()->routeIs('admin.okupansihotel')">
@@ -128,11 +137,7 @@
                 </x-responsive-nav-link>
                 
                 <x-responsive-nav-link href="{{ route('admin.hotel') }}" :active="request()->routeIs('admin.hotel')">
-                    {{ __('Dashboard Hotel') }}
-                </x-responsive-nav-link>
-                
-                <x-responsive-nav-link href="{{ route('admin.resto') }}" :active="request()->routeIs('admin.resto')">
-                    {{ __('Dashboard Restaurant') }}
+                    {{ __('Keuangan Hotel') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link href="{{ route('admin.user.user') }}" :active="request()->routeIs('admin.user.user')">

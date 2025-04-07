@@ -28,78 +28,92 @@ class AdminRestoController extends Controller
 
         $orders = $query->get();
 
-        // 1️⃣ Total Penjualan
-        $totalSales = $orders->count();
+        // Key Metrics
+        $totalTransactions = $query->count();
+        $totalRevenue = $query->sum(DB::raw('quantity * item_price'));
+        $averageTransactionValue = $totalTransactions > 0 ? $totalRevenue / $totalTransactions : 0;
 
-        // 2️⃣ Total Pendapatan
-        $totalRevenue = $orders->sum(fn($order) => $order->quantity * $order->item_price);
+        // Line Chart – Pendapatan per bulan
+        $monthlyRevenue = clone $query;
+        $monthlyRevenue = $monthlyRevenue->selectRaw("DATE_FORMAT(order_date, '%Y-%m') as month, SUM(quantity * item_price) as total_revenue")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($item) {
+                $item->total_revenue = (int) $item->total_revenue;
+                return $item;
+            });
 
-        // 3️⃣ Rata-rata Order Value
-        $averageOrderValue = $totalSales > 0 ? $totalRevenue / $totalSales : 0;
-
-        // 4️⃣ Profit & Loss (30% biaya operasional)
-        $profitLoss = $totalRevenue - ($totalRevenue * 0.3);
-
-        // 5️⃣ Target Pencapaian (Target: Rp 100 Juta per bulan)
-        $targetAchievement = ($totalRevenue / 100000000) * 100;
-
-        // 6️⃣ Pendapatan Harian (Gunakan order_date)
-        $revenueTrend = $query->select(
-            DB::raw("DATE(order_date) as order_date"),
-            DB::raw("SUM(quantity * item_price) as total_revenue")
-        )->groupBy('order_date')->orderBy('order_date', 'asc')->get();
-
-        // 7️⃣ Profit & Loss Harian (Gunakan order_date)
-        $profitLossTrend = $query->select(
-            DB::raw("DATE(order_date) as order_date"),
-            DB::raw("SUM(quantity * item_price * 0.7) as profit_or_loss")
-        )->groupBy('order_date')->orderBy('order_date', 'asc')->get();
-
-        // 8️⃣ Distribusi Metode Pembayaran (Jangan gunakan `groupBy(date)`)
-        $paymentMethods = RestoOrder::select(
-            'transaction_type',
-            DB::raw("SUM(quantity) as total_payments") // 🔹 Pastikan jumlah dihitung dengan benar
-        )
-            ->whereNotNull('transaction_type') // 🔹 Pastikan hanya data valid yang diambil
-            ->whereBetween('order_date', [$startDate ?? '1888-01-01', $endDate ?? now()]) // ✅ Pastikan filter tanggal
-            ->when($restoId, function ($q) use ($restoId) {
-                return $q->where('user_id', $restoId);
-            })
+        // Pie Chart – Metode Pembayaran
+        $paymentDistribution = clone $query;
+        $paymentDistribution = $paymentDistribution->select('transaction_type', DB::raw('SUM(quantity * item_price) as total_revenue'))
             ->groupBy('transaction_type')
-            ->orderByDesc(DB::raw("SUM(quantity)")) // 🔹 Urutkan dari transaksi terbanyak
+            ->get()
+            ->map(function ($item) {
+                $item->total_revenue = (int) $item->total_revenue;
+                return $item;
+            });
+
+        // Pie Chart – Berdasarkan item_type
+        $revenueByItemType = clone $query;
+        $revenueByItemType = $revenueByItemType->select('item_type', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('item_type')
+            ->get()
+            ->map(function ($item) {
+                $item->total_revenue = (int) $item->total_revenue;
+                return $item;
+            });
+
+        // Bar Chart – Berdasarkan type_of_order
+        $revenueByOrderType = clone $query;
+        $revenueByOrderType = $revenueByOrderType->select('type_of_order', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('type_of_order')
+            ->get()
+            ->map(function ($item) {
+                $item->total_revenue = (int) $item->total_revenue;
+                return $item;
+            });
+
+        // Bar Chart – Top 5 menu paling banyak dibeli
+        $top5Items = clone $query;
+        $top5Items = $top5Items->select('item_name', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('item_name')
+            ->orderByDesc('total_revenue')
+            ->limit(5)
             ->get();
 
-        // 9️⃣ Pendapatan Berdasarkan Jenis Menu
-        $revenueByItemType = $query->select(
-            'item_name',
-            DB::raw("SUM(quantity * item_price) as total_revenue")
-        )->groupBy('item_name')->get();
+        // Bar Chart – Top 5 menu paling jarang dibeli
+        $least5Items = clone $query;
+        $least5Items = $least5Items->select('item_name', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('item_name')
+            ->orderBy('total_revenue')
+            ->limit(5)
+            ->get();
 
-        // 🔟 Biaya Operasional vs Pendapatan (Gunakan order_date)
-        $costVsRevenue = $query->select(
-            DB::raw("DATE(order_date) as order_date"),
-            DB::raw("SUM(quantity * item_price) as total_revenue"),
-            DB::raw("SUM(quantity * item_price * 0.3) as total_cost")
-        )->groupBy('order_date')->orderBy('order_date', 'asc')->get();
+        // Bar Chart – Berdasarkan received_by
+        $revenueByReceiver = clone $query;
+        $revenueByReceiver = $revenueByReceiver->select('received_by', DB::raw('SUM(quantity * item_price) as total_revenue'))
+            ->groupBy('received_by')
+            ->get();
 
-        // Daftar restoran untuk filter
         $restos = User::where('usertype', 'resto')->get();
 
+
         return view('admin.resto', compact(
-            'restos',
-            'totalSales',
-            'totalRevenue',
-            'averageOrderValue',
-            'profitLoss',
-            'targetAchievement',
-            'revenueTrend',
-            'profitLossTrend',
-            'paymentMethods',
-            'revenueByItemType',
-            'costVsRevenue',
             'startDate',
             'endDate',
-            'restoId'
+            'totalTransactions',
+            'totalRevenue',
+            'averageTransactionValue',
+            'monthlyRevenue',
+            'paymentDistribution',
+            'revenueByItemType',
+            'revenueByOrderType',
+            'top5Items',
+            'least5Items',
+            'revenueByReceiver',
+            'restoId',
+            'restos'
         ));
     }
 }
