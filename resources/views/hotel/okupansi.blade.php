@@ -1,130 +1,111 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Okupansi Hotel') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Dashboard Okupansi Hotel') }}
+            </h2>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow rounded-lg p-6">
+
                 <!-- 🔹 Filter Form -->
-                <form method="GET" action="{{ route('hotel.okupansi') }}" class="mb-4">
+                <form method="GET" action="{{ route('hotel.okupansi') }}" class="mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-gray-700">Tanggal Mulai:</label>
-                            <input type="date" name="start_date" class="w-full p-2 border rounded"
-                                value="{{ request('start_date') }}">
+                            <label class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
+                            <input type="date" name="start_date" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" value="{{ request('start_date') }}">
                         </div>
                         <div>
-                            <label class="block text-gray-700">Tanggal Akhir:</label>
-                            <input type="date" name="end_date" class="w-full p-2 border rounded"
-                                value="{{ request('end_date') }}">
+                            <label class="block text-sm font-medium text-gray-700">Tanggal Akhir</label>
+                            <input type="date" name="end_date" class="mt-1 w-full border-gray-300 rounded-md shadow-sm" value="{{ request('end_date') }}">
                         </div>
                         <div class="flex items-end">
-                            <button type="submit"
-                                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md shadow-sm">
                                 Filter
                             </button>
                         </div>
                     </div>
                 </form>
 
-                <!-- 🔹 Ringkasan Key Metrics -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <!-- 🔹 Ringkasan Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="bg-blue-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Total Reservasi</h4>
-                        <p class="text-2xl font-bold">{{ $totalReservations }}</p>
+                        <h4 class="text-sm font-semibold text-gray-800">Total Reservasi</h4>
+                        <p class="text-2xl font-bold text-gray-900">{{ $totalReservations }}</p>
                     </div>
                     <div class="bg-green-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Rata-rata Lama Menginap</h4>
-                        <p class="text-2xl font-bold">{{ number_format($averageStay, 2) }} Malam</p>
+                        <h4 class="text-sm font-semibold text-gray-800">Rata-rata Lama Menginap</h4>
+                        <p class="text-2xl font-bold text-gray-900">{{ number_format($averageStay, 2) }} Malam</p>
                     </div>
                     <div class="bg-yellow-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Persentase Okupansi</h4>
-                        <p class="text-2xl font-bold">{{ number_format($occupancyRate, 2) }}%</p>
+                        <h4 class="text-sm font-semibold text-gray-800">Persentase Okupansi</h4>
+                        <p class="text-2xl font-bold text-gray-900">{{ number_format($occupancyRate, 2) }}%</p>
                     </div>
                     <div class="bg-red-100 p-4 rounded-lg text-center">
-                        <h4 class="text-lg font-semibold">Rasio Pembatalan</h4>
-                        <p class="text-2xl font-bold">{{ number_format($cancellationRate, 2) }}%</p>
+                        <h4 class="text-sm font-semibold text-gray-800">Rasio Pembatalan</h4>
+                        <p class="text-2xl font-bold text-gray-900">{{ number_format($cancellationRate, 2) }}%</p>
                     </div>
                 </div>
 
-                <!-- 🔹 Grafik Okupansi -->
-                <style>
-                    .chart-container {
-                        width: 100%;
-                        height: 300px;
-                        /* Menetapkan tinggi tetap untuk grafik */
-                    }
-                </style>
-
+                <!-- 🔹 Chart Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Tren Harian</h4>
-                        <div class="chart-container">
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Tren Harian</h4>
+                        <div class="h-64">
                             <canvas id="weekdayOccupancyChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Rata-rata Lama Menginap per Bulan</h4>
-                        <div class="chart-container">
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Rata-rata Lama Menginap per Bulan</h4>
+                        <div class="h-64">
                             <canvas id="avgStayChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Segmentasi Pasar</h4>
-                        <div class="chart-container">
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Segmentasi Pasar</h4>
+                        <div class="h-64">
                             <canvas id="segmentChart"></canvas>
                         </div>
                     </div>
 
-                    {{-- <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Rasio Pembatalan Bulanan</h4>
-                        <div class="chart-container">
-                            <canvas id="cancellationChart"></canvas>
-                        </div>
-                    </div> --}}
-
-
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Tipe Kamar Terisi</h4>
-                        <div class="chart-container">
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Tipe Kamar Terisi</h4>
+                        <div class="h-64">
                             <canvas id="roomTypeDistribution"></canvas>
                         </div>
                     </div>
 
                     <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="font-semibold text-gray-700 mb-2">Tingkat Okupansi & Jumlah Booking per Bulan</h4>
-                        <div class="chart-container">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Tingkat Okupansi & Jumlah Booking per Bulan</h4>
+                        <div class="h-64">
                             <canvas id="ratioCancel"></canvas>
                         </div>
                     </div>
 
-
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <div class="text-md font-semibold mb-2">
-                            <h4 class="text-md font-semibold mb-2">Okupansi per Bulan (%)</h4>
-                            <div class="chart-container">
-                                <canvas id="monthlyOccupancy"></canvas>
-                            </div>
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Okupansi per Bulan (%)</h4>
+                        <div class="h-64">
+                            <canvas id="monthlyOccupancy"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Rasio Pembatalan & Pemesanan</h4>
-                        <div class="chart-container">
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Rasio Pembatalan & Pemesanan</h4>
+                        <div class="h-64">
                             <canvas id="multiAxisChart"></canvas>
                         </div>
                     </div>
-                    <div class="bg-white p-4 shadow-md rounded-lg">
-                        <h4 class="text-md font-semibold mb-2">Hari Kerja vs Akhir pekan</h4>
-                        <div class="chart-container">
+
+                    <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Hari Kerja vs Akhir Pekan</h4>
+                        <div class="h-64">
                             <canvas id="stayDurationTrend"></canvas>
                         </div>
-
                     </div>
                 </div>
 

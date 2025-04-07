@@ -19,21 +19,35 @@ class AdminController extends Controller
         $hotelCount = User::where('usertype', 'hotel')->count();
         $restoCount = User::where('usertype', 'resto')->count();
 
-        // Ambil daftar semua pengguna
-        $users = User::all();
+        $restoUsers = User::where('usertype', 'resto')->with('orders')->get();
+        $hotelUsers = User::where('usertype', 'hotel')->with('bookings')->get();
 
-        // Siapkan chart untuk data yang diinginkan
-        $chart = new AdminDashboardChart();
+        $restoStats = $restoUsers->map(function ($user) {
+            $lastOrder = $user->orders->sortByDesc('updated_at')->first();
+            return [
+                'name' => $user->name,
+                'last_updated' => $lastOrder ? $lastOrder->updated_at->diffForHumans() : 'Belum pernah menginput data',
+            ];
+        });
+        
 
-        // Pastikan chart mengambil data berdasarkan selectedUserId jika ada
-        $chart->bookingStatusChart = $chart->createBookingStatusChart($selectedUserId);
-        $chart->typeMealChart = $chart->createTypeMealChart($selectedUserId);
-        $chart->arrivalYearChart = $chart->createArrivalYearChart($selectedUserId);
-        $chart->arrivalMonthChart = $chart->createArrivalMonthChart($selectedUserId);
-        $chart->roomTypeChart = $chart->createRoomTypeChart($selectedUserId);
-        $chart->marketSegmentChart = $chart->createMarketSegmentChart($selectedUserId);
+        $hotelStats = $hotelUsers->map(function ($user) {
+            $lastBooking = $user->bookings->sortByDesc('updated_at')->first();
+            return [
+                'name' => $user->name,
+                'last_updated' => $lastBooking ? $lastBooking->updated_at->diffForHumans() : 'Belum pernah menginput data',
+            ];
+        });
+
+
+
 
         // Kirim data ke view
-        return view('admin.dashboard', compact('hotelCount', 'restoCount', 'users', 'selectedUserId', 'chart'));
-    }
+        return view('admin.dashboard')->with([
+            'hotelCount' => $hotelCount,
+            'restoCount' => $restoCount,
+            'restoStats' => $restoStats,
+            'hotelStats' => $hotelStats,
+        ]);
+            }
 }

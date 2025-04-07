@@ -8,10 +8,7 @@
                 <a href="{{ route('hotel.databooking.create') }}" class="btn btn-primary  px-4">
                     Tambah Data
                 </a>
-                <a href="{{ asset('storage/template_bookings.xlsx') }}" class="btn btn-info px-4">
-                    Download Template Excel
-                </a>
-                
+
             </div>
         </div>
         
@@ -44,9 +41,9 @@
                         <div class="flex items-center">
                             <form action="{{ route('hotel.booking.booking') }}" method="GET" class="flex">
                                 <input type="text" name="search" id="search" class="form-input form-input-sm"
-                                    placeholder="Search by Booking ID" value="{{ request('search') }}">
+                                    placeholder="Nama File" value="{{ request('search') }}">
                                 <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
-                                <button type="submit" class="btn btn-primary btn-sm ml-2">Search</button>
+                                <button type="submit" class="btn btn-primary btn-sm ml-2">Cari</button>
                             </form>
                         </div>
 
@@ -78,14 +75,14 @@
                                                 {{-- {{ route('hotel.databooking.show', $uploadOrder->id) }} --}}
                                                 <a href="{{ route('hotel.databooking.viewUploadOrder', $uploadOrder->id) }}"
                                                     class="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-md hover:bg-blue-600 text-decoration-none">
-                                                    View
+                                                    Lihat
                                                 </a>
                                                                                               
 
                                                 <!-- Tombol Update -->
                                                 <a href="{{ route('hotel.databooking.edit', $uploadOrder->id) }}"
                                                     class="px-3 py-1 bg-yellow-500 text-white text-sm font-semibold rounded-md hover:bg-yellow-600 text-decoration-none">
-                                                    Update
+                                                    Edit
                                                 </a>
 
                                                 <!-- Tombol Delete -->
@@ -96,7 +93,7 @@
                                                     @method('DELETE')
                                                     <button type="submit"
                                                         class="px-3 py-1 bg-red-500 text-white text-sm font-semibold rounded-md hover:bg-red-600">
-                                                        Delete
+                                                        Hapus
                                                     </button>
                                                 </form>
                                             </div>

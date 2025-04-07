@@ -52,7 +52,7 @@ class User extends Authenticatable
     }
     public function bookings()
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Booking::class,'user_id');
     }
 
     public function restoOrders()
@@ -69,4 +69,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\Room::class, 'user_id');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(RestoOrder::class, 'user_id');
+    }
+
 }
