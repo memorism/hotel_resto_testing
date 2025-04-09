@@ -11,6 +11,13 @@
         </div>
     </x-slot>
 
+
+    @if(session('success'))
+        <div class="p-4 mb-4 text-green-700 bg-green-100 rounded-md">
+            {{ session('success') }}
+        </div>
+    @endif
+
     {{-- isi --}}
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -58,22 +65,22 @@
                                         </td>
                                         <td class="text-center px-4 py-2 flex justify-center space-x-2">
                                             <!-- Tombol Edit -->
-                                            <a href="{{ route('admin.user.edit', $user->id) }}" 
-                                               class="px-4 py-2 bg-yellow-500 text-white font-semibold rounded-md hover:bg-yellow-600">
+                                            <a href="{{ route('admin.user.edit', $user->id) }}"
+                                                class="px-4 py-2 bg-yellow-500 text-white font-semibold rounded-md hover:bg-yellow-600">
                                                 Edit
                                             </a>
-                                        
+
                                             <!-- Tombol Hapus -->
-                                            <form method="POST" action="{{ route('admin.user.destroy', $user->id) }}" 
-                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
+                                            <form method="POST" action="{{ route('admin.user.destroy', $user->id) }}"
+                                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" 
-                                                        class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600">
+                                                <button type="submit"
+                                                    class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600">
                                                     Hapus
                                                 </button>
                                             </form>
-                                        </td>                                        
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -84,9 +91,3 @@
         </div>
     </div>
 </x-app-layout>
-
-@if(session('success'))
-    <div class="p-4 mb-4 text-green-700 bg-green-100 rounded-md">
-        {{ session('success') }}
-    </div>
-@endif

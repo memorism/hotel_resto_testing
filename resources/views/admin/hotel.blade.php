@@ -40,25 +40,44 @@
                 </form>
 
                 <!-- 🔹 Ringkasan Keuangan -->
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                    @php
-                        $cards = [
-                            ['label' => 'Total Pendapatan', 'value' => $totalRevenue, 'bg' => 'bg-blue-100'],
-                            // ['label' => 'Total Biaya Operasional', 'value' => $totalExpenses, 'bg' => 'bg-red-100'],
-                            ['label' => 'Keuntungan Bersih', 'value' => $profit, 'bg' => 'bg-green-100'],
-                            ['label' => 'RevPAR', 'value' => $revPAR, 'bg' => 'bg-yellow-100'],
-                            ['label' => 'ADR', 'value' => $adr, 'bg' => 'bg-purple-100'],
-                            ['label' => 'Kerugian Akibat Pembatalan', 'value' => $cancellationLoss, 'bg' => 'bg-gray-100 text-red-500']
-                        ];
-                    @endphp
-
-                    @foreach ($cards as $card)
-                        <div class="{{ $card['bg'] }} p-4 rounded-lg text-center shadow">
-                            <h4 class="text-sm font-semibold text-gray-700">{{ $card['label'] }}</h4>
-                            <p class="text-xl font-bold">Rp{{ number_format($card['value'], 0, ',', '.') }}</p>
-                        </div>
-                    @endforeach
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Total Pendapatan</h4>
+                        <p class="text-2xl font-bold text-blue-800">Rp{{ number_format($totalRevenue, 0, ',', '.') }}</p>
+                    </div>
+                
+                    {{-- 
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Total Biaya Operasional</h4>
+                        <p class="text-2xl font-bold text-red-800">Rp{{ number_format($totalExpenses, 0, ',', '.') }}</p>
+                    </div>
+                    --}}
+                
+                    {{-- 
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Keuntungan Bersih</h4>
+                        <p class="text-2xl font-bold text-green-800">Rp{{ number_format($profit, 0, ',', '.') }}</p>
+                    </div>
+                    --}}
+                
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">RevPAR</h4>
+                        <p class="text-2xl font-bold text-yellow-800">Rp{{ number_format($revPAR, 0, ',', '.') }}</p>
+                    </div>
+                
+                    <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">ADR</h4>
+                        <p class="text-2xl font-bold text-purple-800">Rp{{ number_format($adr, 0, ',', '.') }}</p>
+                    </div>
+                
+                    <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Kerugian Akibat Pembatalan</h4>
+                        <p class="text-2xl font-bold text-red-600">Rp{{ number_format($cancellationLoss, 0, ',', '.') }}</p>
+                    </div>
                 </div>
+                
+
+                
 
                 <!-- 🔹 Tabel Kamar dengan Pendapatan Tertinggi -->
                 <div class="bg-white p-4 rounded-lg shadow-md mb-8">

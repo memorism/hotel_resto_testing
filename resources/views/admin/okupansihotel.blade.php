@@ -44,21 +44,23 @@
 
                 <!-- 🔹 Key Metrics -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-blue-100 p-4 rounded-lg text-center">
-                        <h4 class="text-sm font-semibold text-gray-800">Total Reservasi</h4>
-                        <p class="text-2xl font-bold text-gray-900">{{ $totalReservations }}</p>
+                    <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Total Reservasi</h4>
+                        <p class="text-2xl font-bold text-indigo-800">{{ $totalReservations }}</p>
                     </div>
-                    <div class="bg-green-100 p-4 rounded-lg text-center">
-                        <h4 class="text-sm font-semibold text-gray-800">Rata-rata Lama Menginap</h4>
-                        <p class="text-2xl font-bold text-gray-900">{{ number_format($averageStay, 2) }} Malam</p>
+                    <div class="bg-pink-50 border-l-4 border-pink-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Rata-rata Lama Menginap</h4>
+                        <p class="text-2xl font-bold text-pink-800">{{ number_format($averageStay, 2) }} Malam</p>
                     </div>
-                    <div class="bg-yellow-100 p-4 rounded-lg text-center">
-                        <h4 class="text-sm font-semibold text-gray-800">Persentase Okupansi</h4>
-                        <p class="text-2xl font-bold text-gray-900">{{ number_format($occupancyRate, 2) }}%</p>
+                    <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Persentase Okupansi</h4>
+                        <p class="text-2xl font-bold text-orange-800">
+                            {{ number_format($occupancyRate, 2) }}%
+                        </p>
                     </div>
-                    <div class="bg-red-100 p-4 rounded-lg text-center">
-                        <h4 class="text-sm font-semibold text-gray-800">Rasio Pembatalan</h4>
-                        <p class="text-2xl font-bold text-gray-900">{{ number_format($cancellationRate, 2) }}%</p>
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                        <h4 class="text-gray-700 font-semibold">Rasio Pembatalan</h4>
+                        <p class="text-2xl font-bold text-green-800">{{ number_format($cancellationRate, 2) }}%</p>
                     </div>
                 </div>
 
@@ -92,12 +94,13 @@
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Tingkat Okupansi & Jumlah Booking per Bulan</h4>
+                    {{-- <div class="bg-white p-4 shadow rounded-lg">
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">Tingkat Okupansi & Jumlah Booking per Bulan
+                        </h4>
                         <div class="h-64">
                             <canvas id="ratioCancel"></canvas>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="bg-white p-4 shadow rounded-lg">
                         <h4 class="text-md font-semibold text-gray-700 mb-2">Okupansi per Bulan (%)</h4>
@@ -239,54 +242,54 @@
             }
         });
 
-        const ctxMulti = document.getElementById('ratioCancel').getContext('2d');
-        new Chart(ctxMulti, {
-            data: {
-                labels: {!! json_encode(array_keys($monthlyOccupancy)) !!},
-                datasets: [
-                    {
-                        type: 'bar',
-                        label: 'Jumlah Booking',
-                        data: {!! json_encode(array_values($monthlyOccupancy)) !!},
-                        backgroundColor: 'rgba(16, 185, 129, 0.5)',
-                        borderColor: 'rgba(16, 185, 129, 1)',
-                        borderWidth: 1,
-                        yAxisID: 'y'
-                    },
-                    {
-                        type: 'line',
-                        label: 'Tingkat Okupansi (%)',
-                        data: {!! json_encode(array_values($occupancyRatePerMonth)) !!},
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Jumlah Booking' },
-                        position: 'left'
-                    },
-                    y1: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Okupansi (%)' },
-                        position: 'right',
-                        grid: { drawOnChartArea: false }
-                    }
-                }
-            }
-        });
+        // const ctxMulti = document.getElementById('ratioCancel').getContext('2d');
+        // new Chart(ctxMulti, {
+        //     data: {
+        //         labels: {!! json_encode(array_keys($monthlyOccupancy)) !!},
+        //         datasets: [
+        //             {
+        //                 type: 'bar',
+        //                 label: 'Jumlah Booking',
+        //                 data: {!! json_encode(array_values($monthlyOccupancy)) !!},
+        //                 backgroundColor: 'rgba(16, 185, 129, 0.5)',
+        //                 borderColor: 'rgba(16, 185, 129, 1)',
+        //                 borderWidth: 1,
+        //                 yAxisID: 'y'
+        //             },
+        //             {
+        //                 type: 'line',
+        //                 label: 'Tingkat Okupansi (%)',
+        //                 data: {!! json_encode(array_values($occupancyRatePerMonth)) !!},
+        //                 backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        //                 borderColor: 'rgba(59, 130, 246, 1)',
+        //                 borderWidth: 2,
+        //                 tension: 0.3,
+        //                 yAxisID: 'y1'
+        //             }
+        //         ]
+        //     },
+        //     options: {
+        //         responsive: true,
+        //         maintainAspectRatio: false,
+        //         interaction: {
+        //             mode: 'index',
+        //             intersect: false,
+        //         },
+        //         scales: {
+        //             y: {
+        //                 beginAtZero: true,
+        //                 title: { display: true, text: 'Jumlah Booking' },
+        //                 position: 'left'
+        //             },
+        //             y1: {
+        //                 beginAtZero: true,
+        //                 title: { display: true, text: 'Okupansi (%)' },
+        //                 position: 'right',
+        //                 grid: { drawOnChartArea: false }
+        //             }
+        //         }
+        //     }
+        // });
 
 
         // Grafik 3️⃣ Tren Okupansi Berdasarkan Jumlah Malam Menginap
