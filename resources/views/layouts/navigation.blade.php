@@ -74,6 +74,15 @@
                             {{ __('Data Keseluruhan') }}
                         </x-nav-link>
                     @endif
+                    @if (Auth::user()->usertype == 'front_office')
+                    <x-nav-link href="{{ route('hotel.frontoffice.booking.index') }}" :active="request()->routeIs('hotel.frontoffice.booking.index')">
+                        {{ __('Dashboard Fo') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('hotel.frontoffice.migrasi.index') }}" :active="request()->routeIs('hotel.frontoffice.migrasi.index')">
+                        {{ __('Data Migrasi') }}
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -183,6 +192,16 @@
                 <x-responsive-nav-link href="{{ route('resto.orders.index') }}" :active="request()->routeIs('resto.orders.index')">
                     {{ __('Data Keseluruhan') }}
                 </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->usertype == 'front_office')
+            <x-responsive-nav-link href="{{ route('hotel.frontoffice.booking.index') }}" :active="request()->routeIs('hotel.frontoffice.booking.index')">
+                {{ __('Data Transaksi') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('hotel.frontoffice.migrasi.index') }}" :active="request()->routeIs('hotel.frontoffice.migrasi.index')">
+                {{ __('Data Migrasi') }}
+            </x-responsive-nav-link>
             @endif
         </div>
 

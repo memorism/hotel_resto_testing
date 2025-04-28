@@ -7,6 +7,8 @@ use App\Http\Controllers\admin\AdminOkupansiRestoController;
 use App\Http\Controllers\Admin\AdminRestoController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Hotel\BookingController;
+use App\Http\Controllers\hotel\frontoffice\BookingControllerFo;
+use App\Http\Controllers\Hotel\Frontoffice\MigrasiController;
 use App\Http\Controllers\Hotel\HotelController;
 use App\Http\Controllers\Hotel\OkupansiController;
 use App\Http\Controllers\hotel\RoomController;
@@ -61,9 +63,9 @@ route::middleware(['auth', 'adminMiddleware'])->group(function () {
     Route::post('/admin/user', [UserAdminController::class, 'store'])->name('admin.user.store');
     Route::delete('/admin/user/{id}', [UserAdminController::class, 'destroy'])->name('admin.user.destroy');
     Route::get('/admin/user/logo/{id}', [UserAdminController::class, 'showLogo'])->name('admin.user.logo');
-    Route::get('/admin/edit/{id}', [UserAdminController::class, 'edit'])->name('admin.user.edit'); 
-    Route::put('/admin/update/{id}', [UserAdminController::class, 'update'])->name('admin.user.update'); 
-    
+    Route::get('/admin/edit/{id}', [UserAdminController::class, 'edit'])->name('admin.user.edit');
+    Route::put('/admin/update/{id}', [UserAdminController::class, 'update'])->name('admin.user.update');
+
 
 
 
@@ -104,7 +106,10 @@ route::middleware(['auth', 'restoMiddleware'])->group(function () {
 route::middleware(['auth', 'hotelMiddleware'])->group(function () {
 
     Route::get('/hotel/dashboard', [HotelController::class, 'index'])->name('hotel.dashboard');
-    Route::get('/hotel/okupansi', [OkupansiController::class, 'index'])->name('hotel.okupansi');    // route rooms
+    Route::get('/hotel/okupansi', [OkupansiController::class, 'index'])->name('hotel.okupansi');
+    // Manager (karena Manager pakai hotelMiddleware)
+    Route::get('/hotel/manage-users', [UserController::class, 'index'])->name('hotel.manage.users');
+
 
     // route booking
     Route::get('/hotel/booking', [BookingController::class, 'index'])->name('hotel.booking.booking');
@@ -138,4 +143,26 @@ route::middleware(['auth', 'hotelMiddleware'])->group(function () {
     Route::put('/hotel/kamar/{room}', [RoomController::class, 'update'])->name('hotel.rooms.update');
 
 
+
 });
+
+// Front Office Only
+Route::middleware(['auth', 'frontoffice'])->group(function () {
+    Route::get('/frontoffice/bookings', [BookingControllerFo::class, 'index'])->name('hotel.frontoffice.booking.index');
+    Route::get('/frontoffice/create', [BookingControllerFo::class, 'create'])->name('hotel.frontoffice.booking.create');
+    Route::delete('/frontoffice/{id}', [BookingControllerFo::class, 'destroy'])->name('hotel.frontoffice.booking.destroy');
+    Route::post('/frontoffice', [BookingControllerFo::class, 'store'])->name('hotel.frontoffice.booking.store');
+    Route::get('/frontoffice/{id}/edit', [BookingControllerFo::class, 'edit'])->name('hotel.frontoffice.booking.edit');
+    Route::put('/frontoffice/{id}', [BookingControllerFo::class, 'update'])->name('hotel.frontoffice.booking.update');
+    Route::get('/frontoffice/migrasi', [MigrasiController::class, 'index'])->name('hotel.frontoffice.migrasi.index');
+    Route::post('/frontoffice/migrasi', [MigrasiController::class, 'store'])->name('hotel.frontoffice.migrasi.store');
+    Route::delete('/frontoffice/migrasi/{id}', [MigrasiController::class, 'destroy'])->name('hotel.frontoffice.migrasi.destroy');
+    Route::get('/frontoffice/migrasi/create', [MigrasiController::class, 'create'])->name('hotel.frontoffice.migrasi.create');
+});
+
+
+// // Finance Only
+// Route::middleware(['auth', 'finance'])->group(function () {
+//     Route::resource('/hotel/transactions', TransactionController::class);
+// });
+
