@@ -5,6 +5,8 @@ use App\Http\Controllers\admin\AdminHotelController;
 use App\Http\Controllers\admin\AdminOkupansiHotelController;
 use App\Http\Controllers\admin\AdminOkupansiRestoController;
 use App\Http\Controllers\Admin\AdminRestoController;
+use App\Http\Controllers\Admin\HotelAdminController;
+use App\Http\Controllers\Admin\RestoAdminController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Hotel\BookingController;
 use App\Http\Controllers\hotel\frontoffice\BookingControllerFo;
@@ -65,6 +67,13 @@ route::middleware(['auth', 'adminMiddleware'])->group(function () {
     Route::get('/admin/user/logo/{id}', [UserAdminController::class, 'showLogo'])->name('admin.user.logo');
     Route::get('/admin/edit/{id}', [UserAdminController::class, 'edit'])->name('admin.user.edit');
     Route::put('/admin/update/{id}', [UserAdminController::class, 'update'])->name('admin.user.update');
+    Route::get('/admin/user/{id}/subusers', [UserAdminController::class, 'showSubUser'])->name('admin.user.showSubUser');
+
+    Route::resource('resto', RestoAdminController::class)->names('admin.resto');
+
+    Route::resource('hotel', HotelAdminController::class)->names('admin.hotel');
+
+
 
 
 

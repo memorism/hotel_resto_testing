@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12 bg-gray-100">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8" x-data="{ usertype: '' }">
             <div class="bg-white p-6 shadow-md rounded-lg">
                 <form action="{{ route('admin.user.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
@@ -47,12 +47,40 @@
                     <div class="mb-4">
                         <x-input-label for="usertype" :value="__('Tipe User')" />
                         <select id="usertype" name="usertype"
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200" required>
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200"
+                            x-model="usertype" required>
+                            <option value="">-- Pilih Tipe User --</option>
                             <option value="admin">Admin</option>
                             <option value="resto">Restaurant</option>
                             <option value="hotel">Hotel</option>
                         </select>
                         <x-input-error :messages="$errors->get('usertype')" class="mt-2" />
+                    </div>
+
+                    <!-- Pilih Hotel (Hanya muncul jika usertype == hotel) -->
+                    <div class="mb-4" x-show="usertype === 'hotel'">
+                        <x-input-label for="hotel_id" :value="__('Pilih Hotel')" />
+                        <select id="hotel_id" name="hotel_id"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            <option value="">-- Pilih Hotel --</option>
+                            @foreach($hotels as $hotel)
+                                <option value="{{ $hotel->id }}">{{ $hotel->name }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('hotel_id')" class="mt-2" />
+                    </div>
+
+                    <!-- Pilih Resto (Hanya muncul jika usertype == resto) -->
+                    <div class="mb-4" x-show="usertype === 'resto'">
+                        <x-input-label for="resto_id" :value="__('Pilih Restaurant')" />
+                        <select id="resto_id" name="resto_id"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">
+                            <option value="">-- Pilih Restaurant --</option>
+                            @foreach($restos as $resto)
+                                <option value="{{ $resto->id }}">{{ $resto->name }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('resto_id')" class="mt-2" />
                     </div>
 
                     <!-- Upload Logo -->

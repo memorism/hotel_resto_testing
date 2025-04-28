@@ -40,6 +40,14 @@
                         <x-nav-link href="{{ route('admin.user.user') }}" :active="request()->routeIs('admin.user.user')">
                             {{ __('User') }}
                         </x-nav-link>
+
+                        <x-nav-link href="{{ route('admin.resto.index') }}" :active="request()->routeIs('admin.resto.index')">
+                            {{ __('Restaurant') }}
+                        </x-nav-link>
+
+                        <x-nav-link href="{{ route('admin.hotel.index') }}" :active="request()->routeIs('admin.hotel.index')">
+                            {{ __('Hotel') }}
+                        </x-nav-link>
                     @endif
 
                     @if (Auth::user()->usertype == 'hotel')
@@ -152,6 +160,15 @@
                 <x-responsive-nav-link href="{{ route('admin.user.user') }}" :active="request()->routeIs('admin.user.user')">
                     {{ __('User') }}
                 </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('admin.resto.index') }}" :active="request()->routeIs('admin.resto.index')">
+                {{ __('Restaurant') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('admin.hotel.index') }}" :active="request()->routeIs('admin.hotel.index')">
+                    {{ __('Hotel') }}
+                </x-responsive-nav-link>
+            
             @endif
 
             @if (Auth::user()->usertype == 'hotel')

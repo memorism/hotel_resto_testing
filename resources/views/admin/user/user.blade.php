@@ -64,6 +64,14 @@
                                         <td class="text-center px-4 py-2">{{ $user->created_at->format('H:i:s | d M Y ') }}
                                         </td>
                                         <td class="text-center px-4 py-2 flex justify-center space-x-2">
+                                            @if($user->usertype === 'hotel' || $user->usertype === 'resto')
+                                                <a href="{{ route('admin.user.showSubUser', $user->id) }}"
+                                                    class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                                    View
+                                                </a>
+                                            @else
+                                                <span class="text-gray-400">-</span>
+                                            @endif
                                             <!-- Tombol Edit -->
                                             <a href="{{ route('admin.user.edit', $user->id) }}"
                                                 class="px-4 py-2 bg-yellow-500 text-white font-semibold rounded-md hover:bg-yellow-600">

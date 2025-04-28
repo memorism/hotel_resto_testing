@@ -19,6 +19,6 @@ class FrontOfficeMiddleware
         if (Auth::user()->usertype === 'front_office') {
             return $next($request);
         }
-        return redirect()->back();
+        return redirect('/frontoffice/bookings');
     }
 }
