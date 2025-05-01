@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hotel;
+use App\Models\Resto;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Carbon\Carbon;
@@ -13,11 +15,11 @@ class AdminController extends Controller
     {
         $selectedUserId = $request->input('user_id');
 
-        $hotelCount = User::where('usertype', 'hotel')->count();
-        $restoCount = User::where('usertype', 'resto')->count();
+        $hotelCount = Hotel::count();
+        $restoCount = Resto::count();
 
-        $hotelUsers = User::where('usertype', 'hotel')->with('hotelBookings')->get();
-        $restoUsers = User::where('usertype', 'resto')->with('restoOrders')->get();
+        $hotelUsers = User::where('usertype', 'hotelnew')->with('hotelBookings')->get();
+        $restoUsers = User::where('usertype', 'restonew')->with('restoOrders')->get();
 
         $hotelStats = $hotelUsers->map(function ($hotel) {
             $lastBooking = $hotel->hotelBookings->sortByDesc('updated_at')->first(); // ✅ perbaikan disini

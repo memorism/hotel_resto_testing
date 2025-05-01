@@ -52,9 +52,9 @@
                                         <td class="text-center px-4 py-2">
                                             @if($user->usertype == 'admin')
                                                 Admin
-                                            @elseif($user->usertype == 'resto')
+                                            @elseif($user->usertype == 'restonew')
                                                 Restaurant
-                                            @elseif($user->usertype == 'hotel')
+                                            @elseif($user->usertype == 'hotelnew')
                                                 Hotel
                                             @else
                                                 {{ ucfirst($user->usertype) }}
@@ -64,8 +64,8 @@
                                         <td class="text-center px-4 py-2">{{ $user->created_at->format('H:i:s | d M Y ') }}
                                         </td>
                                         <td class="text-center px-4 py-2 flex justify-center space-x-2">
-                                            @if($user->usertype === 'hotel' || $user->usertype === 'resto')
-                                                <a href="{{ route('admin.user.showSubUser', $user->id) }}"
+                                            @if($user->usertype === 'hotelnew' || $user->usertype === 'restonew')
+                                                <a href="{{ route('admin.user.subuser.index', $user->id) }}"
                                                     class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition">
                                                     View
                                                 </a>

@@ -83,9 +83,9 @@
                         </x-nav-link>
                     @endif
 
-                    @if (Auth::user()->usertype == 'front_office')
+                    @if (Auth::user()->usertype == 'frontofficehotel')
                         <x-nav-link href="{{ route('hotel.frontoffice.booking.index') }}" :active="request()->routeIs('hotel.frontoffice.booking.index')">
-                            {{ __('Dashboard Fo') }}
+                            {{ __('Data Transaksi') }}
                         </x-nav-link>
 
                         <x-nav-link href="{{ route('hotel.frontoffice.migrasi.index') }}" :active="request()->routeIs('hotel.frontoffice.migrasi.index')">
@@ -232,7 +232,7 @@
                 </x-responsive-nav-link>
             @endif
 
-            @if (Auth::user()->usertype == 'front_office')
+            @if (Auth::user()->usertype == 'frontofficehotel')
             <x-responsive-nav-link href="{{ route('hotel.frontoffice.booking.index') }}" :active="request()->routeIs('hotel.frontoffice.booking.index')">
                 {{ __('Data Transaksi') }}
             </x-responsive-nav-link>

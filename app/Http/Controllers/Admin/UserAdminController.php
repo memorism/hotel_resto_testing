@@ -15,7 +15,7 @@ class UserAdminController extends Controller
 {
     public function index()
     {
-        $users = User::whereIn('usertype', ['admin', 'hotel', 'resto'])
+        $users = User::whereIn('usertype', ['admin', 'hotelnew', 'restonew'])
             ->select('id', 'name', 'email', 'usertype', 'created_at')
             ->get();
 
@@ -35,17 +35,17 @@ class UserAdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|confirmed|min:8',
-            'usertype' => 'required|in:admin,hotel,resto',
+            'usertype' => 'required|in:admin,hotelnew,restonew',
             'hotel_id' => 'nullable|exists:hotels,id',
             'resto_id' => 'nullable|exists:restos,id',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        if ($request->usertype === 'hotel' && !$request->hotel_id) {
+        if ($request->usertype === 'hotelnew' && !$request->hotel_id) {
             return back()->withErrors(['hotel_id' => 'Hotel wajib dipilih untuk usertype hotel']);
         }
 
-        if ($request->usertype === 'resto' && !$request->resto_id) {
+        if ($request->usertype === 'restonew' && !$request->resto_id) {
             return back()->withErrors(['resto_id' => 'Resto wajib dipilih untuk usertype resto']);
         }
 
@@ -92,7 +92,7 @@ class UserAdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'usertype' => 'required|in:admin,hotel,resto',
+            'usertype' => 'required|in:admin,hotelnew,restonew',
             'hotel_id' => 'nullable|exists:hotels,id',
             'resto_id' => 'nullable|exists:restos,id',
             'old_password' => 'required|string|min:8',
@@ -104,11 +104,11 @@ class UserAdminController extends Controller
             return back()->withErrors(['old_password' => 'Password lama tidak sesuai.']);
         }
 
-        if ($request->usertype === 'hotel' && !$request->hotel_id) {
+        if ($request->usertype === 'hotelnew' && !$request->hotel_id) {
             return back()->withErrors(['hotel_id' => 'Hotel wajib dipilih untuk usertype hotel']);
         }
 
-        if ($request->usertype === 'resto' && !$request->resto_id) {
+        if ($request->usertype === 'restonew' && !$request->resto_id) {
             return back()->withErrors(['resto_id' => 'Resto wajib dipilih untuk usertype resto']);
         }
 
@@ -145,22 +145,22 @@ class UserAdminController extends Controller
         return redirect()->route('admin.user.user')->with('success', 'User berhasil dihapus!');
     }
 
-    public function showSubUser($id)
-    {
-        $parentUser = User::findOrFail($id);
+    // public function showSubUser($id)
+    // {
+    //     $parentUser = User::findOrFail($id);
 
-        if ($parentUser->usertype === 'hotel' && $parentUser->hotel_id) {
-            $subUsers = User::where('hotel_id', $parentUser->hotel_id)
-                ->whereNotIn('usertype', ['admin', 'hotel', 'resto'])
-                ->get();
-        } elseif ($parentUser->usertype === 'resto' && $parentUser->resto_id) {
-            $subUsers = User::where('resto_id', $parentUser->resto_id)
-                ->whereNotIn('usertype', ['admin', 'hotel', 'resto'])
-                ->get();
-        } else {
-            $subUsers = collect();
-        }
+    //     if ($parentUser->usertype === 'hotelnew' && $parentUser->hotel_id) {
+    //         $subUsers = User::where('hotel_id', $parentUser->hotel_id)
+    //             ->whereNotIn('usertype', ['admin', 'hotelnew', 'restonew'])
+    //             ->get();
+    //     } elseif ($parentUser->usertype === 'restonew' && $parentUser->resto_id) {
+    //         $subUsers = User::where('resto_id', $parentUser->resto_id)
+    //             ->whereNotIn('usertype', ['admin', 'hotelnew', 'restonew'])
+    //             ->get();
+    //     } else {
+    //         $subUsers = collect();
+    //     }
 
-        return view('admin.user.subusers', compact('parentUser', 'subUsers'));
-    }
+    //     return view('admin.user.subusers', compact('parentUser', 'subUsers'));
+    // }
 }

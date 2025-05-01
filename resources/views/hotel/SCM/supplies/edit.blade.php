@@ -31,8 +31,9 @@
 
                 <div class="mb-4">
                     <label class="block font-medium">Jumlah Saat Ini</label>
-                    <input type="number" class="w-full border rounded px-3 py-2 bg-gray-100"
-                        value="{{ $supply->quantity }}" readonly>
+                    <input type="number"  name="quantity" class="w-full border rounded px-3 py-"
+                        value="{{ old('quantity', $supply->quantity) }}" required>
+                        @error('quantity') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="flex justify-end space-x-2">

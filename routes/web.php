@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminSubuserController;
 use App\Http\Controllers\Hotel\Finance\FinanceMigrasiController;
 use App\Http\Controllers\Hotel\Finance\HotelFinanceController;
 use App\Http\Controllers\Hotel\HotelControllercopy;
@@ -69,7 +70,18 @@ route::middleware(['auth', 'adminMiddleware'])->group(function () {
     Route::get('/admin/user/logo/{id}', [UserAdminController::class, 'showLogo'])->name('admin.user.logo');
     Route::get('/admin/edit/{id}', [UserAdminController::class, 'edit'])->name('admin.user.edit');
     Route::put('/admin/update/{id}', [UserAdminController::class, 'update'])->name('admin.user.update');
-    Route::get('/admin/user/{id}/subusers', [UserAdminController::class, 'showSubUser'])->name('admin.user.showSubUser');
+    Route::get('/admin/subusers/{id}', [AdminSubuserController::class, 'index'])->name('admin.user.subuser.index');
+    Route::get('/admin/subusers/{id}/create', [AdminSubuserController::class, 'create'])->name('admin.subusers.create');
+    Route::post('/admin/subusers/{id}', [AdminSubuserController::class, 'store'])->name('admin.subusers.store');
+    // Edit & update subuser
+    Route::get('/admin/subusers/edit/{subuserId}', [AdminSubuserController::class, 'edit'])->name('admin.subusers.edit');
+    Route::put('/admin/subusers/update/{subuserId}', [AdminSubuserController::class, 'update'])->name('admin.subusers.update');
+
+    // Hapus subuser
+    Route::delete('/admin/subusers/delete/{subuserId}', [AdminSubuserController::class, 'destroy'])->name('admin.subusers.destroy');
+
+
+
 
     Route::resource('resto', RestoAdminController::class)->names('admin.resto');
 

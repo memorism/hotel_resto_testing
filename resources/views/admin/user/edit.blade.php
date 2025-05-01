@@ -1,3 +1,19 @@
+
+@php
+    if ($user->usertype == 'admin') {
+        $displayUsertype = 'Admin';
+    } elseif ($user->usertype == 'restonew') {
+        $displayUsertype = 'Restaurant';
+    } elseif ($user->usertype == 'hotelnew') {
+        $displayUsertype = 'Hotel';
+    } else {
+        $displayUsertype = ucfirst($user->usertype);
+    }
+@endphp
+
+
+
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold text-gray-800 leading-tight">
@@ -51,7 +67,7 @@
                     <div class="mb-4">
                         <x-input-label for="usertype" :value="__('Tipe User')" />
                         <input type="text" name="usertype" id="usertype" class="form-control"
-                                    value="{{ $user->usertype}}" readonly>
+                               value="{{ $displayUsertype }}" readonly>
                     </div>
 
                     <!-- Upload Logo -->

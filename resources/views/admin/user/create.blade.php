@@ -58,7 +58,7 @@
                     </div>
 
                     <!-- Pilih Hotel (Hanya muncul jika usertype == hotel) -->
-                    <div class="mb-4" x-show="usertype === 'hotel'">
+                    <div class="mb-4" x-show="usertype === 'hotelnew'">
                         <x-input-label for="hotel_id" :value="__('Pilih Hotel')" />
                         <select id="hotel_id" name="hotel_id"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">
@@ -71,7 +71,7 @@
                     </div>
 
                     <!-- Pilih Resto (Hanya muncul jika usertype == resto) -->
-                    <div class="mb-4" x-show="usertype === 'resto'">
+                    <div class="mb-4" x-show="usertype === 'restonew'">
                         <x-input-label for="resto_id" :value="__('Pilih Restaurant')" />
                         <select id="resto_id" name="resto_id"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200">

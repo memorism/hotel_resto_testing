@@ -16,7 +16,7 @@ class FrontOfficeMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->usertype === 'front_office') {
+        if (Auth::user()->usertype === 'frontofficehotel') {
             return $next($request);
         }
         return redirect()->back();
