@@ -60,6 +60,7 @@ class MigrasiController extends Controller
             'user_id'     => $user->id,
             'file_name'   => $request->file('file')->getClientOriginalName(),
             'description' => $request->description ?? null,
+            'type' => 'booking',
         ]);
 
         try {

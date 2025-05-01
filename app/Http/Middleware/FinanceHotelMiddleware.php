@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
-class FinanceMiddleware
+
+class FinanceHotelMiddleware
 {
     /**
      * Handle an incoming request.
@@ -16,7 +17,7 @@ class FinanceMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->usertype === 'finance') {
+        if (Auth::user()->usertype === 'financehotel') {
             return $next($request);
         }
         return redirect()->back();

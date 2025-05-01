@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\FinanceMiddleware;
+use App\Http\Middleware\FinanceHotelMiddleware;
 use App\Http\Middleware\FrontOfficeMiddleware;
 use App\Http\Middleware\HotelMiddlewareNew;
 use App\Http\Middleware\RestoMiddlewareNew;
@@ -25,9 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'restoMiddleware' => RestoMiddleware::class,
             'hotelMiddleware' => HotelMiddleware::class,
             'frontoffice' => FrontOfficeMiddleware::class,
-            'financeMiddleware'  => FinanceMiddleware::class, 
             'hotelMiddlewareNew' => HotelMiddlewareNew::class,
-            'restoMiddlewareNew' => RestoMiddlewareNew::class
+            'restoMiddlewareNew' => RestoMiddlewareNew::class,
+            'financehotelMiddleware' => FinanceHotelMiddleware::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

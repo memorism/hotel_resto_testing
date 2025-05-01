@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Hotel\Finance\FinanceMigrasiController;
+use App\Http\Controllers\Hotel\Finance\HotelFinanceController;
 use App\Http\Controllers\Hotel\HotelControllercopy;
 use App\Http\Controllers\HotelNew\HotelNewController;
 use Illuminate\Support\Facades\Route;
@@ -170,6 +172,15 @@ route::middleware(['auth', 'hotelMiddlewareNew'])->group(function () {
         Route::get('/{room}', [RoomController::class, 'show'])->name('show');
         Route::delete('/{room}', [RoomController::class, 'destroy'])->name('destroy');
     });
+
+});
+
+Route::middleware(['auth', 'financehotelMiddleware'])->group(function () {
+    Route::resource('/finance', HotelFinanceController::class)->names('finance');
+    Route::get('/migrasi', [FinanceMigrasiController::class, 'index'])->name('finance.migrasi.index');
+    Route::get('/migrasi/create', [FinanceMigrasiController::class, 'create'])->name('finance.migrasi.create');
+    Route::post('/migrasi', [FinanceMigrasiController::class, 'store'])->name('finance.migrasi.store');
+    Route::delete('/migrasi/{id}', [FinanceMigrasiController::class, 'destroy'])->name('finance.migrasi.destroy');
 
 });
 

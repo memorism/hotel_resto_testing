@@ -1,7 +1,5 @@
 <?php
 
-// app/Models/UploadOrder.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class HotelUploadLog extends Model
 {
-    protected $fillable = ['hotel_id', 'user_id', 'file_name', 'description'];
+    protected $fillable = ['hotel_id', 'user_id', 'file_name', 'description', 'type',];
 
     public function hotel()
     {
@@ -25,6 +23,12 @@ class HotelUploadLog extends Model
     {
         return $this->hasMany(HotelBooking::class, 'hotel_upload_log_id');
     }
+    public function finances()
+    {
+        return $this->hasMany(HotelFinance::class, 'hotel_upload_log_id');
+    }
+
+
 
 }
 
