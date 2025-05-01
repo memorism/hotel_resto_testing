@@ -51,8 +51,8 @@
                             x-model="usertype" required>
                             <option value="">-- Pilih Tipe User --</option>
                             <option value="admin">Admin</option>
-                            <option value="resto">Restaurant</option>
-                            <option value="hotel">Hotel</option>
+                            <option value="restonew">Restaurant</option>
+                            <option value="hotelnew">Hotel</option>
                         </select>
                         <x-input-error :messages="$errors->get('usertype')" class="mt-2" />
                     </div>

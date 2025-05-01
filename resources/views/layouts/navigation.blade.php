@@ -50,7 +50,7 @@
                         </x-nav-link>
                     @endif
 
-                    @if (Auth::user()->usertype == 'hotel')
+                    @if (Auth::user()->usertype == 'hotelnew')
                         <x-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
@@ -68,7 +68,7 @@
                         </x-nav-link>
                     @endif
 
-                    @if (Auth::user()->usertype == 'resto')
+                    @if (Auth::user()->usertype == 'restonew')
                         <x-nav-link href="{{ route('resto.dashboard') }}" :active="request()->routeIs('resto.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
@@ -171,7 +171,7 @@
             
             @endif
 
-            @if (Auth::user()->usertype == 'hotel')
+            @if (Auth::user()->usertype == 'hotelnnew')
                 <x-responsive-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
@@ -193,7 +193,7 @@
                 </x-responsive-nav-link>
             @endif
 
-            @if (Auth::user()->usertype == 'resto')
+            @if (Auth::user()->usertype == 'restonew')
                 <x-responsive-nav-link href="{{ route('resto.dashboard') }}" :active="request()->routeIs('resto.dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>

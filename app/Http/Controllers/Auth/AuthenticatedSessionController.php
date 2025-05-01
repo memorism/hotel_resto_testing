@@ -25,18 +25,17 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
         if(Auth::user()->usertype == 'admin') {
             return redirect(route('admin.dashboard'));
         }
-        elseif(Auth::user()->usertype == 'resto') {
-            return redirect(route('resto.dashboard'));
-        }
-        elseif(Auth::user()->usertype == 'hotel') {
-            return redirect(route('hotel.dashboard'));
-        }
+        // elseif(Auth::user()->usertype == 'resto') {
+        //     return redirect(route('resto.dashboard'));
+        // }
+        // elseif(Auth::user()->usertype == 'hotel') {
+        //     return redirect(route('hotel.dashboard'));
+        // }
         
         return redirect()->intended(route('dashboard', absolute: false));
     }
@@ -49,7 +48,6 @@ class AuthenticatedSessionController extends Controller
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

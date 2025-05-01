@@ -7,23 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Resto extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'name',
-        'street',
-        'village',
-        'district',
-        'city',
-        'province',
-        'postal_code',
-        'phone',
-        'email',
-        'logo'
+        'name', 'address', 'phone', 'email', 'logo', 'street', 'village', 'district', 'city', 'province', 'postal_code'
     ];
 
-    public function users()
-    {
+    public function orders() {
+        return $this->hasMany(RestoOrder::class);
+    }
+
+    public function uploadLogs() {
+        return $this->hasMany(RestoUploadLog::class);
+    }
+
+    public function users() {
         return $this->hasMany(User::class);
     }
 }

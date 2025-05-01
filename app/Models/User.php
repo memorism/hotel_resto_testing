@@ -53,34 +53,9 @@ class User extends Authenticatable
 
 
     }
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class, 'user_id');
-    }
-
-    public function restoOrders()
-    {
-        return $this->hasMany(RestoOrder::class);
-    }
-
-    public function excelUploads()
-    {
-        return $this->hasMany(ExcelUpload::class);
-    }
-
-    public function rooms()
-    {
-        return $this->hasMany(\App\Models\Room::class, 'user_id');
-    }
-
-    public function orders()
-    {
-        return $this->hasMany(RestoOrder::class, 'user_id');
-    }
-
     public function hotel()
     {
-        return $this->belongsTo(Hotel::class, 'hotel_id');
+        return $this->belongsTo(Hotel::class);
     }
 
     public function resto()
@@ -88,6 +63,35 @@ class User extends Authenticatable
         return $this->belongsTo(Resto::class);
     }
 
+    public function hotelBookings()
+    {
+        return $this->hasMany(HotelBooking::class);
+    }
 
+    public function hotelUploadLogs()
+    {
+        return $this->hasMany(HotelUploadLog::class);
+    }
+
+    public function restoOrders()
+    {
+        return $this->hasMany(RestoOrder::class);
+    }
+
+    public function restoUploadLogs()
+    {
+        return $this->hasMany(RestoUploadLog::class);
+    }
+
+    public function hotelRooms()
+    {
+        return $this->hasMany(HotelRoom::class);
+    }
+
+    public function rooms()
+    {
+        return $this->hasMany(\App\Models\HotelRoom::class, 'hotel_id', 'hotel_id');
+    }
+    
 
 }

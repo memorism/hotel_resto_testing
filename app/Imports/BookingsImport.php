@@ -2,7 +2,7 @@
 
 namespace App\Imports;
 
-use App\Models\Booking;
+use App\Models\HotelBooking;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -28,7 +28,7 @@ class BookingsImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            Booking::create([
+            HotelBooking::create([
                 'booking_id' => $row['booking_id'],
                 'no_of_adults' => $row['no_of_adults'],
                 'no_of_children' => $row['no_of_children'],

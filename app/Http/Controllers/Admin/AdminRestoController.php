@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Models\RestoOrder;
-use App\Models\User;
+use App\Models\Resto;
 use App\Http\Controllers\Controller;
 use DB;
 
@@ -18,86 +18,81 @@ class AdminRestoController extends Controller
 
         $query = RestoOrder::query();
 
-        if ($startDate && $endDate) {
-            $query->whereBetween('order_date', [$startDate, $endDate]);
+        // Gunakan resto_id, bukan user_id
+        if ($restoId) {
+            $query->where('resto_id', $restoId);
         }
 
-        if ($restoId) {
-            $query->where('user_id', $restoId);
+        if ($startDate && $endDate) {
+            $query->whereBetween('order_date', [$startDate, $endDate]);
         }
 
         $orders = $query->get();
 
         // Key Metrics
-        $totalTransactions = $query->count();
-        $totalRevenue = $query->sum(DB::raw('quantity * item_price'));
+        $totalTransactions = $orders->count();
+        $totalRevenue = $orders->sum(fn($order) => $order->quantity * $order->item_price);
         $averageTransactionValue = $totalTransactions > 0 ? $totalRevenue / $totalTransactions : 0;
 
         // Line Chart – Pendapatan per bulan
-        $monthlyRevenue = clone $query;
-        $monthlyRevenue = $monthlyRevenue->selectRaw("DATE_FORMAT(order_date, '%Y-%m') as month, SUM(quantity * item_price) as total_revenue")
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->map(function ($item) {
-                $item->total_revenue = (int) $item->total_revenue;
-                return $item;
-            });
+        $monthlyRevenue = $orders->groupBy(function ($order) {
+            return date('Y-m', strtotime($order->order_date));
+        })->map(function ($group) {
+            return [
+                'month' => $group->first()->order_date ? date('Y-m', strtotime($group->first()->order_date)) : '',
+                'total_revenue' => $group->sum(fn($o) => $o->quantity * $o->item_price),
+            ];
+        })->values()->sortBy('month')->values();
 
         // Pie Chart – Metode Pembayaran
-        $paymentDistribution = clone $query;
-        $paymentDistribution = $paymentDistribution->select('transaction_type', DB::raw('SUM(quantity * item_price) as total_revenue'))
-            ->groupBy('transaction_type')
-            ->get()
-            ->map(function ($item) {
-                $item->total_revenue = (int) $item->total_revenue;
-                return $item;
-            });
+        $paymentDistribution = $orders->groupBy('transaction_type')->map(function ($group, $key) {
+            return [
+                'transaction_type' => $key,
+                'total_revenue' => $group->sum(fn($o) => $o->quantity * $o->item_price),
+            ];
+        })->values();
 
         // Pie Chart – Berdasarkan item_type
-        $revenueByItemType = clone $query;
-        $revenueByItemType = $revenueByItemType->select('item_type', DB::raw('SUM(quantity * item_price) as total_revenue'))
-            ->groupBy('item_type')
-            ->get()
-            ->map(function ($item) {
-                $item->total_revenue = (int) $item->total_revenue;
-                return $item;
-            });
+        $revenueByItemType = $orders->groupBy('item_type')->map(function ($group, $key) {
+            return [
+                'item_type' => $key,
+                'total_revenue' => $group->sum(fn($o) => $o->quantity * $o->item_price),
+            ];
+        })->values();
 
         // Bar Chart – Berdasarkan type_of_order
-        $revenueByOrderType = clone $query;
-        $revenueByOrderType = $revenueByOrderType->select('type_of_order', DB::raw('SUM(quantity * item_price) as total_revenue'))
-            ->groupBy('type_of_order')
-            ->get()
-            ->map(function ($item) {
-                $item->total_revenue = (int) $item->total_revenue;
-                return $item;
-            });
+        $revenueByOrderType = $orders->groupBy('type_of_order')->map(function ($group, $key) {
+            return [
+                'type_of_order' => $key,
+                'total_revenue' => $group->sum(fn($o) => $o->quantity * $o->item_price),
+            ];
+        })->values();
 
         // Bar Chart – Top 5 menu paling banyak dibeli
-        $top5Items = clone $query;
-        $top5Items = $top5Items->select('item_name', DB::raw('SUM(quantity * item_price) as total_revenue'))
-            ->groupBy('item_name')
-            ->orderByDesc('total_revenue')
-            ->limit(5)
-            ->get();
+        $top5Items = $orders->groupBy('item_name')->map(function ($group, $key) {
+            return [
+                'item_name' => $key,
+                'total_revenue' => $group->sum(fn($o) => $o->quantity * $o->item_price),
+            ];
+        })->sortByDesc('total_revenue')->take(5)->values();
 
         // Bar Chart – Top 5 menu paling jarang dibeli
-        $least5Items = clone $query;
-        $least5Items = $least5Items->select('item_name', DB::raw('SUM(quantity * item_price) as total_revenue'))
-            ->groupBy('item_name')
-            ->orderBy('total_revenue')
-            ->limit(5)
-            ->get();
+        $least5Items = $orders->groupBy('item_name')->map(function ($group, $key) {
+            return [
+                'item_name' => $key,
+                'total_revenue' => $group->sum(fn($o) => $o->quantity * $o->item_price),
+            ];
+        })->sortBy('total_revenue')->take(5)->values();
 
         // Bar Chart – Berdasarkan received_by
-        $revenueByReceiver = clone $query;
-        $revenueByReceiver = $revenueByReceiver->select('received_by', DB::raw('SUM(quantity * item_price) as total_revenue'))
-            ->groupBy('received_by')
-            ->get();
+        $revenueByReceiver = $orders->groupBy('received_by')->map(function ($group, $key) {
+            return [
+                'received_by' => $key,
+                'total_revenue' => $group->sum(fn($o) => $o->quantity * $o->item_price),
+            ];
+        })->values();
 
-        $restos = User::where('usertype', 'resto')->get();
-
+        $restos = Resto::all();
 
         return view('admin.resto', compact(
             'startDate',

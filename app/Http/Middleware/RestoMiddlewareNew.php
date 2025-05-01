@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
-class FrontOfficeMiddleware
+
+class RestoMiddlewareNew
 {
     /**
      * Handle an incoming request.
@@ -16,7 +17,7 @@ class FrontOfficeMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->usertype === 'front_office') {
+        if (Auth::user()->usertype === 'restonew') {
             return $next($request);
         }
         return redirect()->back();

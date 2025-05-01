@@ -4,7 +4,7 @@ namespace App\Http\Controllers\hotel\frontoffice;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Booking;
+use App\Models\HotelBooking;
 
 class BookingControllerFo extends Controller
 {
@@ -19,7 +19,7 @@ class BookingControllerFo extends Controller
         $perPage = $request->get('perPage', 10);
         $search = $request->get('search', '');
 
-        $bookings = Booking::where('hotel_id', $hotelId)
+        $bookings = HotelBooking::where('hotel_id', $hotelId)
             ->when($search, function ($query, $search) {
                 return $query->where('booking_id', 'like', '%' . $search . '%');
             })
@@ -60,7 +60,7 @@ class BookingControllerFo extends Controller
             'booking_status' => 'required|in:Not_Canceled,Canceled',
         ]);
 
-        Booking::create(array_merge($request->all(), [
+        HotelBooking::create(array_merge($request->all(), [
             'hotel_id' => auth()->user()->hotel_id, // 🔥 Pakai hotel_id, bukan user_id lagi
             'user_id'  => auth()->user()->id,
         ]));
@@ -73,7 +73,7 @@ class BookingControllerFo extends Controller
      */
     public function edit($id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = HotelBooking::findOrFail($id);
         $this->authorizeBooking($booking);
 
         return view('hotel.frontoffice.booking.edit', compact('booking'));
@@ -84,7 +84,7 @@ class BookingControllerFo extends Controller
      */
     public function update(Request $request, $id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = HotelBooking::findOrFail($id);
         $this->authorizeBooking($booking);
 
         $request->validate([
@@ -115,7 +115,7 @@ class BookingControllerFo extends Controller
      */
     public function destroy($id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = HotelBooking::findOrFail($id);
         $this->authorizeBooking($booking);
         $booking->delete();
 

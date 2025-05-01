@@ -2,6 +2,8 @@
 
 use App\Http\Middleware\FinanceMiddleware;
 use App\Http\Middleware\FrontOfficeMiddleware;
+use App\Http\Middleware\HotelMiddlewareNew;
+use App\Http\Middleware\RestoMiddlewareNew;
 use App\Http\Middleware\UserMiddleware;
 use App\Http\Middleware\HotelMiddleware;
 use App\Http\Middleware\AdminMiddleware;
@@ -24,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'hotelMiddleware' => HotelMiddleware::class,
             'frontoffice' => FrontOfficeMiddleware::class,
             'financeMiddleware'  => FinanceMiddleware::class, 
+            'hotelMiddlewareNew' => HotelMiddlewareNew::class,
+            'restoMiddlewareNew' => RestoMiddlewareNew::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

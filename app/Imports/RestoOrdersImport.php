@@ -3,26 +3,30 @@
 namespace App\Imports;
 
 use App\Models\RestoOrder;
-use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
-use Carbon\Carbon;
 
 class RestoOrdersImport implements ToModel, WithHeadingRow
 {
-    protected $upload;
+    protected $uploadLogId;
+    protected $restoId;
+    protected $userId;
 
-    public function __construct($upload)
+    public function __construct($uploadLogId, $restoId, $userId)
     {
-        $this->upload = $upload;
+        $this->uploadLogId = $uploadLogId;
+        $this->restoId = $restoId;
+        $this->userId = $userId;
     }
 
     public function model(array $row)
     {
         return new RestoOrder([
-            'user_id' => Auth::id(),
-            'excel_upload_id' => $this->upload->id,
+            'resto_upload_log_id' => $this->uploadLogId,
+            'resto_id' => $this->restoId,
+            'user_id' => $this->userId,
             'order_date' => isset($row['order_date']) ? Carbon::instance(Date::excelToDateTimeObject($row['order_date']))->format('Y-m-d') : null,
             'time_order' => isset($row['time_order']) ? Carbon::instance(Date::excelToDateTimeObject($row['time_order']))->format('H:i:s') : null,
             'item_name' => $row['item_name'] ?? null,

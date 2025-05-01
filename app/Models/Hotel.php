@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Hotel extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
         'street',
@@ -21,8 +19,28 @@ class Hotel extends Model
         'email'
     ];
 
+    public function rooms()
+    {
+        return $this->hasMany(HotelRoom::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(HotelBooking::class);
+    }
+
+    public function uploadLogs()
+    {
+        return $this->hasMany(HotelUploadLog::class);
+    }
+
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function hotel()
+    {
+        return $this->belongsTo(Hotel::class, 'hotel_id');
     }
 }

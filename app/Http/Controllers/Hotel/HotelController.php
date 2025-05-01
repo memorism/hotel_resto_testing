@@ -3,99 +3,92 @@
 namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
-use App\Charts\BookingChart;
-use App\Models\Booking;
+use App\Models\HotelBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-
 
 class HotelController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::id();
         $user = Auth::user();
+        $hotelId = $user->hotel_id;
 
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        $start = Carbon::parse($startDate);
-        $end = Carbon::parse($endDate);
-        $daysInRange = $start->diffInDays($end) + 1;
-
-        $query = Booking::where('user_id', $userId);
+        $query = HotelBooking::where('hotel_id', $hotelId);
 
         if ($startDate && $endDate) {
-            $query->whereBetween('arrival_year', [
-                Carbon::parse($startDate)->format('Y'),
-                Carbon::parse($endDate)->format('Y')
-            ])
-                ->whereBetween('arrival_month', [
-                    Carbon::parse($startDate)->format('m'),
-                    Carbon::parse($endDate)->format('m')
-                ])
-                ->whereBetween('arrival_date', [
-                    Carbon::parse($startDate)->format('d'),
-                    Carbon::parse($endDate)->format('d')
-                ]);
+            try {
+                $start = Carbon::parse($startDate);
+                $end = Carbon::parse($endDate);
+
+                $query->whereRaw("
+                    STR_TO_DATE(CONCAT(arrival_year, '-', LPAD(arrival_month, 2, '0'), '-', LPAD(arrival_date, 2, '0')), '%Y-%m-%d')
+                    BETWEEN ? AND ?
+                ", [$start->format('Y-m-d'), $end->format('Y-m-d')]);
+
+                $daysInRange = $start->diffInDays($end) + 1;
+            } catch (\Exception $e) {
+                return back()->withErrors(['Tanggal tidak valid.']);
+            }
+        } else {
+            $daysInRange = 30; // default untuk perhitungan RevPAR jika range tidak diberikan
         }
 
         $bookings = $query->get();
 
-        // 1️⃣ Key Metrics
-        $totalRevenue = $bookings->where('booking_status', 'Not_Canceled')
-            ->sum(function ($booking) {
-                $nights = $booking->no_of_weekend_nights + $booking->no_of_week_nights;
-                $price = $booking->avg_price_per_room;
-                return $nights * $price;
-            });
-        $totalExpenses = 0; // Dummy data, bisa diambil dari database
+        // Key Metrics
+        $totalRevenue = $bookings->where('booking_status', 'Not_Canceled')->sum(fn($b) =>
+            ($b->no_of_weekend_nights + $b->no_of_week_nights) * $b->avg_price_per_room
+        );
+        $totalExpenses = 0; // Dummy sementara
         $profit = $totalRevenue - $totalExpenses;
-        $totalNightsSold = $bookings->where('booking_status', 'Not_Canceled')
-            ->sum(fn($b) => $b->no_of_weekend_nights + $b->no_of_week_nights);
+        $totalNightsSold = $bookings->where('booking_status', 'Not_Canceled')->sum(fn($b) =>
+            $b->no_of_weekend_nights + $b->no_of_week_nights
+        );
         $roomsSold = $bookings->where('booking_status', 'Not_Canceled')->count();
         $adr = ($roomsSold > 0) ? $totalRevenue / $roomsSold : 0;
         $totalRooms = $user->rooms()->sum('total_rooms');
-        $revPAR = ($totalRooms > 0 && $daysInRange > 0)
-            ? ($totalRevenue / ($totalRooms * $daysInRange))
-            : 0;
-        $cancellationLoss = $bookings->where('booking_status', 'Canceled')->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room);
+        $revPAR = ($totalRooms > 0 && $daysInRange > 0) ? ($totalRevenue / ($totalRooms * $daysInRange)) : 0;
+        $cancellationLoss = $bookings->where('booking_status', 'Canceled')->sum(fn($b) =>
+            ($b->no_of_weekend_nights + $b->no_of_week_nights) * $b->avg_price_per_room
+        );
 
-        // 2️⃣ Pendapatan Per Bulan
-        $monthlyRevenue = $bookings->groupBy('arrival_month')->map(fn($row) => $row->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room))->toArray();
+        // Pendapatan per bulan
+        $monthlyRevenue = $bookings->groupBy('arrival_month')->map(fn($group) =>
+            $group->sum(fn($b) =>
+                ($b->no_of_weekend_nights + $b->no_of_week_nights) * $b->avg_price_per_room
+            )
+        )->toArray();
         ksort($monthlyRevenue);
 
-        // 3️⃣ Biaya Operasional vs Pendapatan
-        $monthlyExpenses = array_fill_keys(array_keys($monthlyRevenue), 0); // Dummy data
+        // Biaya operasional dummy
+        $monthlyExpenses = array_fill_keys(array_keys($monthlyRevenue), 0);
 
+        // Segmentasi pasar
+        $marketSegmentRevenue = $bookings->groupBy('market_segment_type')->map(fn($group) =>
+            $group->sum(fn($b) =>
+                ($b->no_of_weekend_nights + $b->no_of_week_nights) * $b->avg_price_per_room
+            )
+        )->toArray();
+        $marketSegmentBookings = $bookings->groupBy('market_segment_type')->map(fn($group) => count($group))->toArray();
 
-        // 5️⃣ Pendapatan Berdasarkan Segmen Pasar
-        $marketSegmentRevenue = $bookings->groupBy('market_segment_type')->map(fn($row) => $row->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room))->toArray();
-        $marketSegmentBookings = $bookings->groupBy('market_segment_type')->map(fn($row) => count($row))->toArray();
+        // Top performing rooms
+        $roomRevenue = $bookings->groupBy('room_type_reserved')->map(fn($group) =>
+            $group->sum(fn($b) =>
+                ($b->no_of_weekend_nights + $b->no_of_week_nights) * $b->avg_price_per_room
+            )
+        )->toArray();
+        $roomBookings = $bookings->groupBy('room_type_reserved')->map(fn($group) => count($group))->toArray();
 
-        // 5️⃣ **Top Performing Rooms (Kamar dengan Pendapatan Tertinggi)**
-        $roomRevenue = $bookings->groupBy('room_type_reserved')->map(fn($row) => $row->sum(fn($booking) => ($booking->no_of_weekend_nights + $booking->no_of_week_nights) * $booking->avg_price_per_room))->toArray();
-        $roomBookings = $bookings->groupBy('room_type_reserved')->map(fn($row) => count($row))->toArray();
-
-
-
-        return view('hotel.dashboard', [
-            'totalRevenue' => $totalRevenue,
-            'totalExpenses' => $totalExpenses,
-            'profit' => $profit,
-            'revPAR' => $revPAR,
-            'adr' => $adr,
-            'cancellationLoss' => $cancellationLoss,
-            'monthlyRevenue' => $monthlyRevenue,
-            'monthlyExpenses' => $monthlyExpenses,
-            'roomRevenue' => $roomRevenue,
-            'roomBookings' => $roomBookings,
-            'marketSegmentRevenue' => $marketSegmentRevenue,
-            'marketSegmentBookings' => $marketSegmentBookings,
-            'startDate' => $startDate,
-            'endDate' => $endDate
-        ]);
+        return view('hotel.dashboard', compact(
+            'totalRevenue', 'totalExpenses', 'profit', 'revPAR', 'adr',
+            'cancellationLoss', 'monthlyRevenue', 'monthlyExpenses',
+            'roomRevenue', 'roomBookings', 'marketSegmentRevenue',
+            'marketSegmentBookings', 'startDate', 'endDate'
+        ));
     }
 }
-

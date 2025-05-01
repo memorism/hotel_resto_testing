@@ -13,12 +13,10 @@ class HotelAdminController extends Controller
     {
         $query = Hotel::query();
 
-        // Search by name
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // Filter by city
         if ($request->filled('city')) {
             $query->where('city', $request->city);
         }
@@ -37,33 +35,33 @@ class HotelAdminController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'          => 'required|string|max:255',
-            'street'        => 'nullable|string|max:255',
-            'village'       => 'nullable|string|max:255',
-            'district'      => 'nullable|string|max:255',
-            'city'          => 'nullable|string|max:255',
-            'province'      => 'nullable|string|max:255',
-            'postal_code'   => 'nullable|string|max:20',
-            'phone'         => 'nullable|string|max:50',
-            'email'         => 'nullable|email|max:255',
-            'logo'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name'        => 'required|string|max:255',
+            'street'      => 'nullable|string|max:255',
+            'village'     => 'nullable|string|max:255',
+            'district'    => 'nullable|string|max:255',
+            'city'        => 'nullable|string|max:255',
+            'province'    => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'phone'       => 'nullable|string|max:50',
+            'email'       => 'nullable|email|max:255',
+            'logo'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $logoPath = $request->hasFile('logo') 
+        $logoPath = $request->file('logo') 
             ? $request->file('logo')->store('logos/hotels', 'public') 
             : null;
 
         Hotel::create([
-            'name'          => $request->name,
-            'street'        => $request->street,
-            'village'       => $request->village,
-            'district'      => $request->district,
-            'city'          => $request->city,
-            'province'      => $request->province,
-            'postal_code'   => $request->postal_code,
-            'phone'         => $request->phone,
-            'email'         => $request->email,
-            'logo'          => $logoPath,
+            'name'        => $request->name,
+            'street'      => $request->street,
+            'village'     => $request->village,
+            'district'    => $request->district,
+            'city'        => $request->city,
+            'province'    => $request->province,
+            'postal_code' => $request->postal_code,
+            'phone'       => $request->phone,
+            'email'       => $request->email,
+            'logo'        => $logoPath,
         ]);
 
         return redirect()->route('admin.hotel.index')->with('success', 'Hotel berhasil ditambahkan!');
@@ -80,36 +78,36 @@ class HotelAdminController extends Controller
         $hotel = Hotel::findOrFail($id);
 
         $request->validate([
-            'name'          => 'required|string|max:255',
-            'street'        => 'nullable|string|max:255',
-            'village'       => 'nullable|string|max:255',
-            'district'      => 'nullable|string|max:255',
-            'city'          => 'nullable|string|max:255',
-            'province'      => 'nullable|string|max:255',
-            'postal_code'   => 'nullable|string|max:20',
-            'phone'         => 'nullable|string|max:50',
-            'email'         => 'nullable|email|max:255',
-            'logo'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name'        => 'required|string|max:255',
+            'street'      => 'nullable|string|max:255',
+            'village'     => 'nullable|string|max:255',
+            'district'    => 'nullable|string|max:255',
+            'city'        => 'nullable|string|max:255',
+            'province'    => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'phone'       => 'nullable|string|max:50',
+            'email'       => 'nullable|email|max:255',
+            'logo'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($request->hasFile('logo')) {
-            if ($hotel->logo) {
+            if ($hotel->logo && Storage::disk('public')->exists($hotel->logo)) {
                 Storage::disk('public')->delete($hotel->logo);
             }
             $hotel->logo = $request->file('logo')->store('logos/hotels', 'public');
         }
 
         $hotel->update([
-            'name'          => $request->name,
-            'street'        => $request->street,
-            'village'       => $request->village,
-            'district'      => $request->district,
-            'city'          => $request->city,
-            'province'      => $request->province,
-            'postal_code'   => $request->postal_code,
-            'phone'         => $request->phone,
-            'email'         => $request->email,
-            'logo'          => $hotel->logo,
+            'name'        => $request->name,
+            'street'      => $request->street,
+            'village'     => $request->village,
+            'district'    => $request->district,
+            'city'        => $request->city,
+            'province'    => $request->province,
+            'postal_code' => $request->postal_code,
+            'phone'       => $request->phone,
+            'email'       => $request->email,
+            'logo'        => $hotel->logo, // tetap dipakai yang sekarang
         ]);
 
         return redirect()->route('admin.hotel.index')->with('success', 'Hotel berhasil diperbarui!');
@@ -119,7 +117,7 @@ class HotelAdminController extends Controller
     {
         $hotel = Hotel::findOrFail($id);
 
-        if ($hotel->logo) {
+        if ($hotel->logo && Storage::disk('public')->exists($hotel->logo)) {
             Storage::disk('public')->delete($hotel->logo);
         }
 

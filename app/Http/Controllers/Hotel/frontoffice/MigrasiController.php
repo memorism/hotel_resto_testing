@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Hotel\Frontoffice;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\UploadOrder;
+use App\Models\HotelUploadLog;
 use App\Models\Hotel;
 use App\Imports\BookingsImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -23,7 +23,7 @@ class MigrasiController extends Controller
             return back()->with('error', 'Data hotel tidak ditemukan atau belum dikaitkan.');
         }
 
-        $uploadOrders = UploadOrder::where('hotel_id', $hotel->id)
+        $uploadOrders = HotelUploadLog::where('hotel_id', $hotel->id)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -55,7 +55,7 @@ class MigrasiController extends Controller
             return back()->with('error', 'Data hotel tidak ditemukan atau belum dikaitkan.');
         }
 
-        $uploadOrder = UploadOrder::create([
+        $uploadOrder = HotelUploadLog::create([
             'hotel_id'    => $hotel->id,
             'user_id'     => $user->id,
             'file_name'   => $request->file('file')->getClientOriginalName(),
@@ -80,7 +80,7 @@ class MigrasiController extends Controller
      */
     public function destroy($id)
     {
-        $uploadOrder = UploadOrder::where('hotel_id', auth()->user()->hotel_id)
+        $uploadOrder = HotelUploadLog::where('hotel_id', auth()->user()->hotel_id)
             ->where('id', $id)
             ->firstOrFail();
 

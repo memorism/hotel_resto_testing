@@ -8,8 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
-use App\Models\hotel;
-use App\Models\resto;
+use App\Models\Hotel;
+use App\Models\Resto;
 
 class UserAdminController extends Controller
 {
@@ -22,7 +22,6 @@ class UserAdminController extends Controller
         return view('admin.user.user', compact('users'));
     }
 
-
     public function create()
     {
         $hotels = Hotel::all();
@@ -30,15 +29,11 @@ class UserAdminController extends Controller
         return view('admin.user.create', compact('hotels', 'restos'));
     }
 
-
-    /**
-     * Handle an incoming registration request.
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|confirmed|min:8',
             'usertype' => 'required|in:admin,hotel,resto',
             'hotel_id' => 'nullable|exists:hotels,id',
@@ -49,12 +44,13 @@ class UserAdminController extends Controller
         if ($request->usertype === 'hotel' && !$request->hotel_id) {
             return back()->withErrors(['hotel_id' => 'Hotel wajib dipilih untuk usertype hotel']);
         }
+
         if ($request->usertype === 'resto' && !$request->resto_id) {
             return back()->withErrors(['resto_id' => 'Resto wajib dipilih untuk usertype resto']);
         }
 
         $logoPath = $request->hasFile('logo')
-            ? $request->file('logo')->store('logos', 'public')
+            ? $request->file('logo')->store('logos/users', 'public')
             : null;
 
         User::create([
@@ -70,22 +66,23 @@ class UserAdminController extends Controller
         return redirect()->route('admin.user.user')->with('success', 'User berhasil ditambahkan!');
     }
 
-
     public function showLogo($id)
     {
         $user = User::findOrFail($id);
 
-        if ($user->logo) {
+        if ($user->logo && Storage::disk('public')->exists($user->logo)) {
             return response()->file(storage_path('app/public/' . $user->logo));
         }
 
-        return response()->file(public_path('images/default.png')); // Jika tidak ada logo
+        return response()->file(public_path('images/default.png'));
     }
 
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        return view('admin.user.edit', compact('user'));
+        $hotels = Hotel::all();
+        $restos = Resto::all();
+        return view('admin.user.edit', compact('user', 'hotels', 'restos'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -94,7 +91,7 @@ class UserAdminController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'usertype' => 'required|in:admin,hotel,resto',
             'hotel_id' => 'nullable|exists:hotels,id',
             'resto_id' => 'nullable|exists:restos,id',
@@ -110,15 +107,16 @@ class UserAdminController extends Controller
         if ($request->usertype === 'hotel' && !$request->hotel_id) {
             return back()->withErrors(['hotel_id' => 'Hotel wajib dipilih untuk usertype hotel']);
         }
+
         if ($request->usertype === 'resto' && !$request->resto_id) {
             return back()->withErrors(['resto_id' => 'Resto wajib dipilih untuk usertype resto']);
         }
 
         if ($request->hasFile('logo')) {
-            if ($user->logo) {
+            if ($user->logo && Storage::disk('public')->exists($user->logo)) {
                 Storage::disk('public')->delete($user->logo);
             }
-            $user->logo = $request->file('logo')->store('logos', 'public');
+            $user->logo = $request->file('logo')->store('logos/users', 'public');
         }
 
         $user->update([
@@ -128,17 +126,17 @@ class UserAdminController extends Controller
             'usertype' => $request->usertype,
             'hotel_id' => $request->hotel_id,
             'resto_id' => $request->resto_id,
+            'logo' => $user->logo,
         ]);
 
         return redirect()->route('admin.user.user')->with('success', 'User berhasil diperbarui!');
     }
 
-
     public function destroy($id): RedirectResponse
     {
         $user = User::findOrFail($id);
 
-        if ($user->logo) {
+        if ($user->logo && Storage::disk('public')->exists($user->logo)) {
             Storage::disk('public')->delete($user->logo);
         }
 
@@ -149,33 +147,20 @@ class UserAdminController extends Controller
 
     public function showSubUser($id)
     {
-        $parentUser = User::findOrFail($id); // Ambil parent user (hotel/resto)
-    
-        if ($parentUser->usertype === 'hotel') {
-            if ($parentUser->hotel_id === null) {
-                // Hotel belum punya hotel_id → subUser kosong
-                $subUsers = collect();
-            } else {
-                $subUsers = User::whereNotNull('hotel_id') // Pastikan ada hotel_id
-                    ->where('hotel_id', $parentUser->hotel_id)
-                    ->whereNotIn('usertype', ['hotel', 'admin', 'resto'])
-                    ->get();
-            }
-        } elseif ($parentUser->usertype === 'resto') {
-            if ($parentUser->resto_id === null) {
-                // Resto belum punya resto_id → subUser kosong
-                $subUsers = collect();
-            } else {
-                $subUsers = User::whereNotNull('resto_id') // Pastikan ada resto_id
-                    ->where('resto_id', $parentUser->resto_id)
-                    ->whereNotIn('usertype', ['hotel', 'admin', 'resto'])
-                    ->get();
-            }
+        $parentUser = User::findOrFail($id);
+
+        if ($parentUser->usertype === 'hotel' && $parentUser->hotel_id) {
+            $subUsers = User::where('hotel_id', $parentUser->hotel_id)
+                ->whereNotIn('usertype', ['admin', 'hotel', 'resto'])
+                ->get();
+        } elseif ($parentUser->usertype === 'resto' && $parentUser->resto_id) {
+            $subUsers = User::where('resto_id', $parentUser->resto_id)
+                ->whereNotIn('usertype', ['admin', 'hotel', 'resto'])
+                ->get();
         } else {
-            abort(404, 'User ini bukan hotel atau resto.');
+            $subUsers = collect();
         }
-    
+
         return view('admin.user.subusers', compact('parentUser', 'subUsers'));
     }
-    
 }

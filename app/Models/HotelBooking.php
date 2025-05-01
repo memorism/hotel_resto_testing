@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Booking extends Model
+class HotelBooking extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
+        'hotel_id',
+        'user_id',
         'booking_id',
         'no_of_adults',
         'no_of_children',
@@ -26,26 +26,31 @@ class Booking extends Model
         'avg_price_per_room',
         'no_of_special_requests',
         'booking_status',
-        'upload_order_id',
-        'hotel_id',
-        'user_id'
+        'hotel_upload_log_id'
     ];
 
-
+    protected $casts = [
+        'avg_price_per_room' => 'float'
+    ];
 
     public function hotel()
     {
-        return $this->belongsTo(User::class, 'hotel_id');
+        return $this->belongsTo(Hotel::class);
     }
+
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
-    public function uploadOrder()
+    public function uploadLog()
     {
-        return $this->belongsTo(UploadOrder::class, 'upload_order_id');
+        return $this->belongsTo(HotelUploadLog::class, );
     }
 
+    // public function customer()
+    // {
+    //     return $this->belongsTo(Customer::class);
+    // }
 
 }
