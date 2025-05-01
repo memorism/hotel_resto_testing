@@ -3,6 +3,8 @@
 use App\Http\Controllers\Hotel\Finance\FinanceMigrasiController;
 use App\Http\Controllers\Hotel\Finance\HotelFinanceController;
 use App\Http\Controllers\Hotel\HotelControllercopy;
+use App\Http\Controllers\Hotel\SCM\HotelSupplyTransactionController;
+use App\Http\Controllers\Hotel\SCM\testController;
 use App\Http\Controllers\HotelNew\HotelNewController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +29,7 @@ use App\Http\Controllers\Resto\RestoController;
 use App\Http\Controllers\Resto\OccupancyController;
 use App\Http\Controllers\Resto\RestoOrderController;
 use App\Http\Controllers\Resto\ExcelUploadController;
+use App\Http\Controllers\Hotel\SCM\HotelSupplyController;
 
 
 // Logout
@@ -183,6 +186,25 @@ Route::middleware(['auth', 'financehotelMiddleware'])->group(function () {
     Route::delete('/migrasi/{id}', [FinanceMigrasiController::class, 'destroy'])->name('finance.migrasi.destroy');
 
 });
+
+Route::middleware(['auth', 'scmhotelMiddleware'])->prefix('scm')->name('scm.')->group(function () {
+    Route::resource('/transactions', HotelSupplyTransactionController::class)
+        ->names([
+            'index' => 'transactions.index',
+            'create' => 'transactions.create',
+            'store' => 'transactions.store',
+            'destroy' => 'transactions.destroy',
+        ])
+        ->except(['show', 'edit', 'update']);
+
+    Route::resource('/supplies', HotelSupplyController::class)
+        ->names('supplies')
+        ->except('show');
+
+    Route::resource('/test', testController::class);
+
+});
+
 
 Route::get('/', fn() => view('welcome'));
 

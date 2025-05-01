@@ -82,24 +82,35 @@
                             {{ __('Data Keseluruhan') }}
                         </x-nav-link>
                     @endif
-                    @if (Auth::user()->usertype == 'front_office')
-                    <x-nav-link href="{{ route('hotel.frontoffice.booking.index') }}" :active="request()->routeIs('hotel.frontoffice.booking.index')">
-                        {{ __('Dashboard Fo') }}
-                    </x-nav-link>
 
-                    <x-nav-link href="{{ route('hotel.frontoffice.migrasi.index') }}" :active="request()->routeIs('hotel.frontoffice.migrasi.index')">
-                        {{ __('Data Migrasi') }}
-                    </x-nav-link>
+                    @if (Auth::user()->usertype == 'front_office')
+                        <x-nav-link href="{{ route('hotel.frontoffice.booking.index') }}" :active="request()->routeIs('hotel.frontoffice.booking.index')">
+                            {{ __('Dashboard Fo') }}
+                        </x-nav-link>
+
+                        <x-nav-link href="{{ route('hotel.frontoffice.migrasi.index') }}" :active="request()->routeIs('hotel.frontoffice.migrasi.index')">
+                            {{ __('Data Migrasi') }}
+                        </x-nav-link>
                     @endif
 
                     @if (Auth::user()->usertype == 'financehotel')
-                    <x-nav-link href="{{ route('finance.index') }}" :active="request()->routeIs('finance.index')">
-                        {{ __('Data Transaksi') }}
-                    </x-nav-link>
-        
-                    <x-nav-link href="{{ route('finance.migrasi.index') }}" :active="request()->routeIs('finance.migrasi.index')">
-                        {{ __('Data Migrasi') }}
-                    </x-nav-link>
+                        <x-nav-link href="{{ route('finance.index') }}" :active="request()->routeIs('finance.index')">
+                            {{ __('Data Transaksi') }}
+                        </x-nav-link>
+            
+                        <x-nav-link href="{{ route('finance.migrasi.index') }}" :active="request()->routeIs('finance.migrasi.index')">
+                            {{ __('Data Migrasi') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->usertype == 'scmhotel')
+                        <x-nav-link href="{{ route('scm.supplies.index') }}" :active="request()->routeIs('scm.supplies.index')">
+                            {{ __('Manajemen Barang') }}
+                        </x-nav-link>
+            
+                        <x-nav-link href="{{ route('scm.transactions.index') }}" :active="request()->routeIs('scm.transactions.index')">
+                            {{ __('Transaksi Barang') }}
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -238,6 +249,16 @@
 
             <x-responsive-nav-link href="{{ route('finance.migrasi.index') }}" :active="request()->routeIs('finance.migrasi.index')">
                 {{ __('Data Migrasi') }}
+            </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->usertype == 'scmhotel')
+            <x-responsive-nav-link href="{{ route('scm.supplies.index') }}" :active="request()->routeIs('scm.supplies.index')">
+                {{ __('Manajemen Barang') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('scm.transactions.index') }}" :active="request()->routeIs('scm.transactions.index')">
+                {{ __('Transaksi Barang') }}
             </x-responsive-nav-link>
             @endif
         </div>
