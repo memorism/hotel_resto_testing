@@ -1,15 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="d-flex justify-content-between align-items-center">
-            <h2 class="fw-semibold fs-4 text-dark mb-0">
+            <h2 class="fw-semibold fs-4 text-dark">
                 {{ __('Kamar Hotel') }}
             </h2>
-            <div>
-                <a href="{{ route('hotel.rooms.create') }}"
-                    class="px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600">
-                    Tambah Kamar
-                </a>
-            </div>
+            <a href="{{ route('hotel.rooms.create') }}" class="btn btn-primary">Tambah Kamar</a>
         </div>
     </x-slot>
 

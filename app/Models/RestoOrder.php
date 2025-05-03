@@ -19,8 +19,9 @@ class RestoOrder extends Model
         'transaction_type',
         'received_by',
         'type_of_order',
-        'excel_upload_id',
-        'resto_id'
+        'resto_upload_log_id',
+        'resto_id',
+        'customer_id',
     ];
 
     public function user()
@@ -36,6 +37,10 @@ class RestoOrder extends Model
     public function resto()
     {
         return $this->belongsTo(Resto::class, 'resto_id');
+    }
+    public function customer()
+    {
+        return $this->belongsTo(SharedCustomer::class, 'customer_id');
     }
 
 }

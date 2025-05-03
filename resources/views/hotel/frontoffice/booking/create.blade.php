@@ -4,16 +4,15 @@
             {{ __('Tambah Booking Baru') }}
         </h2>
     </x-slot>
-    
 
     <div class="py-8">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6">
                 @if ($errors->any())
                     <div class="mb-4 text-red-600">
-                        <ul>
+                        <ul class="list-disc list-inside text-sm">
                             @foreach ($errors->all() as $error)
-                                <li>• {{ $error }}</li>
+                                <li>{{ $error }}</li>
                             @endforeach
                         </ul>
                     </div>
@@ -23,6 +22,23 @@
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {{-- Nama File --}}
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Nama File</label>
+                            <select name="file_name" class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-blue-300" required>
+                                <option value="">-- Pilih File --</option>
+                                @php
+                                    $user = auth()->user();
+                                    $fileNames = \App\Models\HotelUploadLog::where('hotel_id', $user->hotel_id)
+                                        ->where('user_id', $user->id)
+                                        ->pluck('file_name', 'file_name');
+                                @endphp
+                                @foreach ($fileNames as $name => $value)
+                                    <option value="{{ $value }}">{{ $value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div>
                             <label class="block font-medium text-sm text-gray-700">Booking ID</label>
                             <input type="text" name="booking_id" class="w-full rounded-md border-gray-300 shadow-sm" required>
@@ -39,12 +55,12 @@
                         </div>
 
                         <div>
-                            <label class="block font-medium text-sm text-gray-700">Jumlah Malam Weekend</label>
+                            <label class="block font-medium text-sm text-gray-700">Malam Weekend</label>
                             <input type="number" name="no_of_weekend_nights" min="0" class="w-full rounded-md border-gray-300 shadow-sm" required>
                         </div>
 
                         <div>
-                            <label class="block font-medium text-sm text-gray-700">Jumlah Malam Weekday</label>
+                            <label class="block font-medium text-sm text-gray-700">Malam Weekday</label>
                             <input type="number" name="no_of_week_nights" min="0" class="w-full rounded-md border-gray-300 shadow-sm" required>
                         </div>
 
@@ -92,7 +108,7 @@
                         </div>
 
                         <div>
-                            <label class="block font-medium text-sm text-gray-700">Harga Rata-rata per Kamar</label>
+                            <label class="block font-medium text-sm text-gray-700">Harga Rata-rata / Kamar</label>
                             <input type="number" step="0.01" name="avg_price_per_room" class="w-full rounded-md border-gray-300 shadow-sm" required>
                         </div>
 
@@ -111,8 +127,12 @@
                     </div>
 
                     <div class="mt-6 flex justify-end">
-                        <a href="{{ route('hotel.frontoffice.booking.index') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-400">Batal</a>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Simpan</button>
+                        <a href="{{ route('hotel.frontoffice.booking.index') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-400">
+                            Batal
+                        </a>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                            Simpan
+                        </button>
                     </div>
                 </form>
             </div>

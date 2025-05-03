@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center">
             <h2 class="text-2xl font-semibold text-gray-800">Riwayat Transaksi Barang</h2>
             <a href="{{ route('scm.transactions.create') }}"
-               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                 Tambah Transaksi
             </a>
         </div>
@@ -28,18 +28,17 @@
                             <tbody>
                                 @foreach($transactions as $trx)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-2 border">{{ \Carbon\Carbon::parse($trx->transaction_date)->format('d M Y') }}</td>
+                                        <td class="px-4 py-2 border">
+                                            {{ \Carbon\Carbon::parse($trx->transaction_date)->format('d M Y') }}</td>
                                         <td class="px-4 py-2 border">{{ $trx->supply->name ?? '-' }}</td>
                                         <td class="px-4 py-2 border capitalize">{{ $trx->type }}</td>
                                         <td class="px-4 py-2 border">{{ $trx->quantity }}</td>
                                         <td class="px-4 py-2 border">{{ $trx->note ?? '-' }}</td>
-                                        <td class="px-4 py-2 border">
-                                            <form method="POST" action="{{ route('scm.transactions.destroy', $trx) }}"
-                                                  onsubmit="return confirm('Hapus transaksi ini?')">
-                                                @csrf @method('DELETE')
-                                                <button class="text-red-600 hover:underline">Hapus</button>
-                                            </form>
+                                        <td class="px-4 py-2 border text-center relative">
+                                            <x-dropdown-action
+                                                :delete-url="route('scm.transactions.destroy', $trx)" />
                                         </td>
+                                        
                                     </tr>
                                 @endforeach
                             </tbody>

@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-100">
+    <div class="py-12 ">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 shadow-md rounded-lg">
                 <form action="{{ route('admin.subusers.store', $parentUser->id) }}" method="POST">
@@ -46,9 +46,9 @@
                     <div class="mb-4">
                         <x-input-label for="usertype" :value="__('Tipe Subuser')" />
                         <select id="usertype" name="usertype"
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200"
+                            class="block w-full mt-1 border-gray-300 rounded-md  px-3 py-2 shadow-sm focus:ring focus:ring-indigo-200"
                             required>
-                            <option value="">-- Pilih Role --</option>
+                            <option value=""> Pilih Role </option>
                             @if($parentUser->usertype === 'hotelnew')
                                 <option value="frontofficehotel">Front Office</option>
                                 <option value="financehotel">Finance</option>

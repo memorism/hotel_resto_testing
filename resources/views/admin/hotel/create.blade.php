@@ -8,7 +8,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12 bg-gray-100">
+    <div class="py-6 ">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 shadow-md rounded-lg">
                 <form action="{{ route('admin.hotel.store') }}" method="POST" enctype="multipart/form-data">

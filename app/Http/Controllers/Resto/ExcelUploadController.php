@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\RestoOrdersImport;
-use Illuminate\Support\Facades\Storage;
 
 class ExcelUploadController extends Controller
 {
@@ -17,6 +16,7 @@ class ExcelUploadController extends Controller
     {
         $restoId = auth()->user()->resto_id;
         $uploads = RestoUploadLog::where('resto_id', $restoId)->orderByDesc('created_at')->get();
+
         return view('resto.dataorders.index', compact('uploads'));
     }
 
@@ -29,8 +29,8 @@ class ExcelUploadController extends Controller
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls',
-            'description' => 'nullable|string',
             'file_name' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $upload = RestoUploadLog::create([
@@ -40,7 +40,10 @@ class ExcelUploadController extends Controller
             'description' => $request->description,
         ]);
 
-        Excel::import(new RestoOrdersImport($upload->id, $upload->resto_id, $upload->user_id), $request->file('file'));
+        Excel::import(
+            new RestoOrdersImport($upload->id, $upload->resto_id, $upload->user_id),
+            $request->file('file')
+        );
 
         return redirect()->route('resto.dataorders.index')->with('success', 'File berhasil diupload dan data diimport!');
     }
@@ -92,6 +95,7 @@ class ExcelUploadController extends Controller
             ->firstOrFail();
 
         if ($request->hasFile('file')) {
+            // Hapus data order lama
             RestoOrder::where('resto_upload_log_id', $upload->id)->delete();
 
             $upload->update([
@@ -99,7 +103,10 @@ class ExcelUploadController extends Controller
                 'description' => $request->description,
             ]);
 
-            Excel::import(new RestoOrdersImport($upload->id, $upload->resto_id, $upload->user_id), $request->file('file'));
+            Excel::import(
+                new RestoOrdersImport($upload->id, $upload->resto_id, $upload->user_id),
+                $request->file('file')
+            );
         } else {
             $upload->update([
                 'file_name' => $request->file_name,

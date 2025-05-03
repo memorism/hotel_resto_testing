@@ -1,11 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="fw-semibold fs-4 text-dark">
-            {{ __('Dashboard') }}
-        </h2>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-semibold fs-4 text-dark">
+                {{ __('Dashboard') }}
+            </h2>
+            <a class="invisible btn btn-primary">test</a>
+        </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-6">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {{-- Card untuk Hotel --}}
@@ -15,7 +18,7 @@
                         🏨
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold">Jumlah Hotel</h3>
+                        <h3 class="text-lg font-semibold">Mitra Hotel</h3>
                         <p class="text-2xl font-bold">{{ $hotelCount }}</p>
                     </div>
                 </div>
@@ -27,7 +30,7 @@
                         🍽️
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold">Jumlah Restaurant</h3>
+                        <h3 class="text-lg font-semibold">Mitra Restaurant</h3>
                         <p class="text-2xl font-bold">{{ $restoCount }}</p>
                     </div>
                 </div>

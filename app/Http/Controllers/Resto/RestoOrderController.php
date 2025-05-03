@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\RestoUploadLog;
 use Illuminate\Support\Facades\DB;
+use App\Models\SharedCustomer;
 
 class RestoOrderController extends Controller
 {
@@ -22,12 +23,12 @@ class RestoOrderController extends Controller
                 $search = $request->search;
                 return $query->where(function ($q) use ($search) {
                     $q->where('item_name', 'like', "%$search%")
-                      ->orWhere('item_type', 'like', "%$search%")
-                      ->orWhere('transaction_type', 'like', "%$search%")
-                      ->orWhere('type_of_order', 'like', "%$search%")
-                      ->orWhere('order_date', 'like', "%$search%")
-                      ->orWhere('time_order', 'like', "%$search%")
-                      ->orWhere('received_by', 'like', "%$search%");
+                        ->orWhere('item_type', 'like', "%$search%")
+                        ->orWhere('transaction_type', 'like', "%$search%")
+                        ->orWhere('type_of_order', 'like', "%$search%")
+                        ->orWhere('order_date', 'like', "%$search%")
+                        ->orWhere('time_order', 'like', "%$search%")
+                        ->orWhere('received_by', 'like', "%$search%");
                 });
             })
             ->paginate($perPage);
@@ -37,13 +38,23 @@ class RestoOrderController extends Controller
 
     public function create()
     {
-        $uploads = RestoUploadLog::where('resto_id', auth()->user()->resto_id)->get();
-        return view('resto.orders.create', compact('uploads'));
+        $restoId = auth()->user()->resto_id;
+
+        $uploads = RestoUploadLog::where('resto_id', $restoId)->get();
+
+        $customers = SharedCustomer::whereHas('restoOrders', function ($q) use ($restoId) {
+            $q->where('resto_id', $restoId);
+        })->orWhereDoesntHave('restoOrders')
+            ->orderBy('name')->get();
+
+        return view('resto.orders.create', compact('uploads', 'customers'));
     }
+
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
+            'customer_id' => 'nullable|exists:shared_customers,id',
             'excel_upload_id' => 'required|exists:resto_upload_logs,id',
             'order_date' => 'required|date',
             'time_order' => 'required|date_format:H:i',
@@ -57,26 +68,14 @@ class RestoOrderController extends Controller
             'type_of_order' => 'required|string',
         ]);
 
-        $restoId = auth()->user()->resto_id;
+        $validated['user_id'] = auth()->id();
+        $validated['resto_id'] = auth()->user()->resto_id;
 
-        RestoOrder::create([
-            'user_id' => auth()->id(),
-            'resto_id' => $restoId,
-            'excel_upload_id' => $request->excel_upload_id,
-            'order_date' => $request->order_date,
-            'time_order' => $request->time_order,
-            'item_name' => $request->item_name,
-            'item_type' => $request->item_type,
-            'item_price' => $request->item_price,
-            'quantity' => $request->quantity,
-            'transaction_amount' => $request->transaction_amount,
-            'transaction_type' => $request->transaction_type,
-            'received_by' => $request->received_by,
-            'type_of_order' => $request->type_of_order,
-        ]);
+        RestoOrder::create($validated);
 
         return redirect()->route('resto.orders.index')->with('success', 'Pesanan berhasil ditambahkan!');
     }
+
 
     public function show($id)
     {
@@ -122,14 +121,22 @@ class RestoOrderController extends Controller
         return redirect()->route('resto.orders.index')->with('success', 'Pesanan berhasil diperbarui!');
     }
 
-    public function destroy($id)
+    public function destroy($request)
     {
-        $order = RestoOrder::where('id', $id)
-            ->where('resto_id', auth()->user()->resto_id)
-            ->firstOrFail();
+        $search = $request->input('search');
 
-        $order->delete();
+        $customers = SharedCustomer::whereHas('restoOrders', function ($q) {
+                $q->where('resto_id', auth()->user()->resto_id);
+            })
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->orderBy('name')
+            ->paginate(10)
+            ->appends(['search' => $search]); // biar keyword tetap ada saat pindah halaman
 
         return redirect()->route('resto.orders.index')->with('success', 'Pesanan berhasil dihapus!');
     }
+
+
 }

@@ -1,18 +1,19 @@
 <x-app-layout>
     {{-- Header --}}
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class=" fw-semibold fs-4 text-dark">
                 {{ __('Tambah Data') }}
             </h2>
-            <a href="{{ asset('storage/template_bookings.xlsx') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
+            <a href="{{ asset('storage/template_bookings.xlsx') }}" class="btn btn-primary">
                 Download Template Excel
-            </a>
+            </a>        
         </div>
     </x-slot>
+    
 
     <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">Tambah Booking Baru</h2>
 

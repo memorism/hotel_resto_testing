@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Statistik Restoran') }}
-        </h2>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-semibold fs-4 text-dark">
+                {{ __('Statistik Restaurant') }}
+            </h2>
+            <a class="invisible btn btn-primary">test</a>
+        </div>
     </x-slot>
 
     <div class="py-6">

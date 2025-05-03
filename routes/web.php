@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminSharedCustomerController;
 use App\Http\Controllers\Admin\AdminSubuserController;
 use App\Http\Controllers\Hotel\Finance\FinanceMigrasiController;
 use App\Http\Controllers\Hotel\Finance\HotelFinanceController;
-use App\Http\Controllers\Hotel\HotelControllercopy;
 use App\Http\Controllers\Hotel\SCM\HotelSupplyTransactionController;
 use App\Http\Controllers\Hotel\SCM\testController;
-use App\Http\Controllers\HotelNew\HotelNewController;
+use App\Http\Controllers\SharedCustomerController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
@@ -32,191 +32,156 @@ use App\Http\Controllers\Resto\RestoOrderController;
 use App\Http\Controllers\Resto\ExcelUploadController;
 use App\Http\Controllers\Hotel\SCM\HotelSupplyController;
 
+// ======================= AUTH & PROFILE =======================
+Route::post('/logout', fn() => tap(Auth::logout(), fn() => redirect('/')));
 
-// Logout
-Route::post('/logout', function () {
-    Auth::logout();
-    return redirect('/');
-});
-
-// Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
 require __DIR__ . '/auth.php';
 
-
-route::middleware(['auth', 'userMiddleware'])->group(function () {
-
-    Route::get('dashboard', [UserController::class, 'index'])->name('dashboard');
-
+// ======================= USER ROUTE =======================
+Route::middleware(['auth', 'userMiddleware'])->group(function () {
+    Route::get('/dashboard', [UserController::class, 'index'])->name('dashboard');
 });
 
-// =============================== ADMIN ROUTE ==============================
-route::middleware(['auth', 'adminMiddleware'])->group(function () {
-
+// ======================= ADMIN ROUTES =======================
+Route::middleware(['auth', 'adminMiddleware'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard/resto', [AdminRestoController::class, 'index'])->name('admin.resto');
     Route::get('/admin/dashboard/hotel', [AdminHotelController::class, 'index'])->name('admin.hotel');
     Route::get('/admin/okupansi/resto', [AdminOkupansiRestoController::class, 'index'])->name('admin.okupansiresto');
     Route::get('/admin/okupansi/hotel', [AdminOkupansiHotelController::class, 'index'])->name('admin.okupansihotel');
-    // route user
-    Route::get('/admin/user', [UserAdminController::class, 'index'])->name('admin.user.user');
-    Route::get('/admin/user/create', [UserAdminController::class, 'create'])->name('admin.user.create');
-    Route::post('/admin/user', [UserAdminController::class, 'store'])->name('admin.user.store');
-    Route::delete('/admin/user/{id}', [UserAdminController::class, 'destroy'])->name('admin.user.destroy');
-    Route::get('/admin/user/logo/{id}', [UserAdminController::class, 'showLogo'])->name('admin.user.logo');
-    Route::get('/admin/edit/{id}', [UserAdminController::class, 'edit'])->name('admin.user.edit');
-    Route::put('/admin/update/{id}', [UserAdminController::class, 'update'])->name('admin.user.update');
-    Route::get('/admin/subusers/{id}', [AdminSubuserController::class, 'index'])->name('admin.user.subuser.index');
-    Route::get('/admin/subusers/{id}/create', [AdminSubuserController::class, 'create'])->name('admin.subusers.create');
-    Route::post('/admin/subusers/{id}', [AdminSubuserController::class, 'store'])->name('admin.subusers.store');
-    // Edit & update subuser
-    Route::get('/admin/subusers/edit/{subuserId}', [AdminSubuserController::class, 'edit'])->name('admin.subusers.edit');
-    Route::put('/admin/subusers/update/{subuserId}', [AdminSubuserController::class, 'update'])->name('admin.subusers.update');
 
-    // Hapus subuser
-    Route::delete('/admin/subusers/delete/{subuserId}', [AdminSubuserController::class, 'destroy'])->name('admin.subusers.destroy');
-
-
-
-
-    Route::resource('resto', RestoAdminController::class)->names('admin.resto');
-
-    Route::resource('hotel', HotelAdminController::class)->names('admin.hotel');
-
-
-});
-// =============================== RESTO ROUTE ==============================
-Route::middleware(['auth', 'restoMiddlewareNew'])->group(function () {
-
-    // 📊 Dashboard & Okupansi
-    Route::get('/restonew/dashboard', [RestoController::class, 'index'])->name('resto.dashboard');
-    Route::get('/restonew/okupansi', [OccupancyController::class, 'index'])->name('resto.okupansi');
-
-    // 🧾 Order Management
-    Route::prefix('restonew/order')->name('resto.orders.')->group(function () {
-        Route::get('/', [RestoOrderController::class, 'index'])->name('index');
-        Route::get('/create', [RestoOrderController::class, 'create'])->name('create');
-        Route::post('/', [RestoOrderController::class, 'store'])->name('store');
-        Route::get('/{order}/edit', [RestoOrderController::class, 'edit'])->name('edit');
-        Route::put('/{order}/update', [RestoOrderController::class, 'update'])->name('update');
-        Route::get('/{id}', [RestoOrderController::class, 'show'])->name('show');
-        Route::delete('/{id}', [RestoOrderController::class, 'destroy'])->name('destroy');
+    // User Management
+    Route::prefix('/admin/user')->group(function () {
+        Route::get('/', [UserAdminController::class, 'index'])->name('admin.user.user');
+        Route::get('/create', [UserAdminController::class, 'create'])->name('admin.user.create');
+        Route::post('/', [UserAdminController::class, 'store'])->name('admin.user.store');
+        Route::delete('/{id}', [UserAdminController::class, 'destroy'])->name('admin.user.destroy');
+        Route::get('/logo/{id}', [UserAdminController::class, 'showLogo'])->name('admin.user.logo');
+        Route::get('/edit/{id}', [UserAdminController::class, 'edit'])->name('admin.user.edit');
+        Route::put('/update/{id}', [UserAdminController::class, 'update'])->name('admin.user.update');
     });
 
-    // 📁 Upload Management
-    Route::prefix('restonew/uploads')->name('resto.dataorders.')->group(function () {
+    // Subuser Management
+    Route::prefix('/admin/subusers')->group(function () {
+        Route::get('/{id}', [AdminSubuserController::class, 'index'])->name('admin.user.subuser.index');
+        Route::get('/{id}/create', [AdminSubuserController::class, 'create'])->name('admin.subusers.create');
+        Route::post('/{id}', [AdminSubuserController::class, 'store'])->name('admin.subusers.store');
+        Route::get('/edit/{subuserId}', [AdminSubuserController::class, 'edit'])->name('admin.subusers.edit');
+        Route::put('/update/{subuserId}', [AdminSubuserController::class, 'update'])->name('admin.subusers.update');
+        Route::delete('/delete/{subuserId}', [AdminSubuserController::class, 'destroy'])->name('admin.subusers.destroy');
+    });
+
+    Route::resource('resto', RestoAdminController::class)->names('admin.resto');
+    Route::resource('hotel', HotelAdminController::class)->names('admin.hotel');
+
+    Route::prefix('/admin/shared-customers')->name('admin.shared_customers.')->group(function () {
+        Route::get('/', [AdminSharedCustomerController::class, 'index'])->name('index');
+        Route::get('/create', [AdminSharedCustomerController::class, 'create'])->name('create');
+        Route::post('/', [AdminSharedCustomerController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [AdminSharedCustomerController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AdminSharedCustomerController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AdminSharedCustomerController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/restore', [AdminSharedCustomerController::class, 'restore'])
+        ->name('restore');
+        Route::post('/{id}/restore', [AdminSharedCustomerController::class, 'restore'])->name('restore');
+    });
+});
+
+// ======================= RESTO ROUTES =======================
+Route::middleware(['auth', 'restoMiddlewareNew'])->prefix('restonew')->name('resto.')->group(function () {
+    Route::get('/dashboard', [RestoController::class, 'index'])->name('dashboard');
+    Route::get('/okupansi', [OccupancyController::class, 'index'])->name('okupansi');
+
+    Route::resource('order', RestoOrderController::class)->names('orders');
+
+    Route::prefix('uploads')->name('dataorders.')->group(function () {
         Route::get('/', [ExcelUploadController::class, 'index'])->name('index');
         Route::get('/create', [ExcelUploadController::class, 'create'])->name('create');
         Route::post('/store', [ExcelUploadController::class, 'store'])->name('store');
-    });
-
-    // 📄 Upload File Detail Actions
-    Route::prefix('restonew')->name('resto.dataorders.')->group(function () {
         Route::get('{uploadId}/view', [ExcelUploadController::class, 'show'])->name('show');
         Route::get('{uploadId}/edit', [ExcelUploadController::class, 'edit'])->name('edit');
         Route::post('{uploadId}/update', [ExcelUploadController::class, 'update'])->name('update');
         Route::delete('{uploadId}/delete', [ExcelUploadController::class, 'destroy'])->name('destroy');
-        Route::get('dataorders/{uploadId}', [ExcelUploadController::class, 'show']); // Optional duplicate
+    });
+    Route::prefix('shared_customers')->name('shared_customers.')->group(function () {
+        Route::get('/', [SharedCustomerController::class, 'indexResto'])->name('index_resto');
+        Route::get('/create/resto', [SharedCustomerController::class, 'createResto'])->name('create_resto');
+        Route::post('/store', [SharedCustomerController::class, 'storeResto'])->name('store');
+        Route::get('/{id}/edit/resto', [SharedCustomerController::class, 'editResto'])->name('edit_resto');
+        Route::put('/{id}/update/resto', [SharedCustomerController::class, 'updateResto'])->name('update_resto');
+        Route::delete('/{id}/delete/resto', [SharedCustomerController::class, 'destroyResto'])->name('destroy_resto');
     });
 
 });
 
-
-// ============================= FRONT OFFICE ROUTE =========================
-Route::middleware(['auth', 'frontoffice'])->group(function () {
-    Route::prefix('frontoffice')->name('hotel.frontoffice.booking.')->group(function () {
-        Route::get('/bookings', [BookingControllerFo::class, 'index'])->name('index');
-        Route::get('/create', [BookingControllerFo::class, 'create'])->name('create');
-        Route::post('/', [BookingControllerFo::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [BookingControllerFo::class, 'edit'])->name('edit');
-        Route::put('/{id}', [BookingControllerFo::class, 'update'])->name('update');
-        Route::delete('/{id}', [BookingControllerFo::class, 'destroy'])->name('destroy');
-    });
-
-    // Migrasi Data Booking FO
-    Route::prefix('frontoffice/migrasi')->name('hotel.frontoffice.migrasi.')->group(function () {
-        Route::get('/', [MigrasiController::class, 'index'])->name('index');
-        Route::get('/create', [MigrasiController::class, 'create'])->name('create');
-        Route::post('/', [MigrasiController::class, 'store'])->name('store');
-        Route::delete('/{id}', [MigrasiController::class, 'destroy'])->name('destroy');
-    });
-});
-
-// =============================== HOTEL ROUTE ==============================
-route::middleware(['auth', 'hotelMiddlewareNew'])->group(function () {
-
-    Route::get('/hotelnew/dashboard', [HotelController::class, 'index'])->name('hotel.dashboard');
-    // 📊 Okupansi Hotel
-    Route::get('/hotelnew/okupansi', [OkupansiController::class, 'index'])->name('hotel.okupansi');
-
-    // 📅 Manajemen Booking Manual
-    Route::prefix('hotelnew/booking')->name('hotel.booking.')->group(function () {
-        Route::get('/', [BookingController::class, 'index'])->name('booking');
-        Route::get('/create', [BookingController::class, 'create'])->name('create');
-        Route::post('/', [BookingController::class, 'store'])->name('store');
-        Route::get('/{booking}/edit', [BookingController::class, 'edit'])->name('edit');
-        Route::put('/{booking}', [BookingController::class, 'update'])->name('update');
-        Route::get('/{id}', [BookingController::class, 'show'])->name('show');
-        Route::delete('/{id}', [BookingController::class, 'destroy'])->name('destroy');
-    });
-
-    // 📁 Manajemen Upload Data Booking (Excel)
-    Route::prefix('hotelnew/databooking')->name('hotel.databooking.')->group(function () {
-        Route::get('/', [UploadOrderController::class, 'index'])->name('index');
-        Route::get('/create', [UploadOrderController::class, 'create'])->name('create');
-        Route::post('/', [UploadOrderController::class, 'store'])->name('store');
-        Route::post('/store-import', [UploadOrderController::class, 'storeAndImport'])->name('storeImport');
-        Route::get('/{id}/edit', [UploadOrderController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [UploadOrderController::class, 'update'])->name('update');
-        Route::get('/{id}', [UploadOrderController::class, 'show'])->name('show');
-        Route::get('/{id}/view-upload-order', [UploadOrderController::class, 'viewUploadOrder'])->name('viewUploadOrder');
-        Route::delete('/{id}', [UploadOrderController::class, 'destroy'])->name('destroy');
-    });
-
-    // 🛏️ Manajemen Kamar Hotel
-    Route::prefix('hotelnew/kamar')->name('hotel.rooms.')->group(function () {
-        Route::get('/', [RoomController::class, 'index'])->name('rooms');
-        Route::get('/create', [RoomController::class, 'create'])->name('create');
-        Route::post('/', [RoomController::class, 'store'])->name('store');
-        Route::get('/{room}/edit', [RoomController::class, 'edit'])->name('edit');
-        Route::put('/{room}', [RoomController::class, 'update'])->name('update');
-        Route::get('/{room}', [RoomController::class, 'show'])->name('show');
-        Route::delete('/{room}', [RoomController::class, 'destroy'])->name('destroy');
-    });
+// ======================= HOTEL FRONT OFFICE ROUTES =======================
+Route::middleware(['auth', 'frontoffice'])->prefix('frontoffice')->name('hotel.frontoffice.')->group(function () {
+    Route::resource('bookings', BookingControllerFo::class)->names('booking');
+    Route::resource('migrasi', MigrasiController::class)->names('migrasi');
+    Route::post('migrasi/preview', [MigrasiController::class, 'preview'])->name('migrasi.preview');
+    Route::post('migrasi/submit', [MigrasiController::class, 'submit'])->name('migrasi.submit');
 
 });
 
+// ======================= HOTEL ROUTES =======================
+Route::middleware(['auth', 'hotelMiddlewareNew'])->prefix('hotelnew')->name('hotel.')->group(function () {
+    // Dashboard hotel
+    Route::get('/dashboard', [HotelController::class, 'index'])->name('dashboard');
+
+    // Statistik okupansi hotel
+    Route::get('/okupansi', [OkupansiController::class, 'index'])->name('okupansi');
+
+    // Booking management
+    Route::resource('booking', BookingController::class); // Default names: hotel.booking.*
+
+    // Upload Order (Data Booking) - CRUD utama
+    Route::resource('databooking', UploadOrderController::class)->names('databooking');
+
+    Route::get('/hotel/databooking/{id}/view-upload-order', [UploadOrderController::class, 'viewUploadOrder'])->name('databooking.viewUploadOrder');
+    Route::post('/hotel/databooking/store-import', [UploadOrderController::class, 'storeAndImport'])->name('databooking.storeImport');
+    // Upload Order - fitur tambahan
+    Route::prefix('databooking')->name('databooking.')->group(function () {
+        Route::get('{databooking}/preview', [UploadOrderController::class, 'preview'])->name('preview');
+        Route::get('{databooking}/export', [UploadOrderController::class, 'export'])->name('export');
+        Route::get('{databooking}/download', [UploadOrderController::class, 'download'])->name('download');
+    });
+
+
+    // Manajemen kamar
+    Route::resource('kamar', RoomController::class)->names('rooms');
+
+    Route::prefix('shared_customers')->name('shared_customers.')->group(function () {
+        Route::get('/', [SharedCustomerController::class, 'indexHotel'])->name('index_hotel');
+        Route::get('/create', [SharedCustomerController::class, 'createHotel'])->name('create_hotel');
+        Route::post('shared_customers', [SharedCustomerController::class, 'storeHotel'])->name('store_hotel');
+        Route::get('/{id}/edit', [SharedCustomerController::class, 'editHotel'])->name('edit_hotel');
+        Route::put('/{id}', [SharedCustomerController::class, 'updateHotel'])->name('update_hotel');
+        Route::delete('/{id}', [SharedCustomerController::class, 'destroyHotel'])->name('destroy_hotel');
+    });
+});
+
+
+// ======================= HOTEL FINANCE ROUTES =======================
 Route::middleware(['auth', 'financehotelMiddleware'])->group(function () {
     Route::resource('/finance', HotelFinanceController::class)->names('finance');
-    Route::get('/migrasi', [FinanceMigrasiController::class, 'index'])->name('finance.migrasi.index');
-    Route::get('/migrasi/create', [FinanceMigrasiController::class, 'create'])->name('finance.migrasi.create');
-    Route::post('/migrasi', [FinanceMigrasiController::class, 'store'])->name('finance.migrasi.store');
-    Route::delete('/migrasi/{id}', [FinanceMigrasiController::class, 'destroy'])->name('finance.migrasi.destroy');
-
+    Route::resource('/migrasi', FinanceMigrasiController::class)->names('finance.migrasi');
 });
 
+// ======================= SCM HOTEL ROUTES =======================
 Route::middleware(['auth', 'scmhotelMiddleware'])->prefix('scm')->name('scm.')->group(function () {
-    Route::resource('/transactions', HotelSupplyTransactionController::class)
-        ->names([
-            'index' => 'transactions.index',
-            'create' => 'transactions.create',
-            'store' => 'transactions.store',
-            'destroy' => 'transactions.destroy',
-        ])
-        ->except(['show', 'edit', 'update']);
-
-    Route::resource('/supplies', HotelSupplyController::class)
-        ->names('supplies')
-        ->except('show');
-
-    Route::resource('/test', testController::class);
-
+    Route::resource('transactions', HotelSupplyTransactionController::class)->except(['show', 'edit', 'update'])->names('transactions');
+    Route::resource('supplies', HotelSupplyController::class)->except('show')->names('supplies');
+    Route::resource('test', testController::class);
 });
 
+Route::resource('shared_customers', SharedCustomerController::class);
 
+
+// ======================= DEFAULT HOME =======================
 Route::get('/', fn() => view('welcome'));
-

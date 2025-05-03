@@ -7,17 +7,17 @@ use Illuminate\Http\Request;
 use App\Models\HotelUploadLog;
 use App\Models\Hotel;
 use App\Imports\BookingsImport;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Throwable;
 
 class MigrasiController extends Controller
 {
-    /**
-     * Tampilkan list histori data migrasi.
-     */
     public function index()
     {
-        $user = auth()->user(); // ✅ ambil user yang login
-        $hotel = Hotel::find($user->hotel_id); // ✅ cek ke tabel hotels
+        $user = auth()->user();
+        $hotel = Hotel::find($user->hotel_id);
 
         if (!$hotel) {
             return back()->with('error', 'Data hotel tidak ditemukan atau belum dikaitkan.');
@@ -30,64 +30,85 @@ class MigrasiController extends Controller
         return view('hotel.frontoffice.migrasi.index', compact('uploadOrders'));
     }
 
-    /**
-     * Tampilkan form upload file migrasi.
-     */
     public function create()
     {
         return view('hotel.frontoffice.migrasi.create');
     }
 
-    /**
-     * Proses simpan data migrasi (upload Excel).
-     */
     public function store(Request $request)
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv',
+            'file_name' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
         ]);
 
         $user = auth()->user();
-        $hotel = Hotel::find($user->hotel_id); // ✅ ambil dari table hotels, bukan users
+        $hotel = Hotel::find($user->hotel_id);
 
         if (!$hotel) {
             return back()->with('error', 'Data hotel tidak ditemukan atau belum dikaitkan.');
         }
 
-        $uploadOrder = HotelUploadLog::create([
-            'hotel_id'    => $hotel->id,
-            'user_id'     => $user->id,
-            'file_name'   => $request->file('file')->getClientOriginalName(),
-            'description' => $request->description ?? null,
-            'type' => 'booking',
-        ]);
-
         try {
+            // 🔍 Validasi struktur kolom
+            $filePath = $request->file('file')->getRealPath();
+            $spreadsheet = IOFactory::load($filePath);
+            $sheet = $spreadsheet->getActiveSheet();
+            $headers = $sheet->rangeToArray('A1:Z1', NULL, TRUE, FALSE)[0];
+
+            $requiredHeaders = [
+                'booking_id',
+                'no_of_adults',
+                'no_of_children',
+                'no_of_weekend_nights',
+                'no_of_week_nights',
+                'type_of_meal_plan',
+                'required_car_parking_space',
+                'room_type_reserved',
+                'lead_time',
+                'arrival_year',
+                'arrival_month',
+                'arrival_date',
+                'market_segment_type',
+                'avg_price_per_room',
+                'no_of_special_requests',
+                'booking_status',
+            ];
+
+            foreach ($requiredHeaders as $header) {
+                if (!in_array($header, $headers)) {
+                    return back()->with('error', 'Template tidak valid. Kolom "' . $header . '" tidak ditemukan.');
+                }
+            }
+
+            $uploadOrder = HotelUploadLog::create([
+                'hotel_id' => $hotel->id,
+                'user_id' => $user->id,
+                'file_name' => $request->file_name,
+                'description' => $request->description,
+                'type' => 'booking',
+            ]);
+
             Excel::import(
                 new BookingsImport($uploadOrder->id, $hotel->id, $user->id),
                 $request->file('file')
             );
 
-            return redirect()->route('hotel.frontoffice.migrasi.index')->with('success', 'Data migrasi berhasil diupload.');
-        } catch (\Exception $e) {
-            $uploadOrder->delete(); // rollback kalau gagal
-            return back()->with('error', 'Gagal import data: ' . $e->getMessage());
+            return redirect()->route('hotel.frontoffice.migrasi.index')
+                ->with('success', 'Data berhasil diupload dan diproses.');
+        } catch (Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan saat proses import: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Hapus data migrasi (beserta data bookings terkait).
-     */
     public function destroy($id)
     {
         $uploadOrder = HotelUploadLog::where('hotel_id', auth()->user()->hotel_id)
             ->where('id', $id)
             ->firstOrFail();
 
-        // Hapus semua bookings yang terkait
         $uploadOrder->bookings()->delete();
-        // Hapus log upload order
         $uploadOrder->delete();
 
         return redirect()->route('hotel.frontoffice.migrasi.index')

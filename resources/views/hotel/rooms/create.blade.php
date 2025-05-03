@@ -40,7 +40,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <a href="{{ route('hotel.rooms.rooms') }}"
+                        <a href="{{ route('hotel.rooms.index') }}"
                            class="mr-4 px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400">Batal</a>
                         <button type="submit"
                                 class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Simpan</button>

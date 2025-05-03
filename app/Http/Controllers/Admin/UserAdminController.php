@@ -13,14 +13,37 @@ use App\Models\Resto;
 
 class UserAdminController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::whereIn('usertype', ['admin', 'hotelnew', 'restonew'])
-            ->select('id', 'name', 'email', 'usertype', 'created_at')
-            ->get();
+        $search = $request->input('search');
+        $usertype = $request->input('usertype');
+        $perPage = $request->input('per_page', 10);
+
+        $query = User::query()
+            ->whereIn('usertype', ['admin', 'hotelnew', 'restonew']);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($usertype) {
+            $query->where('usertype', $usertype);
+        }
+
+        $perPage = $perPage === 'semua' ? $query->count() : (int) $perPage;
+
+        $users = $query->select('id', 'name', 'email', 'usertype', 'logo', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->appends($request->all()); // biar query string tetap jalan
 
         return view('admin.user.user', compact('users'));
     }
+
+
 
     public function create()
     {

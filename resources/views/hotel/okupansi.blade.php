@@ -1,9 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-semibold fs-4 text-dark">
                 {{ __('Dashboard Okupansi Hotel') }}
             </h2>
+            <a class="invisible btn btn-primary">test</a>
         </div>
     </x-slot>
 

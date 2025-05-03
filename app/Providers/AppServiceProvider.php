@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\SharedCustomer;
+use App\Policies\SharedCustomerPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,4 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
+    protected $policies = [
+        SharedCustomer::class => SharedCustomerPolicy::class,
+    ];
 }

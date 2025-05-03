@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-100">
+    <div class="py-12 ">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 shadow-md rounded-lg">
                 <form action="{{ route('admin.subusers.update', $subuser->id) }}" method="POST">
@@ -51,7 +51,7 @@
 
                     <div class="mb-4">
                         <x-input-label for="usertype" :value="__('Role')" />
-                        <select id="usertype" name="usertype" class="block w-full mt-1 border-gray-300 rounded-md"
+                        <select id="usertype" name="usertype" class="block w-full mt-1  px-3 py-2 border-gray-300 rounded-md"
                             required>
                             @php
                                 $roles = $parentUser->usertype === 'hotelnew'

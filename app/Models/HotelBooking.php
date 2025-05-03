@@ -26,7 +26,8 @@ class HotelBooking extends Model
         'avg_price_per_room',
         'no_of_special_requests',
         'booking_status',
-        'hotel_upload_log_id'
+        'hotel_upload_log_id',
+        'customer_id',
     ];
 
     protected $casts = [
@@ -45,12 +46,13 @@ class HotelBooking extends Model
 
     public function uploadLog()
     {
-        return $this->belongsTo(HotelUploadLog::class, );
+        return $this->belongsTo(HotelUploadLog::class, 'hotel_upload_log_id');
     }
 
-    // public function customer()
-    // {
-    //     return $this->belongsTo(Customer::class);
-    // }
+    public function customer()
+    {
+        return $this->belongsTo(SharedCustomer::class, 'customer_id');
+    }
+
 
 }

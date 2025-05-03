@@ -23,7 +23,6 @@ class BookingsImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            // 🔥 Skip kalau booking_id kosong
             if (empty($row['booking_id'])) {
                 continue;
             }
@@ -45,7 +44,7 @@ class BookingsImport implements ToCollection, WithHeadingRow
                 'avg_price_per_room' => $row['avg_price_per_room'],
                 'no_of_special_requests' => $row['no_of_special_requests'],
                 'booking_status' => $row['booking_status'],
-                'upload_order_id' => $this->uploadOrderId,
+                'hotel_upload_log_id' => $this->uploadOrderId,
                 'hotel_id' => $this->hotelId,
                 'user_id' => $this->userId,
             ]);

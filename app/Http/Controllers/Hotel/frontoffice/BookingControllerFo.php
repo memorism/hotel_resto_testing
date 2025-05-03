@@ -5,6 +5,7 @@ namespace App\Http\Controllers\hotel\frontoffice;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\HotelBooking;
+use App\Models\HotelUploadLog;
 
 class BookingControllerFo extends Controller
 {
@@ -16,14 +17,39 @@ class BookingControllerFo extends Controller
         $user = auth()->user();
         $hotelId = $user->hotel_id;
 
-        $perPage = $request->get('perPage', 10);
-        $search = $request->get('search', '');
+        $perPage = $request->get('per_page', 5);
+        $perPage = $perPage === 'semua'
+            ? HotelBooking::where('hotel_id', $hotelId)->count()
+            : (int) $perPage;
 
-        $bookings = HotelBooking::where('hotel_id', $hotelId)
-            ->when($search, function ($query, $search) {
-                return $query->where('booking_id', 'like', '%' . $search . '%');
+        $bookingId = $request->get('booking_id');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        $bookings = HotelBooking::with('uploadLog')
+            ->where('hotel_id', $hotelId)
+            ->when($bookingId, function ($query, $bookingId) {
+                return $query->where('booking_id', 'like', '%' . $bookingId . '%');
             })
-            ->paginate($perPage);
+            ->when($startDate, function ($query, $startDate) {
+                $queryDate = date('Y-m-d', strtotime($startDate));
+                return $query->whereRaw(
+                    "STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') >= ?",
+                    [$queryDate]
+                );
+            })
+            ->when($endDate, function ($query, $endDate) {
+                $queryDate = date('Y-m-d', strtotime($endDate));
+                return $query->whereRaw(
+                    "STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') <= ?",
+                    [$queryDate]
+                );
+            })
+            ->orderByDesc('arrival_year')
+            ->orderByDesc('arrival_month')
+            ->orderByDesc('arrival_date')
+            ->paginate($perPage)
+            ->appends($request->all());
 
         return view('hotel.frontoffice.booking.index', compact('bookings'));
     }
@@ -33,8 +59,14 @@ class BookingControllerFo extends Controller
      */
     public function create()
     {
-        return view('hotel.frontoffice.booking.create');
+        $user = auth()->user();
+        $fileNames = HotelUploadLog::where('hotel_id', $user->hotel_id)
+            ->where('user_id', $user->id)
+            ->pluck('file_name', 'file_name');
+
+        return view('hotel.frontoffice.booking.create', compact('fileNames'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -43,6 +75,7 @@ class BookingControllerFo extends Controller
     {
         $request->validate([
             'booking_id' => 'required|unique:bookings,booking_id',
+            'file_name' => 'required|string|max:255',
             'no_of_adults' => 'required|integer|min:1',
             'no_of_children' => 'required|integer|min:0',
             'no_of_weekend_nights' => 'required|integer|min:0',
@@ -60,13 +93,26 @@ class BookingControllerFo extends Controller
             'booking_status' => 'required|in:Not_Canceled,Canceled',
         ]);
 
+        $user = auth()->user();
+
+        $file = \App\Models\HotelUploadLog::where('hotel_id', $user->hotel_id)
+            ->where('user_id', $user->id)
+            ->where('file_name', $request->file_name)
+            ->first();
+
+        if (!$file) {
+            return redirect()->back()->with('error', 'File yang dipilih tidak valid atau tidak milik Anda.');
+        }
+
         HotelBooking::create(array_merge($request->all(), [
-            'hotel_id' => auth()->user()->hotel_id, // 🔥 Pakai hotel_id, bukan user_id lagi
-            'user_id'  => auth()->user()->id,
+            'hotel_id' => $user->hotel_id,
+            'user_id' => $user->id,
+            'hotel_upload_log_id' => $file->id,
         ]));
 
         return redirect()->route('hotel.frontoffice.booking.index')->with('success', 'Booking berhasil disimpan.');
     }
+
 
     /**
      * Show the form for editing the specified resource.

@@ -42,7 +42,7 @@ class RoomController extends Controller
             'price_per_room' => $request->price_per_room,
         ]);
 
-        return redirect()->route('hotel.rooms.rooms')->with('success', 'Data kamar berhasil ditambahkan.');
+        return redirect()->route('hotel.rooms.index')->with('success', 'Data kamar berhasil ditambahkan.');
     }
 
     public function edit(HotelRoom $room)
@@ -69,7 +69,7 @@ class RoomController extends Controller
 
         $room->update($request->only('room_type', 'description', 'total_rooms', 'price_per_room'));
 
-        return redirect()->route('hotel.rooms.rooms')->with('success', 'Data kamar berhasil diperbarui.');
+        return redirect()->route('hotel.rooms.index')->with('success', 'Data kamar berhasil diperbarui.');
     }
 
     public function destroy(HotelRoom $room)
@@ -80,6 +80,6 @@ class RoomController extends Controller
 
         $room->delete();
 
-        return redirect()->route('hotel.rooms.rooms')->with('success', 'Kamar berhasil dihapus.');
+        return redirect()->route('hotel.rooms.index')->with('success', 'Kamar berhasil dihapus.');
     }
 }

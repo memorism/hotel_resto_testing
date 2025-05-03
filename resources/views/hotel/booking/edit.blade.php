@@ -1,9 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Edit Booking') }}
-        </h2>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-semibold fs-4 text-dark">
+                {{ __('Edit Booking') }}
+            </h2>
+            <a class="invisible btn btn-primary">test</a>
+        </div>
     </x-slot>
+    
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -19,7 +23,8 @@
                             <div class="form-group">
                                 <label for="file_name" class="block text-sm font-medium text-gray-700">Nama File</label>
                                 <input type="text" name="file_name" id="file_name" class="form-control"
-                                    value="{{ $booking->uploadOrder->file_name }}" readonly>
+                                value="{{ optional($booking->uploadLog)->file_name }}"
+                                readonly>
                             </div>
 
                             <!-- Booking ID -->
@@ -165,7 +170,7 @@
 
                         <!-- Submit Button -->
                         <div class="flex items-center justify-end mt-4">
-                            <a href="{{ url()->previous() }}"
+                            <a href="{{ route('hotel.booking.index') }}"
                                 class="ms-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-md shadow-md">
                                 {{ __('Kembali') }}
                             </a>

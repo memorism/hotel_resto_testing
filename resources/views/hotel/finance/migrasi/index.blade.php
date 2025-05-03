@@ -1,10 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-semibold text-gray-800">
-                Histori Data Migrasi Keuangan
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="fw-semibold fs-4 text-dark">
+                {{ __('Histori Data Migrasi Keuangan') }}
             </h2>
-            <a href="{{ route('finance.migrasi.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <a href="{{ route('finance.migrasi.create') }}" class="btn btn-primary">
                 Tambah Data
             </a>
         </div>
@@ -27,7 +27,7 @@
                                 <th class="border px-4 py-2">Deskripsi</th>
                                 <th class="border px-4 py-2">Diupload Oleh</th>
                                 <th class="border px-4 py-2">Tanggal</th>
-                                <th class="border px-4 py-2">Aksi</th>
+                                <th class="border px-4 py-2"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -37,13 +37,10 @@
                                     <td class="border px-4 py-2">{{ $upload->description ?? '-' }}</td>
                                     <td class="border px-4 py-2">{{ $upload->user->name }}</td>
                                     <td class="border px-4 py-2">{{ $upload->created_at->format('d M Y, H:i') }}</td>
-                                    <td class="border px-4 py-2">
-                                        <form action="{{ route('finance.migrasi.destroy', $upload->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus histori ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:underline">Hapus</button>
-                                        </form>
+                                    <td class="border px-4 py-2 text-center">
+                                        <x-dropdown-action :delete-url="route('finance.migrasi.destroy', $upload->id)" />
                                     </td>
+
                                 </tr>
                             @endforeach
                         </tbody>
