@@ -43,4 +43,16 @@ class Hotel extends Model
     {
         return $this->belongsTo(Hotel::class, 'hotel_id');
     }
+
+    public function linkedRestos()
+    {
+        return $this->belongsToMany(Resto::class, 'hotel_resto_links');
+    }
+
+
+    public function finances()
+    {
+        return $this->hasMany(HotelFinance::class);
+    }
+
 }

@@ -8,18 +8,42 @@ use Illuminate\Database\Eloquent\Model;
 class Resto extends Model
 {
     protected $fillable = [
-        'name', 'address', 'phone', 'email', 'logo', 'street', 'village', 'district', 'city', 'province', 'postal_code'
+        'name',
+        'address',
+        'phone',
+        'email',
+        'logo',
+        'street',
+        'village',
+        'district',
+        'city',
+        'province',
+        'postal_code'
     ];
 
-    public function orders() {
+    public function orders()
+    {
         return $this->hasMany(RestoOrder::class);
     }
 
-    public function uploadLogs() {
+    public function uploadLogs()
+    {
         return $this->hasMany(RestoUploadLog::class);
     }
 
-    public function users() {
+    public function users()
+    {
         return $this->hasMany(User::class);
     }
+
+    public function linkedHotels()
+    {
+        return $this->belongsToMany(Hotel::class, 'hotel_resto_links');
+    }
+
+    public function tables()
+    {
+        return $this->hasMany(RestoTable::class);
+    }
+
 }

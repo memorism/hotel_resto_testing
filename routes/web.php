@@ -6,6 +6,10 @@ use App\Http\Controllers\Hotel\Finance\FinanceMigrasiController;
 use App\Http\Controllers\Hotel\Finance\HotelFinanceController;
 use App\Http\Controllers\Hotel\SCM\HotelSupplyTransactionController;
 use App\Http\Controllers\Hotel\SCM\testController;
+use App\Http\Controllers\hotel\SharedCustomerHotelController;
+use App\Http\Controllers\Resto\RestoFinanceController;
+use App\Http\Controllers\Resto\RestoTableController;
+use App\Http\Controllers\resto\SharedCustomerRestoController;
 use App\Http\Controllers\SharedCustomerController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +35,7 @@ use App\Http\Controllers\Resto\OccupancyController;
 use App\Http\Controllers\Resto\RestoOrderController;
 use App\Http\Controllers\Resto\ExcelUploadController;
 use App\Http\Controllers\Hotel\SCM\HotelSupplyController;
+use Illuminate\Support\Facades\Schedule;
 
 // ======================= AUTH & PROFILE =======================
 Route::post('/logout', fn() => tap(Auth::logout(), fn() => redirect('/')));
@@ -88,7 +93,7 @@ Route::middleware(['auth', 'adminMiddleware'])->group(function () {
         Route::put('/{id}', [AdminSharedCustomerController::class, 'update'])->name('update');
         Route::delete('/{id}', [AdminSharedCustomerController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/restore', [AdminSharedCustomerController::class, 'restore'])
-        ->name('restore');
+            ->name('restore');
         Route::post('/{id}/restore', [AdminSharedCustomerController::class, 'restore'])->name('restore');
     });
 });
@@ -110,13 +115,16 @@ Route::middleware(['auth', 'restoMiddlewareNew'])->prefix('restonew')->name('res
         Route::delete('{uploadId}/delete', [ExcelUploadController::class, 'destroy'])->name('destroy');
     });
     Route::prefix('shared_customers')->name('shared_customers.')->group(function () {
-        Route::get('/', [SharedCustomerController::class, 'indexResto'])->name('index_resto');
-        Route::get('/create/resto', [SharedCustomerController::class, 'createResto'])->name('create_resto');
-        Route::post('/store', [SharedCustomerController::class, 'storeResto'])->name('store');
-        Route::get('/{id}/edit/resto', [SharedCustomerController::class, 'editResto'])->name('edit_resto');
-        Route::put('/{id}/update/resto', [SharedCustomerController::class, 'updateResto'])->name('update_resto');
-        Route::delete('/{id}/delete/resto', [SharedCustomerController::class, 'destroyResto'])->name('destroy_resto');
+        Route::get('/', [SharedCustomerRestoController::class, 'indexResto'])->name('index_resto');
+        Route::get('/create/resto', [SharedCustomerRestoController::class, 'createResto'])->name('create_resto');
+        Route::post('/store', [SharedCustomerRestoController::class, 'storeResto'])->name('store');
+        Route::get('/{id}/edit/resto', [SharedCustomerRestoController::class, 'editResto'])->name('edit_resto');
+        Route::put('/{id}/update/resto', [SharedCustomerRestoController::class, 'updateResto'])->name('update_resto');
+        Route::delete('/{id}/delete/resto', [SharedCustomerRestoController::class, 'destroyResto'])->name('destroy_resto');
     });
+
+    Route::resource('finances', RestoFinanceController::class);
+    Route::resource('tables', RestoTableController::class);
 
 });
 
@@ -157,12 +165,12 @@ Route::middleware(['auth', 'hotelMiddlewareNew'])->prefix('hotelnew')->name('hot
     Route::resource('kamar', RoomController::class)->names('rooms');
 
     Route::prefix('shared_customers')->name('shared_customers.')->group(function () {
-        Route::get('/', [SharedCustomerController::class, 'indexHotel'])->name('index_hotel');
-        Route::get('/create', [SharedCustomerController::class, 'createHotel'])->name('create_hotel');
-        Route::post('shared_customers', [SharedCustomerController::class, 'storeHotel'])->name('store_hotel');
-        Route::get('/{id}/edit', [SharedCustomerController::class, 'editHotel'])->name('edit_hotel');
-        Route::put('/{id}', [SharedCustomerController::class, 'updateHotel'])->name('update_hotel');
-        Route::delete('/{id}', [SharedCustomerController::class, 'destroyHotel'])->name('destroy_hotel');
+        Route::get('/', [SharedCustomerHotelController::class, 'indexHotel'])->name('index_hotel');
+        Route::get('/create', [SharedCustomerHotelController::class, 'createHotel'])->name('create_hotel');
+        Route::post('shared_customers', [SharedCustomerHotelController::class, 'storeHotel'])->name('store_hotel');
+        Route::get('/{id}/edit', [SharedCustomerHotelController::class, 'editHotel'])->name('edit_hotel');
+        Route::put('/{id}', [SharedCustomerHotelController::class, 'updateHotel'])->name('update_hotel');
+        Route::delete('/{id}', [SharedCustomerHotelController::class, 'destroyHotel'])->name('destroy_hotel');
     });
 });
 
@@ -182,6 +190,10 @@ Route::middleware(['auth', 'scmhotelMiddleware'])->prefix('scm')->name('scm.')->
 
 Route::resource('shared_customers', SharedCustomerController::class);
 
+
+
+
+Schedule::command('sync:income-finances')->dailyAt('23:55');
 
 // ======================= DEFAULT HOME =======================
 Route::get('/', fn() => view('welcome'));

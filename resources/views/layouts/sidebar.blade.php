@@ -32,7 +32,8 @@
                 <x-sidebar-link route="admin.resto.index" icon="fa-solid fa-utensils">Restaurant</x-sidebar-link>
                 <x-sidebar-link route="admin.hotel.index" icon="fa-solid fa-hotel">Hotel</x-sidebar-link>
                 <x-sidebar-link route="admin.user.user" icon="fa-solid fa-users">User</x-sidebar-link>
-                <x-sidebar-link route="admin.shared_customers.index" icon="fa-solid fa-users-viewfinder">Daftar Pelanggan</x-sidebar-link>
+                <x-sidebar-link route="admin.shared_customers.index" icon="fa-solid fa-users-viewfinder">Daftar
+                    Pelanggan</x-sidebar-link>
 
             </div>
         @endif
@@ -47,9 +48,11 @@
                 <p class="text-xs text-gray-500 tracking-widest uppercase mb-2">Operasional</p>
                 <x-sidebar-link route="hotel.okupansi" icon="fa-solid fa-chart-area">Statistik</x-sidebar-link>
                 <x-sidebar-link route="hotel.booking.index" icon="fa-solid fa-list-check">Data Booking</x-sidebar-link>
-                <x-sidebar-link route="hotel.databooking.index" icon="fa-solid fa-folder-open">Unggah Booking</x-sidebar-link>
+                <x-sidebar-link route="hotel.databooking.index" icon="fa-solid fa-folder-open">Unggah
+                    Booking</x-sidebar-link>
                 <x-sidebar-link route="hotel.rooms.index" icon="fa-solid fa-bed">Manajemen Kamar</x-sidebar-link>
-                <x-sidebar-link route="hotel.shared_customers.index_hotel" icon="fa-solid fa-users">Daftar Pelanggan</x-sidebar-link>
+                <x-sidebar-link route="hotel.shared_customers.index_hotel" icon="fa-solid fa-users">Daftar
+                    Pelanggan</x-sidebar-link>
 
 
             </div>
@@ -62,7 +65,15 @@
                 <x-sidebar-link route="resto.okupansi" icon="fa-solid fa-chart-bar">Statistik</x-sidebar-link>
                 <x-sidebar-link route="resto.dataorders.index" icon="fa-solid fa-folder-open">Unggah Order</x-sidebar-link>
                 <x-sidebar-link route="resto.orders.index" icon="fa-solid fa-receipt">Data Order</x-sidebar-link>
-                <x-sidebar-link route="resto.shared_customers.index_resto" icon="fa-solid fa-bed">Daftar Pelanggan</x-sidebar-link>
+                <x-sidebar-link route="resto.shared_customers.index_resto" icon="fa-solid fa-bed">Daftar
+                    Pelanggan</x-sidebar-link>
+                <x-sidebar-link route="resto.finances.index" icon="fa-solid fa-money-bill-wave">
+                    Keuangan Resto
+                </x-sidebar-link>
+                <x-sidebar-link route="resto.tables.index" icon="fa-solid fa-utensils">
+                    Meja 
+                </x-sidebar-link>
+
             </div>
         @endif
 
