@@ -13,24 +13,34 @@ class AdminController extends Controller
 {
     public function index(Request $request)
     {
-        $selectedUserId = $request->input('user_id');
-
         $hotelCount = Hotel::count();
         $restoCount = Resto::count();
 
-        $hotelUsers = User::where('usertype', 'hotelnew')->with('hotelBookings')->get();
-        $restoUsers = User::where('usertype', 'restonew')->with('restoOrders')->get();
+        // Ambil semua hotel & resto
+        $hotels = Hotel::with([
+            'bookings' => function ($q) {
+                $q->orderByDesc('updated_at');
+            }
+        ])->get();
 
-        $hotelStats = $hotelUsers->map(function ($hotel) {
-            $lastBooking = $hotel->hotelBookings->sortByDesc('updated_at')->first(); // ✅ perbaikan disini
+        $restos = Resto::with([
+            'orders' => function ($q) {
+                $q->orderByDesc('updated_at');
+            }
+        ])->get();
+
+        // Statistik per hotel
+        $hotelStats = $hotels->map(function ($hotel) {
+            $lastBooking = $hotel->bookings->first(); // Sudah terurut descending
             return [
                 'name' => $hotel->name,
                 'last_updated' => $lastBooking ? $lastBooking->updated_at->diffForHumans() : 'Belum pernah menginput data',
             ];
         });
 
-        $restoStats = $restoUsers->map(function ($resto) {
-            $lastOrder = $resto->restoOrders->sortByDesc('updated_at')->first();
+        // Statistik per resto
+        $restoStats = $restos->map(function ($resto) {
+            $lastOrder = $resto->orders->first(); // Sudah terurut descending
             return [
                 'name' => $resto->name,
                 'last_updated' => $lastOrder ? $lastOrder->updated_at->diffForHumans() : 'Belum pernah menginput data',
@@ -44,4 +54,5 @@ class AdminController extends Controller
             'restoStats'
         ));
     }
+
 }

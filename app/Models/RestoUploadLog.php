@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RestoUploadLog extends Model
 {
-    protected $fillable = ['user_id', 'file_name', 'description','resto_id'];
+    protected $fillable = ['user_id', 'file_name', 'description','resto_id','type'];
 
     public function user()
     {
@@ -24,6 +24,11 @@ class RestoUploadLog extends Model
     public function resto()
     {
         return $this->belongsTo(Resto::class, 'resto_id');
+    }
+
+    public function finances()
+    {
+        return $this->hasMany(RestoFinance::class);
     }
 
 }

@@ -33,15 +33,31 @@ class SharedCustomerRestoController extends Controller
         return redirect($redirectTo)->with('success', 'Pelanggan berhasil ditambahkan!');
     }
 
-    public function indexResto()
+    public function indexResto(Request $request)
     {
+        $search = $request->input('search');
+
         $customers = SharedCustomer::whereHas('restoOrders', function ($q) {
             $q->where('resto_id', auth()->user()->resto_id);
-        })->paginate(10);
-
+        })
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->when($request->gender, function ($query, $gender) {
+                $query->where('gender', $gender);
+            })
+            ->when($request->sort, function ($query) use ($request) {
+                $direction = $request->direction === 'asc' ? 'asc' : 'desc';
+                $query->orderBy($request->sort, $direction);
+            }, function ($query) {
+                $query->orderBy('name');
+            })
+            ->paginate(10)
+            ->appends($request->all());
 
         return view('resto.shared_customers.index_resto', compact('customers'));
     }
+
 
     public function editResto($id)
     {

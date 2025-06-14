@@ -18,6 +18,9 @@ class AdminRestoController extends Controller
 
         $query = RestoOrder::query();
 
+        $query->where('approval_status', 'approved');
+
+
         // Gunakan resto_id, bukan user_id
         if ($restoId) {
             $query->where('resto_id', $restoId);

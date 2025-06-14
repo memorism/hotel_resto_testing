@@ -41,6 +41,12 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('finance.index');
         } elseif ($user->usertype == 'scmhotel') {
             return redirect()->route('scm.supplies.index');
+        } elseif ($user->usertype == 'cashierresto') {
+            return redirect()->route('cashierresto.orders.index');
+        } elseif ($user->usertype == 'financeresto') {
+            return redirect()->route('financeresto.finances.index');
+        } elseif ($user->usertype == 'scmresto') {
+            return redirect()->route('scmresto.supplies.index');
         }
 
         return redirect()->route('dashboard'); // fallback jika usertype tidak dikenali

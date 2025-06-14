@@ -11,34 +11,48 @@ class AdminSharedCustomerController extends Controller
 {
     public function index(Request $request)
     {
+        $search = $request->input('search');
+        $source = $request->input('source');
+        $withDeleted = $request->boolean('with_deleted');
+        $perPage = $request->input('per_page', 10); // Default to 10 items per page
+        $sort = $request->input('sort', 'created_at'); // Default sort by created_at
+        $direction = $request->input('direction', 'desc'); // Default sort direction descending
+
         $query = SharedCustomer::query();
-    
-        // ✅ Tampilkan yang sudah dihapus (soft delete)
-        if ($request->boolean('with_deleted')) {
+
+        if ($withDeleted) {
             $query->withTrashed();
         }
-    
-        // 🔍 Search berdasarkan nama/email/phone
-        if ($search = $request->input('search')) {
+
+        if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%");
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%');
             });
         }
-    
-        // 📁 Filter berdasarkan asal data
-        if ($request->input('source') === 'hotel') {
-            $query->whereHas('hotelOrders');
-        } elseif ($request->input('source') === 'resto') {
-            $query->whereHas('restoOrders');
+
+        if ($source) {
+            $query->where('source', $source);
         }
-    
-        $customers = $query->latest()->paginate(10);
-    
+
+        // Validate sort column
+        $allowedSortColumns = ['name', 'email', 'phone', 'gender', 'address', 'created_at'];
+        if (!in_array($sort, $allowedSortColumns)) {
+            $sort = 'created_at';
+        }
+
+        // Validate direction
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+
+        // Handle "semua" for per_page
+        $perPage = ($perPage === 'semua') ? $query->count() : (int) $perPage;
+
+        $customers = $query->orderBy($sort, $direction)->paginate($perPage)->appends($request->all());
+
         return view('admin.shared_customers.index', compact('customers'));
     }
-    
+
 
     public function create()
     {

@@ -16,7 +16,8 @@ class Hotel extends Model
         'province',
         'postal_code',
         'phone',
-        'email'
+        'email',
+        'logo',
     ];
 
     public function rooms()
@@ -48,7 +49,6 @@ class Hotel extends Model
     {
         return $this->belongsToMany(Resto::class, 'hotel_resto_links');
     }
-
 
     public function finances()
     {

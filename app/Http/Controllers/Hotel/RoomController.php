@@ -5,19 +5,29 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\HotelRoom;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+// use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class RoomController extends Controller
 {
-    use AuthorizesRequests;
+    // use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
         $hotelId = auth()->user()->hotel_id;
-        $rooms = HotelRoom::where('hotel_id', $hotelId)->get();
+
+        $rooms = HotelRoom::where('hotel_id', $hotelId)
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('room_type', 'like', '%' . $search . '%')
+                        ->orWhere('description', 'like', '%' . $search . '%');
+                });
+            })
+            ->orderBy('room_type')
+            ->get();
 
         return view('hotel.rooms.rooms', compact('rooms'));
     }
+
 
     public function create()
     {
@@ -47,6 +57,11 @@ class RoomController extends Controller
 
     public function edit(HotelRoom $room)
     {
+        // dd([
+        //     'user_hotel_id' => auth()->user()->hotel_id,
+        //     'room_hotel_id' => $room->hotel_id,
+        // ]);
+        
         if ($room->hotel_id !== auth()->user()->hotel_id) {
             abort(403, 'Unauthorized action.');
         }

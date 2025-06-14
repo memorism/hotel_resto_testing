@@ -1,57 +1,116 @@
-{{-- Nama --}}
-<div class="mb-6">
-    <x-input-label for="name" :value="__('Nama Resto')" />
-    <x-text-input id="name" type="text" name="name" value="{{ old('name', $resto->name ?? '') }}"
-        class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-300 focus:border-indigo-400" required />
-    <x-input-error :messages="$errors->get('name')" class="mt-2 text-sm text-red-500" />
-</div>
-
-{{-- Alamat Lengkap --}}
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-    @foreach ([
-        'street' => 'Jalan',
-        'village' => 'Kelurahan/Desa',
-        'district' => 'Kecamatan',
-        'city' => 'Kota/Kabupaten',
-        'province' => 'Provinsi',
-        'postal_code' => 'Kode Pos'
-    ] as $field => $label)
-        <div>
-            <x-input-label for="{{ $field }}" :value="__($label)" />
-            <x-text-input id="{{ $field }}" type="text" name="{{ $field }}"
-                value="{{ old($field, $resto->$field ?? '') }}"
-                class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-300 focus:border-indigo-400" />
-            <x-input-error :messages="$errors->get($field)" class="mt-2 text-sm text-red-500" />
+{{-- Form Container --}}
+<div class="space-y-8">
+    {{-- Nama --}}
+    <div>
+        <x-input-label for="name" :value="__('Nama Resto')" class="text-sm font-medium text-gray-700" />
+        <div class="mt-1.5">
+            <x-text-input 
+                id="name" 
+                type="text" 
+                name="name" 
+                value="{{ old('name', $resto->name ?? '') }}"
+                class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                placeholder="Masukkan nama restaurant"
+                required 
+            />
+            <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
-    @endforeach
-</div>
+    </div>
 
-{{-- Telepon --}}
-<div class="mb-6">
-    <x-input-label for="phone" :value="__('Telepon')" />
-    <x-text-input id="phone" type="text" name="phone" value="{{ old('phone', $resto->phone ?? '') }}"
-        class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-300 focus:border-indigo-400" />
-    <x-input-error :messages="$errors->get('phone')" class="mt-2 text-sm text-red-500" />
-</div>
-
-{{-- Email --}}
-<div class="mb-6">
-    <x-input-label for="email" :value="__('Email')" />
-    <x-text-input id="email" type="email" name="email" value="{{ old('email', $resto->email ?? '') }}"
-        class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-300 focus:border-indigo-400" />
-    <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm text-red-500" />
-</div>
-
-{{-- Logo --}}
-<div class="mb-6">
-    <x-input-label for="logo" :value="__('Logo (Opsional)')" />
-    <input id="logo" type="file" name="logo"
-        class="mt-2 block w-full text-sm border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200"
-        accept="image/*" />
-    <x-input-error :messages="$errors->get('logo')" class="mt-2 text-sm text-red-500" />
-    @if(isset($resto) && $resto->logo)
-        <div class="mt-4">
-            <img src="{{ asset('storage/' . $resto->logo) }}" alt="Logo" class="h-16 rounded-md border">
+    {{-- Alamat Lengkap --}}
+    <div>
+        <h3 class="text-sm font-medium text-gray-700 mb-3">Alamat Lengkap</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @foreach ([
+                'street' => 'Jalan',
+                'village' => 'Kelurahan/Desa',
+                'district' => 'Kecamatan',
+                'city' => 'Kota/Kabupaten',
+                'province' => 'Provinsi',
+                'postal_code' => 'Kode Pos'
+            ] as $field => $label)
+                <div>
+                    <x-input-label for="{{ $field }}" :value="__($label)" class="text-sm font-medium text-gray-700" />
+                    <div class="mt-1.5">
+                        <x-text-input 
+                            id="{{ $field }}" 
+                            type="text" 
+                            name="{{ $field }}"
+                            value="{{ old($field, $resto->$field ?? '') }}"
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                            placeholder="Masukkan {{ strtolower($label) }}"
+                        />
+                        <x-input-error :messages="$errors->get($field)" class="mt-2" />
+                    </div>
+                </div>
+            @endforeach
         </div>
-    @endif
+    </div>
+
+    {{-- Kontak --}}
+    <div>
+        <h3 class="text-sm font-medium text-gray-700 mb-3">Informasi Kontak</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {{-- Telepon --}}
+            <div>
+                <x-input-label for="phone" :value="__('Telepon')" class="text-sm font-medium text-gray-700" />
+                <div class="mt-1.5">
+                    <x-text-input 
+                        id="phone" 
+                        type="text" 
+                        name="phone" 
+                        value="{{ old('phone', $resto->phone ?? '') }}"
+                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                        placeholder="Masukkan nomor telepon"
+                    />
+                    <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                </div>
+            </div>
+
+            {{-- Email --}}
+            <div>
+                <x-input-label for="email" :value="__('Email')" class="text-sm font-medium text-gray-700" />
+                <div class="mt-1.5">
+                    <x-text-input 
+                        id="email" 
+                        type="email" 
+                        name="email" 
+                        value="{{ old('email', $resto->email ?? '') }}"
+                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
+                        placeholder="Masukkan alamat email"
+                    />
+                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Logo --}}
+    <div>
+        <x-input-label for="logo" :value="__('Logo Restaurant')" class="text-sm font-medium text-gray-700" />
+        <div class="mt-1.5">
+            <div class="flex items-center space-x-4">
+                @if(isset($resto) && $resto->logo)
+                    <div class="flex-shrink-0">
+                        <img src="{{ asset('storage/' . $resto->logo) }}" 
+                             alt="Logo {{ $resto->name }}" 
+                             class="h-16 w-16 rounded-lg object-cover ring-2 ring-gray-200">
+                    </div>
+                @endif
+                <div class="flex-grow">
+                    <label class="block">
+                        <span class="sr-only">Pilih logo restaurant</span>
+                        <input type="file" 
+                               name="logo" 
+                               id="logo"
+                               accept="image/*"
+                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 focus:outline-none"
+                        />
+                    </label>
+                    <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
+                    <x-input-error :messages="$errors->get('logo')" class="mt-2" />
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

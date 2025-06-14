@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class HotelBooking extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'hotel_id',
         'user_id',
@@ -17,7 +19,6 @@ class HotelBooking extends Model
         'no_of_week_nights',
         'type_of_meal_plan',
         'required_car_parking_space',
-        'room_type_reserved',
         'lead_time',
         'arrival_year',
         'arrival_month',
@@ -28,11 +29,25 @@ class HotelBooking extends Model
         'booking_status',
         'hotel_upload_log_id',
         'customer_id',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'rejection_note',
+        'room_id',
     ];
 
     protected $casts = [
-        'avg_price_per_room' => 'float'
+        'avg_price_per_room' => 'float',
+        'approved_at' => 'datetime',
     ];
+
+    protected $appends = ['room_type_reserved']; // virtual field
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function hotel()
     {
@@ -54,5 +69,19 @@ class HotelBooking extends Model
         return $this->belongsTo(SharedCustomer::class, 'customer_id');
     }
 
+    public function room()
+    {
+        return $this->belongsTo(HotelRoom::class, 'room_id');
+    }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getRoomTypeReservedAttribute()
+    {
+        return $this->room?->room_type ?? '-';
+    }
 }

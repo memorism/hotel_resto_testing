@@ -17,19 +17,21 @@ use Carbon\Carbon;
 class SyncCombinedReports extends Command
 {
     protected $signature = 'sync:combined-reports';
-    protected $description = 'Sinkronisasi laporan gabungan hotel dan resto per hari.';
+    protected $description = 'Sinkronisasi laporan gabungan hotel dan resto per bulan.';
 
     public function handle()
     {
-        $tanggal = now()->toDateString();
-        $this->info("🗕️ Sinkronisasi data untuk tanggal: $tanggal");
+        $bulan = now()->format('Y-m');
+        $tanggal = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth()->toDateString();
+        $this->info("🗕️ Sinkronisasi data untuk bulan: $bulan");
 
-        // === 1. Semua Hotel (termasuk tanpa resto) ===
+        // === 1. Semua Hotel ===
         foreach (Hotel::all() as $hotel) {
             $this->info("🏨 Proses hotel: {$hotel->name}");
 
             $bookings = HotelBooking::where('hotel_id', $hotel->id)
-                ->whereRaw("STR_TO_DATE(CONCAT(arrival_year, '-', LPAD(arrival_month, 2, '0'), '-', LPAD(arrival_date, 2, '0')), '%Y-%m-%d') = ?", [$tanggal])
+                ->where('approval_status', 'approved')
+                ->whereRaw("DATE_FORMAT(STR_TO_DATE(CONCAT(arrival_year, '-', LPAD(arrival_month, 2, '0'), '-', LPAD(arrival_date, 2, '0')), '%Y-%m-%d'), '%Y-%m') = ?", [$bulan])
                 ->get();
 
             $totalBooking = $bookings->count();
@@ -37,7 +39,7 @@ class SyncCombinedReports extends Command
             $totalKamar = HotelRoom::where('hotel_id', $hotel->id)->count();
             $hotelIncome = $bookings->sum(fn($b) => $b->avg_price_per_room * ($b->no_of_week_nights + $b->no_of_weekend_nights));
             $hotelExpense = HotelFinance::where('hotel_id', $hotel->id)
-                ->whereDate('transaction_date', $tanggal)
+                ->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$bulan])
                 ->where('transaction_type', 'pengeluaran')
                 ->sum('amount');
 
@@ -61,22 +63,22 @@ class SyncCombinedReports extends Command
             ]);
         }
 
-        // === 2. Semua Resto (termasuk tanpa hotel) ===
+        // === 2. Semua Resto ===
         foreach (Resto::all() as $resto) {
             $this->info("🍽️ Proses resto: {$resto->name}");
 
-            $restoIncome = RestoOrder::where('resto_id', $resto->id)
-                ->whereDate('order_date', $tanggal)
-                ->sum('transaction_amount');
+            $approvedOrders = RestoOrder::where('resto_id', $resto->id)
+                ->where('approval_status', 'approved')
+                ->whereRaw("DATE_FORMAT(order_date, '%Y-%m') = ?", [$bulan]);
+
+            $restoIncome = $approvedOrders->sum('transaction_amount');
 
             $restoExpense = RestoFinance::where('resto_id', $resto->id)
-                ->whereDate('tanggal', $tanggal)
+                ->whereRaw("DATE_FORMAT(tanggal, '%Y-%m') = ?", [$bulan])
                 ->where('jenis', 'pengeluaran')
                 ->sum('nominal');
-            
-            $totalTransaksiResto = RestoOrder::where('resto_id', $resto->id)
-                ->whereDate('order_date', $tanggal)
-                ->count();
+
+            $totalTransaksiResto = $approvedOrders->count();
             $totalMeja = RestoTable::where('resto_id', $resto->id)->count();
             $utilRate = $totalMeja > 0 ? min(100, round(($totalTransaksiResto / $totalMeja) * 100, 2)) : 0;
 
@@ -107,6 +109,6 @@ class SyncCombinedReports extends Command
             }
         }
 
-        $this->info("✅ Sinkronisasi combined_reports selesai!");
+        $this->info("✅ Sinkronisasi laporan gabungan bulanan selesai!");
     }
 }

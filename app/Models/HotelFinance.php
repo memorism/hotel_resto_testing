@@ -24,6 +24,10 @@ class HotelFinance extends Model
         'reference_number',
         'description',
         'hotel_upload_log_id',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'rejection_note',
     ];
 
     public function hotel()

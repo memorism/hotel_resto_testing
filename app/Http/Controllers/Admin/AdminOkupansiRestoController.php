@@ -21,6 +21,8 @@ class AdminOkupansiRestoController extends Controller
 
         $query = RestoOrder::query();
 
+        $query->where('approval_status', 'approved');
+
         if ($restoId) {
             $query->where('resto_id', $restoId);
         }
@@ -48,17 +50,33 @@ class AdminOkupansiRestoController extends Controller
             ->orderByDesc('total_orders')
             ->first();
 
-        $busiestHour = (clone $query)->select(DB::raw('HOUR(time_order) as hour'), DB::raw('COUNT(*) as total_orders'))
-            ->groupBy(DB::raw('HOUR(time_order)'))
+        $busiestHour = (clone $query)
+            ->select(DB::raw('HOUR(STR_TO_DATE(time_order, "%H:%i:%s")) as hour'), DB::raw('COUNT(*) as total_orders'))
+            ->whereNotNull('time_order')
+            ->where('time_order', '!=', '00:00:00')
+            ->groupBy(DB::raw('HOUR(STR_TO_DATE(time_order, "%H:%i:%s"))'))
             ->orderByDesc('total_orders')
             ->first();
+
+        // // Debug logging
+        // \Log::info('Busiest Hour Query Debug:', [
+        //     'sql' => (clone $query)->select(DB::raw('HOUR(STR_TO_DATE(time_order, "%H:%i:%s")) as hour'), DB::raw('COUNT(*) as total_orders'))
+        //         ->whereNotNull('time_order')
+        //         ->where('time_order', '!=', '00:00:00')
+        //         ->groupBy(DB::raw('HOUR(STR_TO_DATE(time_order, "%H:%i:%s"))'))
+        //         ->orderByDesc('total_orders')
+        //         ->toSql(),
+        //     'bindings' => (clone $query)->getBindings(),
+        //     'result' => $busiestHour
+        // ]);
 
         $busiestDay = (clone $query)->select(DB::raw('DAYNAME(order_date) as day'), DB::raw('COUNT(*) as total_orders'))
             ->groupBy(DB::raw('DAYNAME(order_date)'))
             ->orderByDesc('total_orders')
             ->first();
 
-        $visitorsPerMonth = (clone $query)->select(DB::raw("DATE_FORMAT(order_date, '%Y-%m') as month"), DB::raw('COUNT(*) as total'))
+        $visitorsPerMonth = (clone $query)
+            ->select(DB::raw("DATE_FORMAT(order_date, '%Y-%m') as month"), DB::raw('COUNT(*) as total'))
             ->groupBy('month')
             ->orderBy('month')
             ->get();

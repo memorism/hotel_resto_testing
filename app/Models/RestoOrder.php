@@ -22,6 +22,11 @@ class RestoOrder extends Model
         'resto_upload_log_id',
         'resto_id',
         'customer_id',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'rejection_note',
+
     ];
 
     public function user()

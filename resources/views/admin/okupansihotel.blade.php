@@ -10,14 +10,15 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-xl p-6">
 
-                <!-- 🔹 Filter Form -->
-                <form method="GET" action="{{ route('admin.okupansihotel') }}" class="mb-4">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-gray-700">Pilih Hotel:</label>
-                            <select name="hotel_id" class="w-full p-2 border rounded">
+                <!-- Filter Form -->
+                <form method="GET" action="{{ route('admin.okupansihotel') }}" class="mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Pilih Hotel:</label>
+                            <select name="hotel_id"
+                                class="w-full rounded-lg p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                                 <option value="">Semua Hotel</option>
                                 @foreach ($hotels as $hotel)
                                     <option value="{{ $hotel->id }}" {{ request('hotel_id') == $hotel->id ? 'selected' : '' }}>
@@ -26,101 +27,210 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-gray-700">Tanggal Mulai:</label>
-                            <input type="date" name="start_date" class="w-full p-2 border rounded"
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Tanggal Mulai:</label>
+                            <input type="date" name="start_date"
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                                 value="{{ request('start_date') }}">
                         </div>
-                        <div>
-                            <label class="block text-gray-700">Tanggal Akhir:</label>
-                            <input type="date" name="end_date" class="w-full p-2 border rounded"
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Tanggal Akhir:</label>
+                            <input type="date" name="end_date"
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                                 value="{{ request('end_date') }}">
                         </div>
                         <div class="flex items-end">
                             <button type="submit"
-                                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                Filter
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150">
+                                <span class="flex items-center justify-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    Filter
+                                </span>
                             </button>
                         </div>
                     </div>
                 </form>
 
-                <!-- 🔹 Key Metrics -->
+                <!-- Key Metrics -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded">
-                        <h4 class="text-gray-700 font-semibold">Total Reservasi</h4>
-                        <p class="text-2xl font-bold text-indigo-800">{{ $totalReservations }}</p>
+                    <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl border border-indigo-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="p-3 bg-indigo-500 bg-opacity-10 rounded-lg">
+                                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-sm font-medium text-gray-500">Total Reservasi</h4>
+                                <p class="text-2xl font-bold text-gray-900">{{ $totalReservations }}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-pink-50 border-l-4 border-pink-400 p-4 rounded">
-                        <h4 class="text-gray-700 font-semibold">Rata-rata Lama Menginap</h4>
-                        <p class="text-2xl font-bold text-pink-800">{{ number_format($averageStay, 2) }} Malam</p>
+                    <div class="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl border border-pink-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="p-3 bg-pink-500 bg-opacity-10 rounded-lg">
+                                    <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-sm font-medium text-gray-500">Rata-rata Lama Menginap</h4>
+                                <p class="text-2xl font-bold text-gray-900">{{ number_format($averageStay, 2) }} <span
+                                        class="text-sm text-gray-500">Malam</span></p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded">
-                        <h4 class="text-gray-700 font-semibold">Persentase Okupansi</h4>
-                        <p class="text-2xl font-bold text-orange-800">
-                            {{ number_format($occupancyRate, 2) }}%
-                        </p>
+                    <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="p-3 bg-orange-500 bg-opacity-10 rounded-lg">
+                                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-sm font-medium text-gray-500">Persentase Okupansi</h4>
+                                <p class="text-2xl font-bold text-gray-900">{{ number_format($occupancyRate, 2) }}<span
+                                        class="text-sm text-gray-500">%</span></p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                        <h4 class="text-gray-700 font-semibold">Rasio Pembatalan</h4>
-                        <p class="text-2xl font-bold text-green-800">{{ number_format($cancellationRate, 2) }}%</p>
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="p-3 bg-green-500 bg-opacity-10 rounded-lg">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-sm font-medium text-gray-500">Rasio Pembatalan</h4>
+                                <p class="text-2xl font-bold text-gray-900">
+                                    {{ number_format($cancellationRate, 2) }}<span
+                                        class="text-sm text-gray-500">%</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 🔹 Semua Grafik -->
+                <!-- Semua Grafik -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Tren Harian</h4>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Tren Harian</h4>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                                <span class="text-sm text-gray-500">Trend</span>
+                            </div>
+                        </div>
                         <div class="h-64">
                             <canvas id="weekdayOccupancyChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Rata-rata Lama Menginap per Bulan</h4>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Rata-rata Lama Menginap per Bulan</h4>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                                <span class="text-sm text-gray-500">Average</span>
+                            </div>
+                        </div>
                         <div class="h-64">
                             <canvas id="avgStayChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Segmentasi Pasar</h4>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Segmentasi Pasar</h4>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></span>
+                                <span class="text-sm text-gray-500">Distribution</span>
+                            </div>
+                        </div>
                         <div class="h-64">
                             <canvas id="segmentChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Tipe Kamar Terisi</h4>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Tipe Kamar Terisi</h4>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"></span>
+                                <span class="text-sm text-gray-500">Distribution</span>
+                            </div>
+                        </div>
                         <div class="h-64">
                             <canvas id="roomTypeDistribution"></canvas>
                         </div>
                     </div>
 
-                    {{-- <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Tingkat Okupansi & Jumlah Booking per Bulan
-                        </h4>
-                        <div class="h-64">
-                            <canvas id="ratioCancel"></canvas>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Okupansi per Bulan (%)</h4>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                                <span class="text-sm text-gray-500">Monthly</span>
+                            </div>
                         </div>
-                    </div> --}}
-
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Okupansi per Bulan (%)</h4>
                         <div class="h-64">
                             <canvas id="monthlyOccupancy"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Rasio Pembatalan & Pemesanan</h4>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Rasio Pembatalan & Pemesanan</h4>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                                    <span class="text-xs text-gray-500">Pemesanan</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                                    <span class="text-xs text-gray-500">Pembatalan</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="h-64">
                             <canvas id="multiAxisChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Hari Kerja vs Akhir Pekan</h4>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Hari Kerja vs Akhir Pekan</h4>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-3 h-3 bg-teal-500 rounded-full"></span>
+                                    <span class="text-xs text-gray-500">Hari Kerja</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-3 h-3 bg-orange-500 rounded-full"></span>
+                                    <span class="text-xs text-gray-500">Akhir Pekan</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="h-64">
                             <canvas id="stayDurationTrend"></canvas>
                         </div>
@@ -134,7 +244,69 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    borderColor: '#e5e7eb',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        color: '#f3f4f6'
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            size: 12
+                        }
+                    },
+                    beginAtZero: true
+                }
+            }
+        };
+
         function createChart(ctx, type, labels, data, colors, xLabel, yLabel, chartLabel) {
+            const options = { ...chartOptions };
+
+            if (type === 'pie') {
+                options.plugins.legend.display = true;
+                options.plugins.legend.position = 'bottom';
+                options.plugins.legend.labels = {
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    color: '#6b7280',
+                    font: {
+                        size: 12
+                    }
+                };
+                delete options.scales;
+            }
+
             return new Chart(ctx, {
                 type: type,
                 data: {
@@ -142,65 +314,80 @@
                     datasets: [{
                         label: chartLabel,
                         data: data,
-                        backgroundColor: colors,
-                        borderColor: colors,
-                        borderWidth: 1
+                        backgroundColor: Array.isArray(colors) ? colors : [colors],
+                        borderColor: type === 'line' ? colors : 'white',
+                        borderWidth: type === 'line' ? 2 : 1,
+                        borderRadius: type === 'bar' ? 4 : 0,
+                        tension: type === 'line' ? 0.3 : 0,
+                        fill: type === 'line' ? 'origin' : undefined,
+                        hoverOffset: type === 'pie' ? 10 : 0
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    aspectRatio: 2, // Menjaga proporsi agar tidak terlalu tinggi
-                    scales: {
-                        x: { title: { display: true, text: xLabel } },
-                        y: { title: { display: true, text: yLabel } }
-                    }
-                }
+                options: options
             });
         }
 
-        // Grafik 1️⃣ Okupansi Berdasarkan Hari Kedatangan
+        // Grafik Okupansi Berdasarkan Hari Kedatangan
         createChart(
-            document.getElementById('weekdayOccupancyChart').getContext('2d'), 'line',
-            {!! json_encode(array_keys($weekdayOccupancy)) !!}, {!! json_encode(array_values($weekdayOccupancy)) !!},
-            ['#3498db'], 'Tanggal', 'Jumlah Reservasi', 'Jumlah Reservasi'
+            document.getElementById('weekdayOccupancyChart').getContext('2d'),
+            'line',
+            {!! json_encode(array_keys($weekdayOccupancy)) !!},
+            {!! json_encode(array_values($weekdayOccupancy)) !!},
+            'rgba(59, 130, 246, 0.5)',
+            'Tanggal',
+            'Jumlah Reservasi',
+            'Jumlah Reservasi'
         );
 
-        // Grafik 2️⃣ Rata-rata Lama Menginap per Bulan
+        // Grafik Rata-rata Lama Menginap per Bulan
         createChart(
-            document.getElementById('avgStayChart').getContext('2d'), 'bar',
-            {!! json_encode(array_keys($avgStayPerMonth)) !!}, {!! json_encode(array_values($avgStayPerMonth)) !!},
-            ['#2ecc71'], 'Bulan', 'Rata-rata Lama Menginap (Malam)', 'Rata-rata Lama Menginap (Malam)'
+            document.getElementById('avgStayChart').getContext('2d'),
+            'bar',
+            {!! json_encode(array_keys($avgStayPerMonth)) !!},
+            {!! json_encode(array_values($avgStayPerMonth)) !!},
+            'rgba(16, 185, 129, 0.7)',
+            'Bulan',
+            'Rata-rata Malam',
+            'Rata-rata Lama Menginap'
         );
 
-        // Grafik 3️⃣ Okupansi Berdasarkan Segmentasi Pasar
+        // Grafik Okupansi Berdasarkan Segmentasi Pasar
         createChart(
-            document.getElementById('segmentChart').getContext('2d'), 'pie',
-            {!! json_encode(array_keys($topMarketSegments)) !!}, {!! json_encode(array_values($topMarketSegments)) !!},
-            ['#e74c3c', '#f39c12', '#9b59b6', '#3498db', '#2ecc71'],
-            'Segmentasi Pasar', 'Jumlah Reservasi', 'Sejumlah'
+            document.getElementById('segmentChart').getContext('2d'),
+            'pie',
+            {!! json_encode(array_keys($topMarketSegments)) !!},
+            {!! json_encode(array_values($topMarketSegments)) !!},
+            ['#ec4899', '#8b5cf6', '#6366f1', '#0ea5e9', '#10b981'],
+            'Segmentasi Pasar',
+            'Jumlah Reservasi',
+            'Segmentasi Pasar'
         );
 
-        // Grafik 4️⃣ Rasio Pembatalan per Bulan
-        // createChart(
-        //     document.getElementById('cancellationChart').getContext('2d'), 'line',
-        //     {!! json_encode(array_keys($cancellationRatio)) !!}, {!! json_encode(array_values($cancellationRatio)) !!},
-        //     ['#e74c3c'], 'Bulan Kedatangan', 'Rasio Pembatalan', 'Persentase Pembatalan per Bulan'
-        // );
-
-        // Grafik 4️⃣ Okupansi Berdasarkan Tipe Kamar
+        // Grafik Okupansi Berdasarkan Tipe Kamar
         createChart(
-            document.getElementById('roomTypeDistribution').getContext('2d'), 'bar',
-            {!! json_encode(array_keys($roomTypeDistributionData)) !!}, {!! json_encode(array_values($roomTypeDistributionData)) !!},
-            ['purple', 'yellow', 'cyan', 'pink'], 'Tipe Kamar', 'Jumlah Reservasi', 'Jumlah Reservasi'
+            document.getElementById('roomTypeDistribution').getContext('2d'),
+            'bar',
+            {!! json_encode(array_keys($roomTypeDistributionData)) !!},
+            {!! json_encode(array_values($roomTypeDistributionData)) !!},
+            ['#0ea5e9', '#6366f1', '#8b5cf6', '#ec4899'],
+            'Tipe Kamar',
+            'Jumlah Reservasi',
+            'Distribusi Tipe Kamar'
         );
 
+        // Grafik Okupansi per Bulan
         createChart(
-            document.getElementById('monthlyOccupancy').getContext('2d'), 'line',
-            {!! json_encode(array_keys($avgStayPerMonth)) !!}, {!! json_encode(array_values($monthlyOccupancy)) !!},
-            ['blue'], 'Bulan', 'Jumlah Reservasi', 'Okupansi Bulanan'
+            document.getElementById('monthlyOccupancy').getContext('2d'),
+            'line',
+            {!! json_encode(array_keys($avgStayPerMonth)) !!},
+            {!! json_encode(array_values($monthlyOccupancy)) !!},
+            'rgba(59, 130, 246, 0.5)',
+            'Bulan',
+            'Okupansi (%)',
+            'Okupansi Bulanan'
         );
 
+        // Grafik Multi-Axis
         new Chart(document.getElementById('multiAxisChart').getContext('2d'), {
             type: 'bar',
             data: {
@@ -209,93 +396,90 @@
                     {
                         label: 'Rasio Pemesanan (%)',
                         data: {!! json_encode(array_values($occupancyRatePerMonth)) !!},
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderWidth: 1,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        borderWidth: 2,
                         type: 'line',
-                        yAxisID: 'y'
+                        yAxisID: 'y',
+                        tension: 0.3
                     },
                     {
                         label: 'Rasio Pembatalan (%)',
                         data: {!! json_encode(array_values($cancellationRatio)) !!},
                         type: 'line',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.5)',
                         borderWidth: 2,
-                        yAxisID: 'y1'
+                        yAxisID: 'y',
+                        tension: 0.3
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                        title: { display: true, text: 'Rasio Pemasanan (%)' }
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     },
-                    y1: {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: { display: true, text: 'Rasio Pembatalan (%)' },
-                        grid: { drawOnChartArea: false }
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#1f2937',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true
                     }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    y: {
+                        position: 'left',
+                        grid: {
+                            color: '#f3f4f6'
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                size: 12
+                            }
+                        },
+                        beginAtZero: true
+                    },
+                    // y1: {
+                    //     position: 'right',
+                    //     grid: {
+                    //         display: false
+                    //     },
+                    //     ticks: {
+                    //         color: '#6b7280',
+                    //         font: {
+                    //             size: 12
+                    //         }
+                    //     },
+                    //     beginAtZero: true
+                    // }
                 }
             }
         });
 
-        // const ctxMulti = document.getElementById('ratioCancel').getContext('2d');
-        // new Chart(ctxMulti, {
-        //     data: {
-        //         labels: {!! json_encode(array_keys($monthlyOccupancy)) !!},
-        //         datasets: [
-        //             {
-        //                 type: 'bar',
-        //                 label: 'Jumlah Booking',
-        //                 data: {!! json_encode(array_values($monthlyOccupancy)) !!},
-        //                 backgroundColor: 'rgba(16, 185, 129, 0.5)',
-        //                 borderColor: 'rgba(16, 185, 129, 1)',
-        //                 borderWidth: 1,
-        //                 yAxisID: 'y'
-        //             },
-        //             {
-        //                 type: 'line',
-        //                 label: 'Tingkat Okupansi (%)',
-        //                 data: {!! json_encode(array_values($occupancyRatePerMonth)) !!},
-        //                 backgroundColor: 'rgba(59, 130, 246, 0.2)',
-        //                 borderColor: 'rgba(59, 130, 246, 1)',
-        //                 borderWidth: 2,
-        //                 tension: 0.3,
-        //                 yAxisID: 'y1'
-        //             }
-        //         ]
-        //     },
-        //     options: {
-        //         responsive: true,
-        //         maintainAspectRatio: false,
-        //         interaction: {
-        //             mode: 'index',
-        //             intersect: false,
-        //         },
-        //         scales: {
-        //             y: {
-        //                 beginAtZero: true,
-        //                 title: { display: true, text: 'Jumlah Booking' },
-        //                 position: 'left'
-        //             },
-        //             y1: {
-        //                 beginAtZero: true,
-        //                 title: { display: true, text: 'Okupansi (%)' },
-        //                 position: 'right',
-        //                 grid: { drawOnChartArea: false }
-        //             }
-        //         }
-        //     }
-        // });
-
-
-        // Grafik 3️⃣ Tren Okupansi Berdasarkan Jumlah Malam Menginap
+        // Grafik Hari Kerja vs Akhir Pekan
         new Chart(document.getElementById('stayDurationTrend').getContext('2d'), {
             type: 'bar',
             data: {
@@ -303,18 +487,53 @@
                 datasets: [{
                     label: 'Jumlah Malam Menginap',
                     data: {!! json_encode([$totalWeekNights, $totalWeekendNights]) !!},
-                    backgroundColor: ['rgba(75, 192, 192, 0.5)', 'rgba(255, 159, 64, 0.5)'],
-                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
-                    borderWidth: 1
+                    backgroundColor: ['rgba(20, 184, 166, 0.7)', 'rgba(249, 115, 22, 0.7)'],
+                    borderColor: ['rgba(20, 184, 166, 1)', 'rgba(249, 115, 22, 1)'],
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#1f2937',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true
+                    }
+                },
                 scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
                     y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Jumlah Malam Menginap' }
+                        grid: {
+                            color: '#f3f4f6'
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                size: 12
+                            }
+                        },
+                        beginAtZero: true
                     }
                 }
             }

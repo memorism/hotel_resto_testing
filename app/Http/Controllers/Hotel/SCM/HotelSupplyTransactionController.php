@@ -10,13 +10,23 @@ use App\Models\HotelSupply;
 
 class HotelSupplyTransactionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $hotelId = Auth::user()->hotel_id;
+        $hotelId = auth()->user()->hotel_id;
 
         $transactions = HotelSupplyTransaction::with('supply')
-            ->where('hotel_id', $hotelId)
-            ->latest()
+            ->whereHas('supply', function ($query) use ($hotelId) {
+                $query->where('hotel_id', $hotelId);
+            })
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('supply', fn($q2) => $q2->where('name', 'like', "%$search%"))
+                        ->orWhere('note', 'like', "%$search%");
+                });
+            })
+            ->when($request->start_date, fn($q) => $q->whereDate('transaction_date', '>=', $request->start_date))
+            ->when($request->end_date, fn($q) => $q->whereDate('transaction_date', '<=', $request->end_date))
+            ->orderByDesc('transaction_date')
             ->paginate(10);
 
         return view('hotel.scm.transactions.index', compact('transactions'));

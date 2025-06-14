@@ -11,23 +11,70 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class SharedCustomerController extends Controller
 {
     use AuthorizesRequests;
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
+        $query = SharedCustomer::query();
 
+        // Apply search filter
+        if ($request->has('search') && $request->search !== '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Apply gender filter
+        if ($request->has('gender') && $request->gender !== '') {
+            $query->where('gender', $request->gender);
+        }
+
+        // Apply date range filter for created_at
+        if ($request->has('start_date') && $request->start_date !== '') {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->has('end_date') && $request->end_date !== '') {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // User-specific filtering
         if ($user->usertype === 'admin') {
-            $customers = SharedCustomer::latest()->paginate(10);
+            // Admin can see all customers
         } elseif ($user->usertype === 'hotel') {
-            $customers = SharedCustomer::whereHas('hotelBookings', function ($q) use ($user) {
+            $query->whereHas('hotelBookings', function ($q) use ($user) {
                 $q->where('hotel_id', $user->hotel_id);
-            })->paginate(10);
+            });
         } elseif ($user->usertype === 'resto') {
-            $customers = SharedCustomer::whereHas('restoOrders', function ($q) use ($user) {
+            $query->whereHas('restoOrders', function ($q) use ($user) {
                 $q->where('resto_id', $user->resto_id);
-            })->paginate(10);
+            });
         } else {
             abort(403);
         }
+
+        // Apply sorting
+        if ($request->has('sort') && $request->sort !== '') {
+            $sort = $request->sort;
+            $direction = $request->direction === 'asc' ? 'asc' : 'desc';
+            switch ($sort) {
+                case 'name':
+                case 'phone':
+                case 'email':
+                case 'gender':
+                case 'created_at':
+                    $query->orderBy($sort, $direction);
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc'); // Default sort
+        }
+
+        $customers = $query->paginate(10)->appends($request->all());
 
         return view('shared_customers.index', compact('customers'));
     }

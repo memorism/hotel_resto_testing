@@ -10,15 +10,18 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class FinanceMigrasiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $hotelId = auth()->user()->hotel_id;
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+
         $uploads = HotelUploadLog::where('hotel_id', $hotelId)
             ->where('type', 'finance')
-            ->latest()
+            ->orderBy($sortBy, $sortDirection)
             ->get();
 
-        return view('hotel.finance.migrasi.index', compact('uploads'));
+        return view('hotel.finance.migrasi.index', compact('uploads', 'sortBy', 'sortDirection'));
     }
 
     public function create()
@@ -29,6 +32,7 @@ class FinanceMigrasiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'file_name' => 'required|string',
             'file' => 'required|mimes:xlsx,xls',
             'description' => 'nullable|string',
         ]);
@@ -37,7 +41,7 @@ class FinanceMigrasiController extends Controller
         $upload = HotelUploadLog::create([
             'user_id' => $user->id,
             'hotel_id' => $user->hotel_id,
-            'file_name' => $request->file('file')->getClientOriginalName(),
+            'file_name' => $request->file_name,
             'description' => $request->description,
             'type' => 'finance',
         ]);

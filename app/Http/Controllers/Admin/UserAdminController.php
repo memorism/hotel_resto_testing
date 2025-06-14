@@ -18,9 +18,17 @@ class UserAdminController extends Controller
         $search = $request->input('search');
         $usertype = $request->input('usertype');
         $perPage = $request->input('per_page', 10);
+        $showDeleted = $request->boolean('show_deleted');
+        $sort = $request->input('sort', 'created_at');
+        $direction = $request->input('direction', 'desc');
 
-        $query = User::query()
-            ->whereIn('usertype', ['admin', 'hotelnew', 'restonew']);
+        $query = User::query();
+
+        if ($showDeleted) {
+            $query->withTrashed();
+        }
+
+        $query->whereIn('usertype', ['admin', 'hotelnew', 'restonew']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -33,10 +41,19 @@ class UserAdminController extends Controller
             $query->where('usertype', $usertype);
         }
 
+        // Validate sort column
+        $allowedSortColumns = ['name', 'email', 'usertype', 'created_at'];
+        if (!in_array($sort, $allowedSortColumns)) {
+            $sort = 'created_at';
+        }
+
+        // Validate direction
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+
         $perPage = $perPage === 'semua' ? $query->count() : (int) $perPage;
 
-        $users = $query->select('id', 'name', 'email', 'usertype', 'logo', 'created_at')
-            ->orderBy('created_at', 'desc')
+        $users = $query->select('id', 'name', 'email', 'usertype', 'logo', 'created_at', 'deleted_at')
+            ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->appends($request->all()); // biar query string tetap jalan
 
@@ -110,8 +127,11 @@ class UserAdminController extends Controller
 
     public function update(Request $request, $id): RedirectResponse
     {
+        // dd($request->all());
+
         $user = User::findOrFail($id);
 
+        // Validasi
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -119,14 +139,17 @@ class UserAdminController extends Controller
             'hotel_id' => 'nullable|exists:hotels,id',
             'resto_id' => 'nullable|exists:restos,id',
             'old_password' => 'required|string|min:8',
-            'password' => 'required|string|confirmed|min:8',
+            'password' => 'nullable|string|confirmed|min:8',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+
+        // Cek password lama
         if (!Hash::check($request->old_password, $user->password)) {
             return back()->withErrors(['old_password' => 'Password lama tidak sesuai.']);
         }
 
+        // Validasi tambahan berdasarkan usertype
         if ($request->usertype === 'hotelnew' && !$request->hotel_id) {
             return back()->withErrors(['hotel_id' => 'Hotel wajib dipilih untuk usertype hotel']);
         }
@@ -135,29 +158,45 @@ class UserAdminController extends Controller
             return back()->withErrors(['resto_id' => 'Resto wajib dipilih untuk usertype resto']);
         }
 
+        // Ambil data dasar
+        $data = $request->only(['name', 'email', 'usertype', 'hotel_id', 'resto_id']);
+
+        // Update password hanya jika diisi
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        // Proses upload logo
         if ($request->hasFile('logo')) {
+            // Hapus logo lama jika ada
             if ($user->logo && Storage::disk('public')->exists($user->logo)) {
                 Storage::disk('public')->delete($user->logo);
             }
-            $user->logo = $request->file('logo')->store('logos/users', 'public');
+            $data['logo'] = $request->file('logo')->store('logos/users', 'public');
         }
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'usertype' => $request->usertype,
-            'hotel_id' => $request->hotel_id,
-            'resto_id' => $request->resto_id,
-            'logo' => $user->logo,
-        ]);
+        // Update user
+        $user->update($data);
 
         return redirect()->route('admin.user.user')->with('success', 'User berhasil diperbarui!');
+
     }
+
 
     public function destroy($id): RedirectResponse
     {
         $user = User::findOrFail($id);
+
+        // Delete related sub-accounts based on usertype
+        if ($user->usertype === 'hotelnew') {
+            User::where('hotel_id', $user->hotel_id)
+                ->whereNotIn('usertype', ['admin', 'hotelnew', 'restonew'])
+                ->delete();
+        } elseif ($user->usertype === 'restonew') {
+            User::where('resto_id', $user->resto_id)
+                ->whereNotIn('usertype', ['admin', 'hotelnew', 'restonew'])
+                ->delete();
+        }
 
         if ($user->logo && Storage::disk('public')->exists($user->logo)) {
             Storage::disk('public')->delete($user->logo);
@@ -165,7 +204,29 @@ class UserAdminController extends Controller
 
         $user->delete();
 
-        return redirect()->route('admin.user.user')->with('success', 'User berhasil dihapus!');
+        return redirect()->route('admin.user.user')->with('success', 'User dan sub-akun terkait berhasil dihapus!');
+    }
+
+    public function restore($id): RedirectResponse
+    {
+        $user = User::withTrashed()->findOrFail($id);
+
+        // Restore related sub-accounts based on usertype
+        if ($user->usertype === 'hotelnew') {
+            User::withTrashed()
+                ->where('hotel_id', $user->hotel_id)
+                ->whereNotIn('usertype', ['admin', 'hotelnew', 'restonew'])
+                ->restore();
+        } elseif ($user->usertype === 'restonew') {
+            User::withTrashed()
+                ->where('resto_id', $user->resto_id)
+                ->whereNotIn('usertype', ['admin', 'hotelnew', 'restonew'])
+                ->restore();
+        }
+
+        $user->restore();
+
+        return redirect()->route('admin.user.user')->with('success', 'User dan sub-akun terkait berhasil dipulihkan!');
     }
 
     // public function showSubUser($id)
@@ -187,3 +248,4 @@ class UserAdminController extends Controller
     //     return view('admin.user.subusers', compact('parentUser', 'subUsers'));
     // }
 }
+

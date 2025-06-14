@@ -8,11 +8,19 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class HotelFinanceImport implements ToCollection, WithHeadingRow
+
+class HotelFinanceImport implements ToCollection, WithHeadingRow,  WithMultipleSheets
 {
     protected $uploadId, $hotelId, $userId;
 
+    public function sheets(): array
+    {
+        return [
+            'DATA' => $this,
+        ];
+    }
     public function __construct($uploadId, $hotelId, $userId)
     {
         $this->uploadId = $uploadId;
@@ -24,7 +32,8 @@ class HotelFinanceImport implements ToCollection, WithHeadingRow
     {
         foreach ($rows as $row) {
             // Lewati baris jika transaction_date kosong
-            if (empty($row['transaction_date'])) continue;
+            if (empty($row['transaction_date']))
+                continue;
 
             // Handle tanggal
             try {
@@ -48,20 +57,20 @@ class HotelFinanceImport implements ToCollection, WithHeadingRow
             }
 
             HotelFinance::create([
-                'hotel_id'             => $this->hotelId,
-                'user_id'              => $this->userId,
-                'hotel_upload_log_id'  => $this->uploadId,
-                'transaction_code'     => $row['transaction_code'],
-                'transaction_date'     => $transactionDate,
-                'transaction_time'     => $transactionTime,
-                'transaction_type'     => $row['transaction_type'],
-                'amount'               => $row['amount'] ?? 0,
-                'payment_method'       => $row['payment_method'],
-                'category'             => $row['category'],
-                'subcategory'          => $row['subcategory'],
-                'source_or_target'     => $row['source_or_target'],
-                'reference_number'     => $row['reference_number'],
-                'description'          => $row['description'],
+                'hotel_id' => $this->hotelId,
+                'user_id' => $this->userId,
+                'hotel_upload_log_id' => $this->uploadId,
+                'transaction_code' => $row['transaction_code'],
+                'transaction_date' => $transactionDate,
+                'transaction_time' => $transactionTime,
+                'transaction_type' => $row['transaction_type'],
+                'amount' => $row['amount'] ?? 0,
+                'payment_method' => $row['payment_method'],
+                'category' => $row['category'],
+                'subcategory' => $row['subcategory'],
+                'source_or_target' => $row['source_or_target'],
+                'reference_number' => $row['reference_number'],
+                'description' => $row['description'],
             ]);
         }
     }

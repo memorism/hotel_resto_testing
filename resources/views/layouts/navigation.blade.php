@@ -105,11 +105,11 @@
 
                     @if (Auth::user()->usertype == 'scmhotel')
                         <x-nav-link href="{{ route('scm.supplies.index') }}" :active="request()->routeIs('scm.supplies.index')">
-                            {{ __('Manajemen Barang') }}
+                            {{ __('Manajemen Inventori') }}
                         </x-nav-link>
             
                         <x-nav-link href="{{ route('scm.transactions.index') }}" :active="request()->routeIs('scm.transactions.index')">
-                            {{ __('Transaksi Barang') }}
+                            {{ __('Transaksi Inventori') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -254,11 +254,11 @@
 
             @if (Auth::user()->usertype == 'scmhotel')
             <x-responsive-nav-link href="{{ route('scm.supplies.index') }}" :active="request()->routeIs('scm.supplies.index')">
-                {{ __('Manajemen Barang') }}
+                {{ __('Manajemen Inventori') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('scm.transactions.index') }}" :active="request()->routeIs('scm.transactions.index')">
-                {{ __('Transaksi Barang') }}
+                {{ __('Transaksi Inventori') }}
             </x-responsive-nav-link>
             @endif
         </div>

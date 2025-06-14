@@ -12,13 +12,42 @@ class RestoTableController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
         $restoId = auth()->user()->resto_id;
-        $tables = RestoTable::where('resto_id', $restoId)->latest()->paginate(10);
+        $search = $request->input('search');
 
-        return view('resto.tables.index', compact('tables'));
+        $tables = RestoTable::where('resto_id', $restoId)
+            ->when($search, function ($query) use ($search) {
+                $query->where('table_code', 'like', '%' . $search . '%');
+            })
+            ->when($request->sort, function ($query) use ($request) {
+                $direction = $request->direction === 'asc' ? 'asc' : 'desc';
+                switch ($request->sort) {
+                    case 'no':
+                        $query->orderBy('id', $direction);
+                        break;
+                    case 'table_code':
+                        $query->orderBy('table_code', $direction);
+                        break;
+                    case 'capacity':
+                        $query->orderBy('capacity', $direction);
+                        break;
+                    case 'is_active':
+                        $query->orderBy('is_active', $direction);
+                        break;
+                    default:
+                        $query->orderBy($request->sort, $direction);
+                }
+            }, function ($query) {
+                $query->latest();
+            })
+            ->paginate(10)
+            ->appends($request->all());
+
+        return view('resto.tables.index', compact('tables', 'search'));
     }
+
 
     public function create()
     {
@@ -38,7 +67,7 @@ class RestoTableController extends Controller
             'table_code' => $request->table_code,
             'capacity' => $request->capacity,
             'is_active' => $request->is_active,
-            
+
 
 
         ]);
@@ -67,7 +96,7 @@ class RestoTableController extends Controller
             'table_code' => $request->table_code,
             'capacity' => $request->capacity,
             'is_active' => $request->is_active,
-            
+
 
         ]);
 

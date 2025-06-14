@@ -20,6 +20,8 @@ class AdminOkupansiHotelController extends Controller
 
         $query = HotelBooking::query();
 
+        $query->where('approval_status', 'approved');
+
         if ($startDateFormatted && $endDateFormatted) {
             $query->whereRaw("STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') BETWEEN ? AND ?", [$startDateFormatted, $endDateFormatted]);
         }
@@ -43,7 +45,7 @@ class AdminOkupansiHotelController extends Controller
             : 0;
         $cancellationRate = ($totalReservations2 > 0) ? ($bookings->where('booking_status', 'Canceled')->count() / $totalReservations2) * 100 : 0;
 
-        $weekdayOccupancy = $bookings->groupBy('arrival_date')->map(fn($row) => count($row))->toArray();
+        $weekdayOccupancy = $bookings->where('booking_status', 'Not_Canceled')->groupBy('arrival_date')->map(fn($row) => count($row))->toArray();
         ksort($weekdayOccupancy);
 
         $bookings->each(function ($booking) {
@@ -63,9 +65,11 @@ class AdminOkupansiHotelController extends Controller
             ->take(5)
             ->toArray();
 
-        $cancellationRatio = $bookings->groupBy('arrival_month')
-            ->map(fn($row) => count($row) > 0 ? $row
-                ->where('booking_status', 'Canceled')->count() / count($row) : 0)->toArray();
+        $cancellationRatio = $bookings->groupBy('arrival_month')->map(function ($rows) {
+            $total = count($rows);
+            $Canceled = $rows->where('booking_status', 'Canceled')->count();
+            return $total > 0 ? ($Canceled / $total) * 100 : 0;
+        })->toArray();
         ksort($cancellationRatio);
 
         $roomTypeDistribution = $bookings->where('booking_status', 'Not_Canceled')

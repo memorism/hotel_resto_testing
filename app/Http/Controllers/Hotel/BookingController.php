@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Models\HotelRoom;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\HotelBooking;
@@ -15,33 +16,58 @@ class BookingController extends Controller
     {
         $hotelId = auth()->user()->hotel_id;
 
-        // Ambil nilai dari request
+        $sort = $request->get('sort', 'arrival_date');
+        $direction = $request->get('direction', 'desc');
+        $allowedSortColumns = [
+            'customer_name',
+            'no_of_adults',
+            'no_of_children',
+            'lead_time',
+            'arrival_year',
+            'arrival_month',
+            'arrival_date',
+            'avg_price_per_room',
+        ];
+
+        if (!in_array($sort, $allowedSortColumns)) {
+            $sort = 'arrival_date';
+        }
+
+        if (!in_array($direction, ['asc', 'desc'])) {
+            $direction = 'desc';
+        }
+
         $perPage = $request->get('per_page', 10);
         $perPage = ($perPage === 'semua')
             ? HotelBooking::where('hotel_id', $hotelId)->count()
             : (int) $perPage;
 
-        $bookingId = $request->get('booking_id');
+        $searchCustomer = $request->get('search_customer');
+        $status = $request->get('status');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
-        $bookings = HotelBooking::with('uploadLog')
+        $query = HotelBooking::with(['uploadLog', 'customer'])
             ->where('hotel_id', $hotelId)
-            ->when($bookingId, function ($query, $bookingId) {
-                return $query->where('booking_id', 'like', '%' . $bookingId . '%');
-            })
-            ->when($startDate, function ($query, $startDate) {
-                $queryDate = date('Y-m-d', strtotime($startDate));
-                return $query->whereRaw("STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') >= ?", [$queryDate]);
-            })
-            ->when($endDate, function ($query, $endDate) {
-                $queryDate = date('Y-m-d', strtotime($endDate));
-                return $query->whereRaw("STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') <= ?", [$queryDate]);
-            })
-            
-            ->orderByDesc('arrival_date')
-            ->paginate($perPage)
-            ->appends($request->all()); // agar pagination tetap menyimpan filter
+            ->when($status, fn($q) => $q->where('approval_status', $status))
+            ->when($startDate, fn($q) => $q->whereRaw("STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') >= ?", [date('Y-m-d', strtotime($startDate))]))
+            ->when($endDate, fn($q) => $q->whereRaw("STR_TO_DATE(CONCAT(arrival_year, '-', arrival_month, '-', arrival_date), '%Y-%m-%d') <= ?", [date('Y-m-d', strtotime($endDate))]))
+            ->when($searchCustomer, function ($q, $searchCustomer) {
+                $q->whereHas('customer', function ($customerQuery) use ($searchCustomer) {
+                    $customerQuery->where('name', 'like', '%' . $searchCustomer . '%');
+                });
+            });
+
+        // Apply sorting
+        if ($sort === 'customer_name') {
+            $query->join('shared_customers', 'hotel_bookings.customer_id', '=', 'shared_customers.id')
+                ->orderBy('shared_customers.name', $direction)
+                ->select('hotel_bookings.*'); // Select all columns from hotel_bookings to avoid issues
+        } else {
+            $query->orderBy($sort, $direction);
+        }
+
+        $bookings = $query->paginate($perPage)->appends($request->all());
 
         return view('hotel.booking.booking', compact('bookings'));
     }
@@ -50,24 +76,24 @@ class BookingController extends Controller
     public function create()
     {
         $hotelId = auth()->user()->hotel_id;
-    
+
         $fileNames = HotelUploadLog::where('hotel_id', $hotelId)->pluck('file_name', 'file_name');
-    
+        $hotelRooms = HotelRoom::where('hotel_id', $hotelId)->get();
         $customers = SharedCustomer::whereHas('hotelBookings', function ($q) use ($hotelId) {
             $q->where('hotel_id', $hotelId);
         })->orWhereDoesntHave('hotelBookings') // pelanggan baru yang belum pernah booking juga ditampilkan
-          ->orderBy('name')->get();
-    
-        return view('hotel.booking.create', compact('fileNames', 'customers'));
+            ->orderBy('name')->get();
+
+        return view('hotel.booking.create', compact('fileNames', 'customers', 'hotelRooms'));
     }
-    
+
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'customer_id' => 'nullable|exists:shared_customers,id',
-            'booking_id' => 'required|string|max:255',
-            'file_name' => 'required|string|max:255',
+            'booking_id' => 'nullable|string|max:255',
+            'file_name' => 'nullable|string|max:255',
             'no_of_adults' => 'required|integer',
             'no_of_children' => 'required|integer',
             'no_of_weekend_nights' => 'required|integer',
@@ -76,34 +102,46 @@ class BookingController extends Controller
             'required_car_parking_space' => 'required|boolean',
             'room_type_reserved' => 'required|string|max:255',
             'lead_time' => 'required|integer',
-            'arrival_year' => 'required|integer',
-            'arrival_month' => 'required|integer',
-            'arrival_date' => 'required|integer',
+            'arrival_date_full' => 'required|date',
             'market_segment_type' => 'required|string|max:255',
             'avg_price_per_room' => 'required|numeric',
             'no_of_special_requests' => 'required|integer',
             'booking_status' => 'required|string|max:255',
         ]);
 
-        $user = auth()->user();
+        // Pisahkan tanggal
+        $arrivalDate = \Carbon\Carbon::parse($validated['arrival_date_full']);
+        $validated['arrival_year'] = $arrivalDate->year;
+        $validated['arrival_month'] = $arrivalDate->month;
+        $validated['arrival_date'] = $arrivalDate->day;
 
-        $file = HotelUploadLog::where('hotel_id', $user->hotel_id)
-            ->where('file_name', $validated['file_name'])
-            ->first();
+        // Hapus field arrival_date_full (karena tidak ada di tabel)
+        unset($validated['arrival_date_full']);
 
-        if (!$file) {
-            return redirect()->back()->with('error', 'File yang dipilih tidak valid atau tidak milik hotel Anda.');
+        // Cek file (jika ada)
+        $file = null;
+        if (!empty($validated['file_name'])) {
+            $file = HotelUploadLog::where('hotel_id', auth()->user()->hotel_id)
+                ->where('file_name', $validated['file_name'])
+                ->first();
+
+            if (!$file) {
+                return redirect()->back()->with('error', 'File yang dipilih tidak valid atau tidak milik hotel Anda.');
+            }
         }
 
-        $validated['hotel_upload_log_id'] = $file->id;
-        $validated['user_id'] = $user->id;
-        $validated['hotel_id'] = $user->hotel_id;
-        $validated['customer_id'] = $validated['customer_id'] ?? null;
+        $data = array_merge($validated, [
+            'hotel_upload_log_id' => $file?->id,
+            'hotel_id' => auth()->user()->hotel_id,
+            'customer_id' => $validated['customer_id'] ?? null,
+            'approval_status' => 'pending',
+        ]);
 
-        HotelBooking::create($validated);
+        HotelBooking::create($data);
 
         return redirect()->route('hotel.booking.index')->with('success', 'Booking berhasil dibuat!');
     }
+
 
     public function show(HotelBooking $booking)
     {
@@ -111,7 +149,8 @@ class BookingController extends Controller
             abort(403);
         }
 
-        return view('hotel.booking.show', compact('booking'));
+
+        return view('hotel.booking.show', compact('booking', 'customers'));
     }
 
     public function edit(HotelBooking $booking)
@@ -120,19 +159,35 @@ class BookingController extends Controller
             return redirect()->route('hotel.booking.index')->with('error', 'Unauthorized access');
         }
 
-        $fileNames = HotelUploadLog::where('hotel_id', auth()->user()->hotel_id)->pluck('file_name', 'file_name');
-        return view('hotel.booking.edit', compact('booking', 'fileNames'));
+        $booking->load('customer');
+
+        $hotelId = auth()->user()->hotel_id;
+
+        $fileNames = HotelUploadLog::where('hotel_id', $hotelId)->pluck('file_name', 'file_name');
+
+        $customers = SharedCustomer::whereHas('hotelBookings', function ($q) use ($hotelId) {
+            $q->where('hotel_id', $hotelId);
+        })->orWhereDoesntHave('hotelBookings')
+            ->orderBy('name')->get();
+
+        $hotelRooms = HotelRoom::where('hotel_id', $hotelId)->get();
+
+
+        return view('hotel.booking.edit', compact('booking', 'fileNames', 'customers', 'hotelRooms'));
     }
+
 
     public function update(Request $request, HotelBooking $booking)
     {
+
         if ($booking->hotel_id != auth()->user()->hotel_id) {
             return redirect()->route('hotel.booking.index')->with('error', 'Unauthorized access');
         }
+        // dd($request->all()); 
 
         $validated = $request->validate([
-            'booking_id' => 'required|string|max:255',
-            'file_name' => 'required|string|max:255',
+            'booking_id' => 'nullable|string|max:255',
+            'file_name' => 'nullable|string|max:255',
             'no_of_adults' => 'required|integer',
             'no_of_children' => 'required|integer',
             'no_of_weekend_nights' => 'required|integer',
@@ -141,28 +196,40 @@ class BookingController extends Controller
             'required_car_parking_space' => 'required|boolean',
             'room_type_reserved' => 'required|string|max:255',
             'lead_time' => 'required|integer',
-            'arrival_year' => 'required|integer',
-            'arrival_month' => 'required|integer',
-            'arrival_date' => 'required|integer',
+            'arrival_date_full' => 'required|date',
             'market_segment_type' => 'required|string|max:255',
+            // 'repeated_guest' => 'required|boolean',
+            // 'no_of_previous_cancellations' => 'required|integer',
+            // 'no_of_previous_bookings_not_canceled' => 'required|integer',
             'avg_price_per_room' => 'required|numeric',
             'no_of_special_requests' => 'required|integer',
             'booking_status' => 'required|string|max:255',
         ]);
 
-        $file = HotelUploadLog::where('hotel_id', auth()->user()->hotel_id)
-            ->where('file_name', $validated['file_name'])
-            ->first();
+        // Konversi arrival_date_full ke tahun, bulan, tanggal
+        $arrivalDate = \Carbon\Carbon::parse($validated['arrival_date_full']);
+        $validated['arrival_year'] = $arrivalDate->year;
+        $validated['arrival_month'] = $arrivalDate->month;
+        $validated['arrival_date'] = $arrivalDate->day;
+        unset($validated['arrival_date_full']);
 
-        if (!$file) {
-            return redirect()->back()->with('error', 'File yang dipilih tidak valid atau tidak milik hotel Anda.');
+        // Cek file log jika ada perubahan file_name
+        $file = null;
+        if (!empty($validated['file_name'])) {
+            $file = HotelUploadLog::where('hotel_id', auth()->user()->hotel_id)
+                ->where('file_name', $validated['file_name'])
+                ->first();
+
+            if (!$file) {
+                return redirect()->back()->with('error', 'File tidak valid.');
+            }
+
+            $validated['hotel_upload_log_id'] = $file->id;
         }
+        $validated['approval_status'] = 'pending';
+        $booking->update($validated);
 
-        $booking->update(array_merge($validated, [
-            'hotel_upload_log_id' => $file->id
-        ]));
-
-        return redirect()->route('hotel.booking.index')->with('success', 'Booking updated successfully!');
+        return redirect()->route('hotel.booking.index')->with('success', 'Booking berhasil diperbarui!');
     }
 
     public function destroy(HotelBooking $booking)
@@ -180,5 +247,75 @@ class BookingController extends Controller
         return redirect()->route('hotel.booking.index')->with('success', 'Booking deleted successfully.');
     }
 
-    
+    public function approve($id)
+    {
+        $booking = HotelBooking::where('id', $id)
+            ->where('hotel_id', auth()->user()->hotel_id)
+            ->firstOrFail();
+
+        $booking->approval_status = 'approved';
+        $booking->approved_by = auth()->id();
+        $booking->approved_at = now();
+        $booking->save();
+
+        return redirect()->back()->with('success', 'Booking berhasil disetujui.');
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'rejection_note' => 'required|string|max:1000',
+        ]);
+
+        $booking = HotelBooking::where('id', $id)
+            ->where('hotel_id', auth()->user()->hotel_id)
+            ->firstOrFail();
+
+        $booking->approval_status = 'rejected';
+        $booking->rejection_note = $request->rejection_note;
+        $booking->rejected_by = auth()->id();
+        $booking->rejected_at = now();
+        $booking->save();
+
+        return redirect()->back()->with('success', 'Booking berhasil ditolak.');
+    }
+
+    public function bulkApprove(Request $request)
+    {
+        $selectedBookings = $request->input('selected_bookings');
+
+        if (empty($selectedBookings)) {
+            return redirect()->back()->with('error', 'Tidak ada booking yang dipilih.');
+        }
+
+        HotelBooking::whereIn('id', $selectedBookings)
+            ->where('hotel_id', auth()->user()->hotel_id)
+            ->update([
+                'approval_status' => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+
+        return redirect()->back()->with('success', 'Booking yang dipilih berhasil disetujui.');
+    }
+
+    public function bulkReject(Request $request)
+    {
+        $request->validate([
+            'selected_bookings' => 'required|array',
+            'selected_bookings.*' => 'exists:hotel_bookings,id',
+            'rejection_note' => 'required|string|max:1000',
+        ]);
+
+        HotelBooking::whereIn('id', $request->selected_bookings)
+            ->where('hotel_id', auth()->user()->hotel_id)
+            ->update([
+                'approval_status' => 'rejected',
+                'rejection_note' => $request->rejection_note,
+                'rejected_by' => auth()->id(),
+                'rejected_at' => now(),
+            ]);
+
+        return redirect()->back()->with('success', 'Booking yang dipilih berhasil ditolak.');
+    }
 }

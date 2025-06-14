@@ -32,6 +32,25 @@ class AdminSubuserController extends Controller
             });
         }
 
+        // Handle status filter
+        if ($request->status === 'deleted') {
+            $query->onlyTrashed();
+        } else {
+            $query->whereNull('deleted_at');
+        }
+
+        // Handle sorting
+        $sort = $request->get('sort', 'name'); // Default sort by name
+        $direction = $request->get('direction', 'asc'); // Default direction ascending
+
+        // Validate sort column
+        $allowedSortColumns = ['name', 'email', 'usertype'];
+        if (!in_array($sort, $allowedSortColumns)) {
+            $sort = 'name';
+        }
+
+        $query->orderBy($sort, $direction);
+
         $subUsers = $query->paginate(10);
 
         return view('admin.user.subuser.index', compact('parentUser', 'subUsers'));
@@ -92,42 +111,46 @@ class AdminSubuserController extends Controller
     {
         $subuser = User::findOrFail($subuserId);
 
+        // Validasi
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $subuser->id,
             'usertype' => 'required|string',
+            'old_password' => 'required|string', // ⬅️ Wajib isi password lama apa pun perubahan
         ];
 
-        // Hanya jika user ingin mengganti password
+        // Jika password baru ingin diganti
         if ($request->filled('password')) {
-            $rules['old_password'] = 'required';
-            $rules['password'] = 'required|confirmed|min:6';
+            $rules['password'] = 'required|string|confirmed|min:6';
         }
 
-        $request->validate($rules);
+        $validated = $request->validate($rules);
 
-        // Jika password ingin diganti, cek old_password dulu
+        // Selalu cek password lama
+        if (!Hash::check($request->old_password, $subuser->password)) {
+            return back()->withErrors(['old_password' => 'Password lama tidak sesuai.'])->withInput();
+        }
+
+        // Update password jika diisi
         if ($request->filled('password')) {
-            if (!Hash::check($request->old_password, $subuser->password)) {
-                return back()->withErrors(['old_password' => 'Password lama tidak sesuai.']);
-            }
-
             $subuser->password = Hash::make($request->password);
         }
 
+        // Update data lainnya
         $subuser->name = $request->name;
         $subuser->email = $request->email;
         $subuser->usertype = $request->usertype;
         $subuser->save();
 
+        // Redirect ke parent user
         $redirectId = $subuser->hotel_id
             ? User::where('hotel_id', $subuser->hotel_id)->where('usertype', 'hotelnew')->value('id')
             : User::where('resto_id', $subuser->resto_id)->where('usertype', 'restonew')->value('id');
 
-
         return redirect()->route('admin.user.subuser.index', $redirectId)
             ->with('success', 'Subuser berhasil diperbarui.');
     }
+
 
     public function destroy($subuserId)
     {
@@ -135,9 +158,24 @@ class AdminSubuserController extends Controller
         $redirectId = $subuser->hotel_id
             ? User::where('hotel_id', $subuser->hotel_id)->where('usertype', 'hotelnew')->value('id')
             : User::where('resto_id', $subuser->resto_id)->where('usertype', 'restonew')->value('id');
-        $subuser->delete();
 
-        return redirect()->route('admin.user.subuser.index', $redirectId)->with('success', 'Subuser berhasil dihapus.');
+        $subuser->delete(); // This will now perform a soft delete
+
+        return redirect()->route('admin.user.subuser.index', $redirectId)
+            ->with('success', 'Subuser berhasil dihapus.');
+    }
+
+    public function restore($subuserId)
+    {
+        $subuser = User::withTrashed()->findOrFail($subuserId);
+        $redirectId = $subuser->hotel_id
+            ? User::where('hotel_id', $subuser->hotel_id)->where('usertype', 'hotelnew')->value('id')
+            : User::where('resto_id', $subuser->resto_id)->where('usertype', 'restonew')->value('id');
+
+        $subuser->restore();
+
+        return redirect()->route('admin.user.subuser.index', $redirectId)
+            ->with('success', 'Subuser berhasil dipulihkan.');
     }
 
 }

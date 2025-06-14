@@ -23,9 +23,33 @@ class MigrasiController extends Controller
             return back()->with('error', 'Data hotel tidak ditemukan atau belum dikaitkan.');
         }
 
-        $uploadOrders = HotelUploadLog::where('hotel_id', $hotel->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = HotelUploadLog::where('hotel_id', $hotel->id)
+            ->where('type', 'booking');
+
+        // Handle sorting
+        $query->when(request('sort'), function ($query) {
+            $direction = request('direction') === 'asc' ? 'asc' : 'desc';
+            switch (request('sort')) {
+                case 'no':
+                    $query->orderBy('id', $direction);
+                    break;
+                case 'file_name':
+                    $query->orderBy('file_name', $direction);
+                    break;
+                case 'description':
+                    $query->orderBy('description', $direction);
+                    break;
+                case 'created_at':
+                    $query->orderBy('created_at', $direction);
+                    break;
+                default:
+                    $query->orderBy(request('sort'), $direction);
+            }
+        }, function ($query) {
+            $query->orderByDesc('created_at');
+        });
+
+        $uploadOrders = $query->get();
 
         return view('hotel.frontoffice.migrasi.index', compact('uploadOrders'));
     }
@@ -51,14 +75,24 @@ class MigrasiController extends Controller
         }
 
         try {
-            // 🔍 Validasi struktur kolom
+            // Validasi isi dan header
             $filePath = $request->file('file')->getRealPath();
             $spreadsheet = IOFactory::load($filePath);
+
+            if ($spreadsheet->getSheetCount() === 0) {
+                return back()->with('error', 'File tidak memiliki sheet aktif.');
+            }
+
             $sheet = $spreadsheet->getActiveSheet();
-            $headers = $sheet->rangeToArray('A1:Z1', NULL, TRUE, FALSE)[0];
+            $headers = $sheet->rangeToArray('A1:Z1', null, true, false)[0];
+
+            if (empty($headers) || count(array_filter($headers)) === 0) {
+                return back()->with('error', 'Baris header tidak ditemukan. Pastikan header berada di baris pertama.');
+            }
 
             $requiredHeaders = [
                 'booking_id',
+                // 'customer_name',
                 'no_of_adults',
                 'no_of_children',
                 'no_of_weekend_nights',
@@ -82,6 +116,7 @@ class MigrasiController extends Controller
                 }
             }
 
+            // Simpan log upload
             $uploadOrder = HotelUploadLog::create([
                 'hotel_id' => $hotel->id,
                 'user_id' => $user->id,
@@ -90,16 +125,26 @@ class MigrasiController extends Controller
                 'type' => 'booking',
             ]);
 
+            // Jalankan import
             Excel::import(
                 new BookingsImport($uploadOrder->id, $hotel->id, $user->id),
                 $request->file('file')
             );
 
+            $bookingCount = $uploadOrder->bookings()->count();
+
             return redirect()->route('hotel.frontoffice.migrasi.index')
-                ->with('success', 'Data berhasil diupload dan diproses.');
+                ->with('success', "Data berhasil diupload dan diproses. Total: $bookingCount booking.");
         } catch (Throwable $e) {
-            return back()->with('error', 'Terjadi kesalahan saat proses import: ' . $e->getMessage());
+            report($e); // log ke laravel.log
+            return back()->with('error', 'Terjadi kesalahan saat proses import. Silakan periksa file dan coba lagi.');
         }
+        // }
+        // catch (Throwable $e) {
+        //     report($e);
+        //     return back()->with('error', 'Gagal: ' . $e->getMessage());
+        // }
+
     }
 
     public function destroy($id)

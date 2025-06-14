@@ -14,6 +14,8 @@ class SharedCustomerHotelController extends Controller
 
     public function indexHotel(Request $request)
     {
+        // dd($request->all());
+
         $query = SharedCustomer::query();
 
         // Filter: hanya yang pernah punya transaksi dengan hotel yang sedang login
@@ -21,12 +23,41 @@ class SharedCustomerHotelController extends Controller
             $q->where('hotel_id', auth()->user()->hotel_id);
         });
 
-        // Optional: filter by search
+        // Apply search filter
         if ($request->has('search') && $request->search !== '') {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
         }
 
-        $customers = $query->paginate(10);
+        // Apply gender filter
+        if ($request->has('gender') && $request->gender !== '') {
+            $query->where('gender', $request->gender);
+        }
+
+        // Apply sorting
+        if ($request->has('sort') && $request->sort !== '') {
+            $sort = $request->sort;
+            $direction = $request->direction === 'asc' ? 'asc' : 'desc';
+            switch ($sort) {
+                case 'name':
+                case 'phone':
+                case 'email':
+                case 'gender':
+                case 'created_at':
+                    $query->orderBy($sort, $direction);
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+            }
+        } else {
+            $query->orderBy('created_at', 'desc'); // Default sort
+        }
+
+        $customers = $query->paginate(10)->appends($request->all());
 
         return view('hotel.shared_customers.index', compact('customers'));
     }
@@ -76,6 +107,6 @@ class SharedCustomerHotelController extends Controller
 
         $customer->update($validated);
 
-        return redirect()->route('hotel.shared_customers.index_hotel')->with('success', 'Pelanggan berhasil diperbarui.');
+        return redirect()->route('hotel.shared_customers.index')->with('success', 'Pelanggan berhasil diperbarui.');
     }
 }
