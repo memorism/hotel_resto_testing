@@ -174,7 +174,7 @@
                                     </td>
                                     <td class="px-6 py-4">{{ $customer->created_at->format('Y-m-d H:i:s') }}</td>
                                     <td class="px-6 py-4 text-center">
-                                        <x-action-dropdown :viewUrl="route('shared_customers.show', $customer->id)"
+                                        <x-dropdown-action :viewUrl="route('shared_customers.show', $customer->id)"
                                             :editUrl="route('shared_customers.edit', $customer->id)"
                                             :deleteUrl="route('shared_customers.destroy', $customer->id)" />
                                     </td>
