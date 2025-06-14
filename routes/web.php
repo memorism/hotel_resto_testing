@@ -55,6 +55,28 @@ use App\Http\Controllers\Resto\Scm\ScmTableController;
 use App\Http\Controllers\Hotel\FrontOffice\FOBookingImportController;
 
 
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/run-storage-link', function () {
+    Artisan::call('storage:link');
+    return 'Storage link created!';
+});
+
+
+Route::get('/run-sync-income', function () {
+    Artisan::call('sync:income-finances');
+    return 'Command sync:income-finances executed!';
+});
+
+Route::get('/run-sync-combined', function () {
+    Artisan::call('sync:combined-reports');
+    return 'Command sync:combined-reports executed!';
+});
+
+Route::get('/run-schedule', function () {
+    Artisan::call('schedule:run');
+    return 'Schedule run executed!';
+});
 
 // ======================= AUTH & PROFILE =======================
 Route::post('/logout', fn() => tap(Auth::logout(), fn() => redirect('/')));
