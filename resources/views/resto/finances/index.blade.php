@@ -226,7 +226,7 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="whitespace-nowrap px-3 py-4">
                                             <div class="flex items-center justify-center">
-                                                @if($f->approval_status === 'pending')
+                                                @if(isset($f) && $f->approval_status === 'pending')
                                                     <input type="checkbox"
                                                         class="finance-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                                         value="{{ $f->id }}">
@@ -237,7 +237,7 @@
                                             {{ ($finances->currentPage() - 1) * $finances->perPage() + $loop->iteration }}
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-4">
-                                            @if ($f->approval_status === 'pending')
+                                            @if(isset($f) && $f->approval_status === 'pending')
                                                 <span
                                                     class="inline-flex items-center rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
                                                     <svg class="mr-1.5 h-2 w-2 text-yellow-400" fill="currentColor"
@@ -246,7 +246,7 @@
                                                     </svg>
                                                     Menunggu
                                                 </span>
-                                            @elseif ($f->approval_status === 'approved')
+                                            @elseif(isset($f) && $f->approval_status === 'approved')
                                                 <span
                                                     class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-600/20">
                                                     <svg class="mr-1.5 h-2 w-2 text-green-400" fill="currentColor"
@@ -255,7 +255,7 @@
                                                     </svg>
                                                     Disetujui
                                                 </span>
-                                            @elseif ($f->approval_status === 'rejected')
+                                            @elseif(isset($f) && $f->approval_status === 'rejected')
                                                 <div>
                                                     <span
                                                         class="inline-flex items-center rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-800 ring-1 ring-inset ring-red-600/20">

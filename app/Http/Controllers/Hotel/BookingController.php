@@ -312,8 +312,8 @@ class BookingController extends Controller
             ->update([
                 'approval_status' => 'rejected',
                 'rejection_note' => $request->rejection_note,
-                'rejected_by' => auth()->id(),
-                'rejected_at' => now(),
+                // 'rejected_by' => auth()->id(),
+                // 'rejected_at' => now(),
             ]);
 
         return redirect()->back()->with('success', 'Booking yang dipilih berhasil ditolak.');

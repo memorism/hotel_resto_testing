@@ -406,7 +406,7 @@
                                                         </svg>
                                                         Ditolak
                                                     </span>
-                                                    @if ($f->rejection_note)
+                                                    @if ($order->rejection_note)
                                                         <div class="mt-1 text-xs text-red-600 italic">
                                                             {{ $order->rejection_note }}
                                                         </div>
