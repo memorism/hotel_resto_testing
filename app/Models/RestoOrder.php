@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class RestoOrder extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'order_date',
@@ -21,18 +19,33 @@ class RestoOrder extends Model
         'transaction_type',
         'received_by',
         'type_of_order',
-        'excel_upload_id'
+        'resto_upload_log_id',
+        'resto_id',
+        'customer_id',
+        'approval_status',
+        'approved_by',
+        'approved_at',
+        'rejection_note',
+
     ];
 
-    // Relasi dengan User
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi dengan ExcelUpload
-    public function excelUpload()
+    public function uploadLog()
     {
-        return $this->belongsTo(ExcelUpload::class, 'excel_upload_id');
+        return $this->belongsTo(RestoUploadLog::class, 'excel_upload_id');
     }
+
+    public function resto()
+    {
+        return $this->belongsTo(Resto::class, 'resto_id');
+    }
+    public function customer()
+    {
+        return $this->belongsTo(SharedCustomer::class, 'customer_id');
+    }
+
 }

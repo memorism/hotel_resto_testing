@@ -2,111 +2,123 @@
 
 namespace App\Http\Controllers\Hotel;
 
-use App\Http\Controllers\Controller;
-use App\Models\Booking;
-use App\Models\Room;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
+use App\Models\HotelBooking;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class OkupansiController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::id();
         $user = Auth::user();
+        $hotelId = $user->hotel_id;
 
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $status = $request->input('status');
 
-        // Filter data berdasarkan user login & tanggal
-        $query = Booking::where('user_id', $userId);
+        $query = HotelBooking::where('hotel_id', $hotelId);
 
-        $totalRooms = $user->rooms()->sum('total_rooms');
+        if ($status) {
+            $query->where('approval_status', $status);
+        }
+
 
         if ($startDate && $endDate) {
-            $query->whereBetween('arrival_year', [
-                Carbon::parse($startDate)->format('Y'),
-                Carbon::parse($endDate)->format('Y')
-            ])
-                ->whereBetween('arrival_month', [
-                    Carbon::parse($startDate)->format('m'),
-                    Carbon::parse($endDate)->format('m')
-                ])
-                ->whereBetween('arrival_date', [
-                    Carbon::parse($startDate)->format('d'),
-                    Carbon::parse($endDate)->format('d')
-                ]);
+            try {
+                $start = Carbon::parse($startDate)->startOfDay();
+                $end = Carbon::parse($endDate)->endOfDay();
+                $query->whereRaw("
+                STR_TO_DATE(CONCAT(arrival_year, '-', LPAD(arrival_month, 2, '0'), '-', LPAD(arrival_date, 2, '0')), '%Y-%m-%d')
+                BETWEEN ? AND ?
+            ", [$start->format('Y-m-d'), $end->format('Y-m-d')]);
+            } catch (\Exception $e) {
+                return redirect()->back()->withErrors(['Tanggal tidak valid.']);
+            }
         }
 
         $bookings = $query->get();
+        $totalRooms = $user->rooms()->sum('total_rooms');
 
-        // 1️⃣ Key Metrics
+        // Filter data
+        $confirmedBookings = $bookings->where('booking_status', 'Not_Canceled');
+        $canceledBookings = $bookings->where('booking_status', 'Canceled');
         $totalReservations = $bookings->count();
-        $totalReservations2 = $bookings->where('booking_status', 'Not_Canceled')->count();
-        $averageStay = $bookings->where('booking_status', 'Not_Canceled')
-        ->avg(fn($booking) => $booking->no_of_weekend_nights + $booking->no_of_week_nights);
-        $occupancyRate = ($totalReservations2 > 0 && $totalRooms > 0)
-            ? ($totalReservations2 / $totalRooms) * 100
-            : 0;
-        $cancellationRate = ($totalReservations2 > 0) ? ($bookings->where('booking_status', 'Canceled')->count() / $totalReservations2) * 100 : 0;
+        $confirmedCount = $confirmedBookings->count();
 
-        // 2️⃣ Okupansi Berdasarkan Hari Kedatangan
-        $weekdayOccupancy = $bookings->groupBy('arrival_date')->map(fn($row) => count($row))->toArray();
+        //  Key Metrics
+        $averageStay = $confirmedBookings->avg(fn($b) => $b->no_of_weekend_nights + $b->no_of_week_nights) ?? 0;
+        $occupancyRate = ($totalRooms > 0) ? ($confirmedCount / $totalRooms) * 100 : 0;
+        $cancellationRate = ($totalReservations > 0) ? ($canceledBookings->count() / $totalReservations) * 100 : 0;
+
+        //  Okupansi per hari (by arrival_date)
+        $weekdayOccupancy = $confirmedBookings->groupBy('arrival_date')
+            ->map(fn($group) => $group->count())->toArray();
         ksort($weekdayOccupancy);
-        
-        // 3️⃣ Rata-rata Lama Menginap per Bulan
-        $bookings->each(function ($booking) {
-            $booking->total_nights = $booking->no_of_weekend_nights + $booking->no_of_week_nights;
+
+        //  Hitung total_nights untuk avg stay per month
+        $bookings->each(function ($b) {
+            $b->total_nights = $b->no_of_weekend_nights + $b->no_of_week_nights;
         });
 
-        $avgStayPerMonth = $bookings->where('booking_status', 'Not_Canceled')
-        ->groupBy('arrival_month')
-        ->map(fn($row) => $row
-        ->avg('total_nights'))
-        ->toArray();
-        ksort($avgStayPerMonth); // Urutkan bulan
+        //  Lama menginap rata-rata per bulan
+        $avgStayPerMonth = $confirmedBookings
+            ->groupBy('arrival_month')
+            ->map(fn($rows) => $rows->avg('total_nights'))
+            ->toArray();
+        ksort($avgStayPerMonth);
 
-        // 4️⃣ Okupansi Berdasarkan Segmentasi Pasar
-        $topMarketSegments = $bookings->where('booking_status', 'Not_Canceled')
+        //  Segmentasi pasar (Top 5)
+        $topMarketSegments = $confirmedBookings
             ->groupBy('market_segment_type')
-            ->map(fn($row) => count($row))
+            ->map(fn($rows) => count($rows))
             ->sortDesc()
             ->take(5)
             ->toArray();
 
-        // 5️⃣ Rasio Pembatalan per Bulan
-        $cancellationRatio = $bookings->groupBy('arrival_month')
-            ->map(fn($row) => count($row) > 0 ? $row
-            ->where('booking_status', 'Canceled')->count() / count($row) : 0)->toArray();
+        //  Rasio pembatalan per bulan
+        $cancellationRatio = $bookings
+            ->groupBy('arrival_month')
+            ->map(
+                fn($rows) => count($rows) > 0
+                ? ($rows->where('booking_status', 'Canceled')->count() / count($rows)) * 100
+                : 0
+            )->toArray();
         ksort($cancellationRatio);
 
-        // 4️⃣ Okupansi Berdasarkan Tipe Kamar
-        $roomTypeDistribution = $bookings->where('booking_status', 'Not_Canceled')
+        // Distribusi tipe kamar
+        $roomTypeDistribution = $confirmedBookings
             ->groupBy('room_type_reserved')
-            ->map(fn($row) => count($row))
+            ->map(fn($rows) => count($rows))
             ->sortDesc()
             ->toArray();
 
-        $monthlyOccupancy = $bookings->where('booking_status', 'Not_Canceled')
+        //  Jumlah booking per bulan
+        $monthlyOccupancy = $confirmedBookings
             ->groupBy('arrival_month')
-            ->map(fn($row) => count($row))
+            ->map(fn($rows) => count($rows))
             ->toArray();
         ksort($monthlyOccupancy);
 
-        $occupancyRatePerMonth = $bookings->groupBy('arrival_month')->map(function ($rows) {
-            $total = count($rows);
-            $notCanceled = $rows->where('booking_status', 'Not_Canceled')->count();
-            return $total > 0 ? ($notCanceled / $total) * 100 : 0;
-        })->toArray();
+        //  Tingkat okupansi per bulan (dalam persen)
+        $occupancyRatePerMonth = $bookings
+            ->groupBy('arrival_month')
+            ->map(function ($rows) {
+                $total = count($rows);
+                $confirmed = $rows->where('booking_status', 'Not_Canceled')->count();
+                return $total > 0 ? ($confirmed / $total) * 100 : 0;
+            })->toArray();
         ksort($occupancyRatePerMonth);
 
-        $totalWeekNights = $bookings->where('booking_status', 'Not_Canceled')
-            ->sum('no_of_week_nights');
-        $totalWeekendNights = $bookings->where('booking_status', 'Not_Canceled')
-            ->sum('no_of_weekend_nights');
+        //  Total malam weekday & weekend
+        $totalWeekNights = $confirmedBookings->sum('no_of_week_nights');
+        $totalWeekendNights = $confirmedBookings->sum('no_of_weekend_nights');
 
         return view('hotel.okupansi', [
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'totalReservations' => $totalReservations,
             'averageStay' => $averageStay,
             'occupancyRate' => $occupancyRate,
@@ -120,9 +132,8 @@ class OkupansiController extends Controller
             'occupancyRatePerMonth' => $occupancyRatePerMonth,
             'totalWeekNights' => $totalWeekNights,
             'totalWeekendNights' => $totalWeekendNights,
-            'startDate' => $startDate,
-            'endDate' => $endDate
+            'status' => $status,
         ]);
     }
-}
 
+}

@@ -39,7 +39,7 @@
                             <label for="per_page" class="ml-2">data</label>
                         </div>
                         <div class="flex items-center">
-                            <form action="{{ route('hotel.booking.booking') }}" method="GET" class="flex">
+                            <form action="{{ route('hotel.booking.index') }}" method="GET" class="flex">
                                 <input type="text" name="search" id="search" class="form-input form-input-sm"
                                     placeholder="Nama File" value="{{ request('search') }}">
                                 <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
@@ -49,9 +49,9 @@
 
                     </div>
 
-                    <div class="min-w-full align-middle">
-                        <table class="min-w-full border divide-y divide-gray-200">
-                            <thead>
+                    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                        <table class="w-full text-sm text-left rtl:text-right text-black-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th class="text-center px-4 py-2">No</th>
                                     <th class="text-center px-4 py-2">Nama File</th>

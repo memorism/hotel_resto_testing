@@ -3,51 +3,56 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hotel;
+use App\Models\Resto;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Booking;
-use App\Charts\AdminDashboardChart;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil user_id dari request
-        $selectedUserId = $request->input('user_id');
+        $hotelCount = Hotel::count();
+        $restoCount = Resto::count();
 
-        // Ambil jumlah hotel dan resto
-        $hotelCount = User::where('usertype', 'hotel')->count();
-        $restoCount = User::where('usertype', 'resto')->count();
+        // Ambil semua hotel & resto
+        $hotels = Hotel::with([
+            'bookings' => function ($q) {
+                $q->orderByDesc('updated_at');
+            }
+        ])->get();
 
-        $restoUsers = User::where('usertype', 'resto')->with('orders')->get();
-        $hotelUsers = User::where('usertype', 'hotel')->with('bookings')->get();
+        $restos = Resto::with([
+            'orders' => function ($q) {
+                $q->orderByDesc('updated_at');
+            }
+        ])->get();
 
-        $restoStats = $restoUsers->map(function ($user) {
-            $lastOrder = $user->orders->sortByDesc('updated_at')->first();
+        // Statistik per hotel
+        $hotelStats = $hotels->map(function ($hotel) {
+            $lastBooking = $hotel->bookings->first(); // Sudah terurut descending
             return [
-                'name' => $user->name,
-                'last_updated' => $lastOrder ? $lastOrder->updated_at->diffForHumans() : 'Belum pernah menginput data',
-            ];
-        });
-        
-
-        $hotelStats = $hotelUsers->map(function ($user) {
-            $lastBooking = $user->bookings->sortByDesc('updated_at')->first();
-            return [
-                'name' => $user->name,
+                'name' => $hotel->name,
                 'last_updated' => $lastBooking ? $lastBooking->updated_at->diffForHumans() : 'Belum pernah menginput data',
             ];
         });
 
+        // Statistik per resto
+        $restoStats = $restos->map(function ($resto) {
+            $lastOrder = $resto->orders->first(); // Sudah terurut descending
+            return [
+                'name' => $resto->name,
+                'last_updated' => $lastOrder ? $lastOrder->updated_at->diffForHumans() : 'Belum pernah menginput data',
+            ];
+        });
 
+        return view('admin.dashboard', compact(
+            'hotelCount',
+            'restoCount',
+            'hotelStats',
+            'restoStats'
+        ));
+    }
 
-
-        // Kirim data ke view
-        return view('admin.dashboard')->with([
-            'hotelCount' => $hotelCount,
-            'restoCount' => $restoCount,
-            'restoStats' => $restoStats,
-            'hotelStats' => $hotelStats,
-        ]);
-            }
 }

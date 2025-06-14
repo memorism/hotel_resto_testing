@@ -38,11 +38,11 @@
                         <span class="ml-2 text-sm text-gray-600">{{ __('Ingat saya') }}</span>
                     </label>
 
-                    @if (Route::has('password.request'))
+                    {{-- @if (Route::has('password.request'))
                         <a class="text-sm text-indigo-600 hover:underline" href="{{ route('password.request') }}">
                             {{ __('Lupa password?') }}
                         </a>
-                    @endif
+                    @endif --}}
                 </div>
 
                 <!-- Submit -->

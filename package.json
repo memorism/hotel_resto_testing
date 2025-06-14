@@ -17,6 +17,7 @@
         "vite": "^6.0"
     },
     "dependencies": {
-        "chart.js": "^4.4.7"
+        "chart.js": "^4.4.7",
+        "tom-select": "^2.4.3"
     }
 }

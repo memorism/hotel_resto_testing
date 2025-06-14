@@ -1,178 +1,107 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Edit Booking') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-gray-800">
+                {{ __('Edit Data Transaksi Hotel') }}
+            </h2>
+            {{-- <a href="{{ route('hotel.booking.index') }}" 
+                class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors duration-150 ease-in-out">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Kembali
+            </a> --}}
+        </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white rounded-xl shadow-sm">
+                <div class="p-6">
                     <form action="{{ route('hotel.booking.update', $booking->id) }}" method="POST">
                         @csrf
                         @method('PUT')
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                            <!-- File Name -->
-                            <div class="form-group">
-                                <label for="file_name" class="block text-sm font-medium text-gray-700">Nama File</label>
-                                <input type="text" name="file_name" id="file_name" class="form-control"
-                                    value="{{ $booking->uploadOrder->file_name }}" readonly>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Customer Information Section -->
+                            <div class="md:col-span-2 bg-gray-50 rounded-xl p-6 border border-gray-200 mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Pelanggan</h3>
+                                <div class="flex-1">
+                                    <x-form.input 
+                                        name="customer_name" 
+                                        label="Nama Pelanggan" 
+                                        :value="optional($booking->customer)->name . ' - ' . optional($booking->customer)->phone" 
+                                        readonly 
+                                    />
+                                </div>
                             </div>
 
-                            <!-- Booking ID -->
-                            <div class="form-group">
-                                <label for="booking_id" class="block text-sm font-medium text-gray-700">ID Pemesanan</label>
-                                <input type="text" name="booking_id" id="booking_id" class="form-control"
-                                    value="{{ $booking->booking_id }}" readonly>
+                            <!-- Guest Information Section -->
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Tamu</h3>
+                                <x-form.input name="no_of_adults" label="Jumlah Dewasa" type="number" :value="$booking->no_of_adults" required />
+                                <x-form.input name="no_of_children" label="Jumlah Anak-anak" type="number" :value="$booking->no_of_children" required />
+                                <x-form.input name="no_of_weekend_nights" label="Malam Akhir Pekan" type="number" :value="$booking->no_of_weekend_nights" required />
+                                <x-form.input name="no_of_week_nights" label="Malam Hari Kerja" type="number" :value="$booking->no_of_week_nights" required />
                             </div>
 
-                            <!-- No of Adults -->
-                            <div class="form-group">
-                                <label for="no_of_adults" class="block text-sm font-medium text-gray-700">Jumlah Dewasa</label>
-                                <input type="number" name="no_of_adults" id="no_of_adults" class="form-control"
-                                    value="{{ $booking->no_of_adults }}" required>
+                            <!-- Room & Services Section -->
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Kamar & Layanan</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Kamar</label>
+                                        <select name="room_type_reserved" id="room_type_reserved"
+                                            class="w-full rounded-lg p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                            <option value="">Pilih Tipe Kamar</option>
+                                            @foreach($hotelRooms as $hotelRoom)
+                                                <option value="{{ $hotelRoom->id }}"
+                                                    {{ $booking->room_type_reserved == $hotelRoom->id ? 'selected' : '' }}>
+                                                    {{ $hotelRoom->room_type }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <x-form.select name="type_of_meal_plan" label="Sarapan" 
+                                        :options="['breakfast' => 'Sarapan', 'Not_breakfast' => 'Tidak Sarapan']" 
+                                        :selected="$booking->type_of_meal_plan" required />
+                                    <x-form.select name="required_car_parking_space" label="Butuh Parkir" 
+                                        :options="[1 => 'Ya', 0 => 'Tidak']" 
+                                        :selected="$booking->required_car_parking_space" required />
+                                </div>
                             </div>
 
-                            <!-- No of Children -->
-                            <div class="form-group">
-                                <label for="no_of_children" class="block text-sm font-medium text-gray-700">Jumlah Anak-anak</label>
-                                <input type="number" name="no_of_children" id="no_of_children" class="form-control"
-                                    value="{{ $booking->no_of_children }}" required>
+                            <!-- Booking Details Section -->
+                            <div class="md:col-span-2 bg-gray-50 rounded-xl p-6 border border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Detail Pemesanan</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <x-form.input name="lead_time" label="Waktu Tunggu (hari)" type="number" :value="$booking->lead_time" required />
+                                    <x-form.input name="arrival_date_full" label="Tanggal Kedatangan" type="date"
+                                        :value="old('arrival_date_full', sprintf('%04d-%02d-%02d', $booking->arrival_year, $booking->arrival_month, $booking->arrival_date))" required />
+                                    <x-form.input name="market_segment_type" label="Segmen Pasar" :value="$booking->market_segment_type" required />
+                                    <x-form.input name="avg_price_per_room" label="Harga Rata-rata Kamar" type="number" :value="$booking->avg_price_per_room" required />
+                                    <x-form.input name="no_of_special_requests" label="Jumlah Permintaan Khusus" type="number" :value="$booking->no_of_special_requests" required />
+                                    <x-form.select name="booking_status" label="Status Pemesanan" 
+                                        :options="['Canceled' => 'Batalkan', 'Not_Canceled' => 'Tidak dibatalkan']" 
+                                        :selected="$booking->booking_status" required />
+                                </div>
                             </div>
-
-                            <!-- No of Weekend Nights -->
-                            <div class="form-group">
-                                <label for="no_of_weekend_nights" class="block text-sm font-medium text-gray-700">Malam Akhir Pekan</label>
-                                <input type="number" name="no_of_weekend_nights" id="no_of_weekend_nights"
-                                    class="form-control" value="{{ $booking->no_of_weekend_nights }}" required>
-                            </div>
-
-                            <!-- No of Week Nights -->
-                            <div class="form-group">
-                                <label for="no_of_week_nights" class="block text-sm font-medium text-gray-700">Malam Hari Kerja</label>
-                                <input type="number" name="no_of_week_nights" id="no_of_week_nights" class="form-control"
-                                    value="{{ $booking->no_of_week_nights }}" required>
-                            </div>
-
-                            <!-- Type of Meal Plan -->
-                            <div class="form-group">
-                                <label for="type_of_meal_plan" class="block text-sm font-medium text-gray-700">Tipe Paket Makanan</label>
-                                <input type="text" name="type_of_meal_plan" id="type_of_meal_plan" class="form-control"
-                                    value="{{ $booking->type_of_meal_plan }}" required>
-                            </div>
-
-                            <!-- Required Car Parking Space -->
-                            <div class="form-group">
-                                <label for="required_car_parking_space" class="block text-sm font-medium text-gray-700">Butuh Parkir</label>
-                                <select name="required_car_parking_space" id="required_car_parking_space"
-                                    class="form-control" required>
-                                    <option value="1" {{ $booking->required_car_parking_space == 1 ? 'selected' : '' }}>Yes</option>
-                                    <option value="0" {{ $booking->required_car_parking_space == 0 ? 'selected' : '' }}>No</option>
-                                </select>
-                            </div>
-
-                            <!-- Room Type Reserved -->
-                            <div class="form-group">
-                                <label for="room_type_reserved" class="block text-sm font-medium text-gray-700">Tipe Kamar</label>
-                                <input type="text" name="room_type_reserved" id="room_type_reserved" class="form-control"
-                                    value="{{ $booking->room_type_reserved }}" required>
-                            </div>
-
-                            <!-- Lead Time -->
-                            <div class="form-group">
-                                <label for="lead_time" class="block text-sm font-medium text-gray-700">Waktu Tunggu</label>
-                                <input type="number" name="lead_time" id="lead_time" class="form-control"
-                                    value="{{ $booking->lead_time }}" required>
-                            </div>
-
-                            <!-- Arrival Year -->
-                            <div class="form-group">
-                                <label for="arrival_year" class="block text-sm font-medium text-gray-700">Tahun Kedatangan</label>
-                                <input type="number" name="arrival_year" id="arrival_year" class="form-control"
-                                    value="{{ $booking->arrival_year }}" required>
-                            </div>
-
-                            <!-- Arrival Month -->
-                            <div class="form-group">
-                                <label for="arrival_month" class="block text-sm font-medium text-gray-700">Bulan Kedatangan</label>
-                                <input type="number" name="arrival_month" id="arrival_month" class="form-control"
-                                    value="{{ $booking->arrival_month }}" required>
-                            </div>
-
-                            <!-- Arrival Date -->
-                            <div class="form-group">
-                                <label for="arrival_date" class="block text-sm font-medium text-gray-700">Tanggal Kedatangan</label>
-                                <input type="number" name="arrival_date" id="arrival_date" class="form-control"
-                                    value="{{ $booking->arrival_date }}" required>
-                            </div>
-
-                            <!-- Market Segment Type -->
-                            <div class="form-group">
-                                <label for="market_segment_type" class="block text-sm font-medium text-gray-700">Segmen Pasar</label>
-                                <input type="text" name="market_segment_type" id="market_segment_type" class="form-control"
-                                    value="{{ $booking->market_segment_type }}" required>
-                            </div>
-
-                            <!-- Repeated Guest -->
-                            <div class="form-group">
-                                <label for="repeated_guest" class="block text-sm font-medium text-gray-700">Tamu Berulang</label>
-                                <select name="repeated_guest" id="repeated_guest" class="form-control" required>
-                                    <option value="1" {{ $booking->repeated_guest == 1 ? 'selected' : '' }}>Yes</option>
-                                    <option value="0" {{ $booking->repeated_guest == 0 ? 'selected' : '' }}>No</option>
-                                </select>
-                            </div>
-
-                            <!-- No of Previous Cancellations -->
-                            <div class="form-group">
-                                <label for="no_of_previous_cancellations" class="block text-sm font-medium text-gray-700"> Jumlah Pembatalan Sebelumnya</label>
-                                <input type="number" name="no_of_previous_cancellations" id="no_of_previous_cancellations"
-                                    class="form-control" value="{{ $booking->no_of_previous_cancellations }}" required>
-                            </div>
-
-                            <!-- No of Previous Bookings Not Canceled -->
-                            <div class="form-group">
-                                <label for="no_of_previous_bookings_not_canceled" class="block text-sm font-medium text-gray-700">Jumlah Pemesanan Sebelumnya</label>
-                                <input type="number" name="no_of_previous_bookings_not_canceled"
-                                    id="no_of_previous_bookings_not_canceled" class="form-control"
-                                    value="{{ $booking->no_of_previous_bookings_not_canceled }}" required>
-                            </div>
-
-                            <!-- Average Price Per Room -->
-                            <div class="form-group">
-                                <label for="avg_price_per_room" class="block text-sm font-medium text-gray-700">Harga Rata-rata Kamar</label>
-                                <input type="number" name="avg_price_per_room" id="avg_price_per_room" class="form-control"
-                                    value="{{ $booking->avg_price_per_room }}" required>
-                            </div>
-
-                            <!-- No of Special Requests -->
-                            <div class="form-group">
-                                <label for="no_of_special_requests" class="block text-sm font-medium text-gray-700">Permintaan Khusus</label>
-                                <input type="number" name="no_of_special_requests" id="no_of_special_requests"
-                                    class="form-control" value="{{ $booking->no_of_special_requests }}" required>
-                            </div>
-
-                            <!-- Booking Status -->
-                            <div class="form-group">
-                                <label for="booking_status" class="block text-sm font-medium text-gray-700">Status Pemesanan</label>
-                                <input type="text" name="booking_status" id="booking_status" class="form-control"
-                                    value="{{ $booking->booking_status }}" required>
-                            </div>
-
                         </div>
 
-                        <!-- Submit Button -->
-                        <div class="flex items-center justify-end mt-4">
-                            <a href="{{ url()->previous() }}"
-                                class="ms-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-md shadow-md">
-                                {{ __('Kembali') }}
+                        <div class="mt-8 flex justify-end gap-4">
+                            <a href="{{ route('hotel.booking.index') }}"
+                                class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-lg transition-colors duration-150 ease-in-out">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Batal
                             </a>
-
                             <button type="submit"
-                                class="ms-4 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md shadow-md">
-                                {{ __('Edit data') }}
+                                class="inline-flex items-center px-6 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-150 ease-in-out">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Simpan Perubahan
                             </button>
                         </div>
                     </form>

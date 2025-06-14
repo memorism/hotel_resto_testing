@@ -6,51 +6,64 @@ use App\Models\RestoOrder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Models\ExcelUpload;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-
+use App\Models\RestoUploadLog;
+use App\Models\SharedCustomer;
 
 class RestoOrderController extends Controller
 {
-    // Menampilkan daftar pesanan hanya untuk user yang login
     public function index(Request $request)
     {
-        $userId = Auth::id(); // Mengambil ID user yang sedang login
+        $restoId = auth()->user()->resto_id;
 
-        // Ambil per halaman dari parameter (default 10)
-        $perPage = $request->get('perPage', 10);
-
-        // Menangani pencarian hanya untuk data milik user yang sedang login
-        $orders = RestoOrder::with('excelUpload')
-            ->where('user_id', $userId)
-            ->when($request->has('search'), function ($query) use ($request) {
-                return $query->where('item_name', 'like', '%' . $request->search . '%')
-                    ->orWhere('item_type', 'like', '%' . $request->search . '%')
-                    ->orWhere('transaction_type', 'like', '%' . $request->search . '%')
-                    ->orWhere('type_of_order', 'like', '%' . $request->search . '%')
-                    ->orWhere('order_date', 'like', '%' . $request->search . '%')
-                    ->orWhere('time_order', 'like', '%' . $request->search . '%')
-                    ->orWhere('received_by', 'like', '%' . $request->search . '%');
+        $orders = RestoOrder::with(['uploadLog', 'customer'])
+            ->where('resto_id', $restoId)
+            ->when($request->status, fn($q) => $q->where('approval_status', $request->status))
+            ->when($request->start_date, fn($q) => $q->whereDate('order_date', '>=', $request->start_date))
+            ->when($request->end_date, fn($q) => $q->whereDate('order_date', '<=', $request->end_date))
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('item_name', 'like', "%$search%")
+                        ->orWhere('transaction_type', 'like', "%$search%")
+                        ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%$search%"));
+                });
             })
-            ->paginate($perPage);
+            ->when($request->sort, function ($query) use ($request) {
+                $direction = $request->direction === 'asc' ? 'asc' : 'desc';
+
+                switch ($request->sort) {
+                    case 'customer_name':
+                        $query->join('shared_customers', 'resto_orders.customer_id', '=', 'shared_customers.id')
+                            ->orderBy('shared_customers.name', $direction);
+                        break;
+                    case 'no':
+                        $query->orderBy('id', $direction);
+                        break;
+                    default:
+                        $query->orderBy($request->sort, $direction);
+                }
+            }, function ($query) {
+                $query->latest();
+            })
+            ->paginate(10)
+            ->appends($request->all());
 
         return view('resto.orders.index', compact('orders'));
     }
 
-    // Menampilkan form tambah pesanan
     public function create()
     {
-        $uploads = ExcelUpload::where('user_id', auth()->id())->get(); // Ambil hanya file milik user yang login
-        return view('resto.orders.create', compact('uploads'));
+        $restoId = auth()->user()->resto_id;
+        $uploads = RestoUploadLog::where('resto_id', $restoId)->get();
+        $customers = SharedCustomer::orderBy('name')->get();
+
+        return view('resto.orders.create', compact('uploads', 'customers'));
     }
 
-
-    // Menyimpan pesanan baru
     public function store(Request $request)
     {
-        $request->validate([
-            'excel_upload_id' => 'required|exists:excel_uploads,id',
+        $validated = $request->validate([
+            'customer_id' => 'nullable|exists:shared_customers,id',
+            'excel_upload_id' => 'nullable|exists:resto_upload_logs,id',
             'order_date' => 'required|date',
             'time_order' => 'required|date_format:H:i',
             'item_name' => 'required|string',
@@ -59,118 +72,157 @@ class RestoOrderController extends Controller
             'quantity' => 'required|integer',
             'transaction_amount' => 'required|integer',
             'transaction_type' => 'required|string',
-            'received_by' => 'required|string',
             'type_of_order' => 'required|string',
         ]);
 
-        RestoOrder::create([
-            'user_id' => Auth::id(),
-            'excel_upload_id' => $request->excel_upload_id, // Menyimpan file yang dipilih
-            'order_date' => $request->order_date,
-            'time_order' => $request->time_order,
-            'item_name' => $request->item_name,
-            'item_type' => $request->item_type,
-            'item_price' => $request->item_price,
-            'quantity' => $request->quantity,
-            'transaction_amount' => $request->transaction_amount,
-            'transaction_type' => $request->transaction_type,
-            'received_by' => $request->received_by,
-            'type_of_order' => $request->type_of_order,
-        ]);
+        $validated['user_id'] = auth()->id();
+        $validated['resto_id'] = auth()->user()->resto_id;
+        $validated['approval_status'] = 'pending';
+
+        if ($request->filled('customer_id')) {
+            $customer = SharedCustomer::find($request->customer_id);
+            $validated['received_by'] = $customer->gender ?? 'Unknown';
+        } else {
+            $validated['received_by'] = 'Unknown';
+        }
+
+        RestoOrder::create($validated);
 
         return redirect()->route('resto.orders.index')->with('success', 'Pesanan berhasil ditambahkan!');
     }
 
-
-    // Menampilkan detail pesanan hanya jika pesanan milik user yang login
-    public function show($id)
-    {
-        $order = RestoOrder::where('id', $id)->where('user_id', Auth::id())->first();
-
-        if (!$order) {
-            return response()->json(['message' => 'Pesanan tidak ditemukan atau tidak memiliki akses'], 403);
-        }
-
-        return response()->json($order);
-    }
-
-    // Menampilkan form edit hanya jika pesanan milik user yang login
     public function edit(RestoOrder $order)
     {
-        // Pastikan hanya user yang memiliki pesanan bisa mengedit
-        if ($order->user_id != Auth::id()) {
-            return abort(403, 'Anda tidak memiliki akses untuk mengedit pesanan ini.');
-        }
+        $this->authorizeAccess($order);
 
-        // Ambil daftar file yang telah diupload oleh user untuk ditampilkan di dropdown
-        $uploads = ExcelUpload::where('user_id', Auth::id())->get();
+        $uploads = RestoUploadLog::where('resto_id', auth()->user()->resto_id)->get();
+        $customers = SharedCustomer::orderBy('name')->get();
 
-        return view('resto.orders.edit', compact('order', 'uploads'));
+        return view('resto.orders.edit', compact('order', 'uploads', 'customers'));
     }
 
-
-    // Memperbarui data pesanan hanya jika pesanan milik user yang login
     public function update(Request $request, RestoOrder $order)
     {
-        // Pastikan pesanan hanya bisa diubah oleh user yang memilikinya
-        if ($order->user_id != auth()->id()) {
-            return redirect()->route('resto.orders.index')->with('error', 'Unauthorized access');
-        }
+        $this->authorizeAccess($order);
 
-        // Validasi data (pastikan time_order bisa menerima format yang benar)
         $validated = $request->validate([
+            'customer_id' => 'nullable|exists:shared_customers,id',
             'order_date' => 'required|date',
-            'time_order' => 'required|date_format:H:i:s', // Pastikan format mencakup detik
+            'time_order' => 'required|date_format:H:i',
             'item_name' => 'required|string',
             'item_type' => 'required|string',
             'item_price' => 'required|integer',
             'quantity' => 'required|integer',
             'transaction_amount' => 'required|integer',
             'transaction_type' => 'required|string',
-            'received_by' => 'required|string',
             'type_of_order' => 'required|string',
         ]);
 
+        $validated['approval_status'] = 'pending';
+        $validated['approved_by'] = null;
+        $validated['approved_at'] = null;
+        $validated['rejection_note'] = null;
 
-        // Pastikan file yang digunakan milik user yang sedang login
-        if ($order->excel_upload_id) {
-            $file = $order->excelUpload;
-            if (!$file || $file->user_id != auth()->id()) {
-                return redirect()->back()->with('error', 'Anda tidak memiliki akses ke file ini.');
-            }
+        if ($request->filled('customer_id')) {
+            $customer = SharedCustomer::find($request->customer_id);
+            $validated['received_by'] = $customer->gender ?? 'Unknown';
+        } else {
+            $validated['received_by'] = 'Unknown';
         }
 
-        // Update data pesanan
-        $order->update($request->only([
-            'order_date',
-            'time_order',
-            'item_name',
-            'item_type',
-            'item_price',
-            'quantity',
-            'transaction_amount',
-            'transaction_type',
-            'received_by',
-            'type_of_order'
-        ]));
+        $order->update($validated);
 
         return redirect()->route('resto.orders.index')->with('success', 'Pesanan berhasil diperbarui!');
     }
 
-
-
-
-    // Menghapus pesanan hanya jika pesanan milik user yang login
     public function destroy($id)
     {
-        $order = RestoOrder::where('id', $id)->where('user_id', Auth::id())->first();
-
-        if (!$order) {
-            return abort(403, 'Anda tidak memiliki akses untuk menghapus pesanan ini.');
-        }
+        $order = RestoOrder::where('id', $id)
+            ->where('resto_id', auth()->user()->resto_id)
+            ->firstOrFail();
 
         $order->delete();
+
         return redirect()->route('resto.orders.index')->with('success', 'Pesanan berhasil dihapus!');
+    }
+
+    public function approve($id)
+    {
+        $order = RestoOrder::where('id', $id)->where('resto_id', auth()->user()->resto_id)->firstOrFail();
+
+        $order->update([
+            'approval_status' => 'approved',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+            'rejection_note' => null,
+        ]);
+
+        return back()->with('success', 'Pesanan berhasil disetujui.');
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'rejection_note' => 'required|string|max:1000',
+        ]);
+
+        $order = RestoOrder::where('id', $id)->where('resto_id', auth()->user()->resto_id)->firstOrFail();
+
+        $order->update([
+            'approval_status' => 'rejected',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+            'rejection_note' => $request->rejection_note,
+        ]);
+
+        return back()->with('success', 'Pesanan berhasil ditolak dengan catatan.');
+    }
+
+    private function authorizeAccess(RestoOrder $order)
+    {
+        if ($order->resto_id !== auth()->user()->resto_id) {
+            abort(403, 'Akses tidak diizinkan.');
+        }
+    }
+
+    public function bulkApprove(Request $request)
+    {
+        $ids = $request->input('selected_orders', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $updated = RestoOrder::whereIn('id', $ids)
+            ->where('approval_status', 'pending')
+            ->update([
+                'approval_status' => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+
+        return back()->with('success', "$updated pesanan berhasil disetujui.");
+    }
+
+    public function bulkReject(Request $request)
+    {
+        $ids = $request->input('selected_orders', []);
+        $note = $request->input('rejection_note');
+
+        if (empty($ids) || empty($note)) {
+            return back()->with('error', 'Pilih data dan isi alasan penolakan.');
+        }
+
+        $updated = RestoOrder::whereIn('id', $ids)
+            ->where('approval_status', 'pending')
+            ->update([
+                'approval_status' => 'rejected',
+                'rejection_note' => $note,
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+
+        return back()->with('success', "$updated pesanan berhasil ditolak.");
     }
 
 }

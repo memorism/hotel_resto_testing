@@ -25,22 +25,32 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        if(Auth::user()->usertype == 'admin') {
-            return redirect(route('admin.dashboard'));
-        }
-        elseif(Auth::user()->usertype == 'resto') {
-            return redirect(route('resto.dashboard'));
-        }
-        elseif(Auth::user()->usertype == 'hotel') {
-            return redirect(route('hotel.dashboard'));
-        }
-        
-        return redirect()->intended(route('dashboard', absolute: false));
-    }
+        $user = Auth::user();
 
+        if ($user->usertype == 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->usertype == 'restonew') {
+            return redirect()->route('resto.dashboard');
+        } elseif ($user->usertype == 'hotelnew') {
+            return redirect()->route('hotel.dashboard');
+        } elseif ($user->usertype == 'frontofficehotel') {
+            return redirect()->route('hotel.frontoffice.booking.index');
+        } elseif ($user->usertype == 'financehotel') {
+            return redirect()->route('finance.index');
+        } elseif ($user->usertype == 'scmhotel') {
+            return redirect()->route('scm.supplies.index');
+        } elseif ($user->usertype == 'cashierresto') {
+            return redirect()->route('cashierresto.orders.index');
+        } elseif ($user->usertype == 'financeresto') {
+            return redirect()->route('financeresto.finances.index');
+        } elseif ($user->usertype == 'scmresto') {
+            return redirect()->route('scmresto.supplies.index');
+        }
+
+        return redirect()->route('dashboard'); // fallback jika usertype tidak dikenali
+    }
     /**
      * Destroy an authenticated session.
      */
@@ -49,7 +59,6 @@ class AuthenticatedSessionController extends Controller
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

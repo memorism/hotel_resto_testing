@@ -40,27 +40,35 @@
                         <x-nav-link href="{{ route('admin.user.user') }}" :active="request()->routeIs('admin.user.user')">
                             {{ __('User') }}
                         </x-nav-link>
+
+                        <x-nav-link href="{{ route('admin.resto.index') }}" :active="request()->routeIs('admin.resto.index')">
+                            {{ __('Restaurant') }}
+                        </x-nav-link>
+
+                        <x-nav-link href="{{ route('admin.hotel.index') }}" :active="request()->routeIs('admin.hotel.index')">
+                            {{ __('Hotel') }}
+                        </x-nav-link>
                     @endif
 
-                    @if (Auth::user()->usertype == 'hotel')
+                    @if (Auth::user()->usertype == 'hotelnew')
                         <x-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
                         <x-nav-link href="{{ route('hotel.okupansi') }}" :active="request()->routeIs('hotel.okupansi')">
                             {{ __('Okupansi') }}
                         </x-nav-link>
-                        <x-nav-link href="{{ route('hotel.rooms.rooms') }}" :active="request()->routeIs('hotel.rooms.rooms')">
+                        <x-nav-link href="{{ route('hotel.rooms.index') }}" :active="request()->routeIs('hotel.rooms.index')">
                             {{ __('Kamar') }}
                         </x-nav-link>
                         <x-nav-link href="{{ route('hotel.databooking.index') }}" :active="request()->routeIs('hotel.databooking.index')">
                             {{ __('Data Unggah') }}
                         </x-nav-link>
-                        <x-nav-link href="{{ route('hotel.booking.booking') }}" :active="request()->routeIs('hotel.booking.booking')">
+                        <x-nav-link href="{{ route('hotel.booking.index') }}" :active="request()->routeIs('hotel.booking.index')">
                             {{ __('Data Keseluruhan') }}
                         </x-nav-link>
                     @endif
 
-                    @if (Auth::user()->usertype == 'resto')
+                    @if (Auth::user()->usertype == 'restonew')
                         <x-nav-link href="{{ route('resto.dashboard') }}" :active="request()->routeIs('resto.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
@@ -72,6 +80,36 @@
                         </x-nav-link>
                         <x-nav-link href="{{ route('resto.orders.index') }}" :active="request()->routeIs('resto.orders.index')">
                             {{ __('Data Keseluruhan') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->usertype == 'frontofficehotel')
+                        <x-nav-link href="{{ route('hotel.frontoffice.booking.index') }}" :active="request()->routeIs('hotel.frontoffice.booking.index')">
+                            {{ __('Data Transaksi') }}
+                        </x-nav-link>
+
+                        <x-nav-link href="{{ route('hotel.frontoffice.migrasi.index') }}" :active="request()->routeIs('hotel.frontoffice.migrasi.index')">
+                            {{ __('Data Migrasi') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->usertype == 'financehotel')
+                        <x-nav-link href="{{ route('finance.index') }}" :active="request()->routeIs('finance.index')">
+                            {{ __('Data Transaksi') }}
+                        </x-nav-link>
+            
+                        <x-nav-link href="{{ route('finance.migrasi.index') }}" :active="request()->routeIs('finance.migrasi.index')">
+                            {{ __('Data Migrasi') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->usertype == 'scmhotel')
+                        <x-nav-link href="{{ route('scm.supplies.index') }}" :active="request()->routeIs('scm.supplies.index')">
+                            {{ __('Manajemen Inventori') }}
+                        </x-nav-link>
+            
+                        <x-nav-link href="{{ route('scm.transactions.index') }}" :active="request()->routeIs('scm.transactions.index')">
+                            {{ __('Transaksi Inventori') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -143,9 +181,18 @@
                 <x-responsive-nav-link href="{{ route('admin.user.user') }}" :active="request()->routeIs('admin.user.user')">
                     {{ __('User') }}
                 </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('admin.resto.index') }}" :active="request()->routeIs('admin.resto.index')">
+                {{ __('Restaurant') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('admin.hotel.index') }}" :active="request()->routeIs('admin.hotel.index')">
+                    {{ __('Hotel') }}
+                </x-responsive-nav-link>
+            
             @endif
 
-            @if (Auth::user()->usertype == 'hotel')
+            @if (Auth::user()->usertype == 'hotelnew')
                 <x-responsive-nav-link href="{{ route('hotel.dashboard') }}" :active="request()->routeIs('hotel.dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
@@ -154,7 +201,7 @@
                     {{ __('Okupansi') }}
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link href="{{ route('hotel.rooms.rooms') }}" :active="request()->routeIs('hotel.rooms.rooms')">
+                <x-responsive-nav-link href="{{ route('hotel.rooms.index') }}" :active="request()->routeIs('hotel.rooms.index')">
                     {{ __('Kamar') }}
                 </x-responsive-nav-link>
 
@@ -162,12 +209,12 @@
                     {{ __('Data Unggah') }}
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link href="{{ route('hotel.booking.booking') }}" :active="request()->routeIs('hotel.booking.booking')">
+                <x-responsive-nav-link href="{{ route('hotel.booking.index') }}" :active="request()->routeIs('hotel.booking.index')">
                     {{ __('Data Keseluruhan') }}
                 </x-responsive-nav-link>
             @endif
 
-            @if (Auth::user()->usertype == 'resto')
+            @if (Auth::user()->usertype == 'restonew')
                 <x-responsive-nav-link href="{{ route('resto.dashboard') }}" :active="request()->routeIs('resto.dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
@@ -183,6 +230,36 @@
                 <x-responsive-nav-link href="{{ route('resto.orders.index') }}" :active="request()->routeIs('resto.orders.index')">
                     {{ __('Data Keseluruhan') }}
                 </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->usertype == 'frontofficehotel')
+            <x-responsive-nav-link href="{{ route('hotel.frontoffice.booking.index') }}" :active="request()->routeIs('hotel.frontoffice.booking.index')">
+                {{ __('Data Transaksi') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('hotel.frontoffice.migrasi.index') }}" :active="request()->routeIs('hotel.frontoffice.migrasi.index')">
+                {{ __('Data Migrasi') }}
+            </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->usertype == 'financehotel')
+            <x-responsive-nav-link href="{{ route('finance.index') }}" :active="request()->routeIs('finance.index')">
+                {{ __('Data Transaksi') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('finance.migrasi.index') }}" :active="request()->routeIs('finance.migrasi.index')">
+                {{ __('Data Migrasi') }}
+            </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->usertype == 'scmhotel')
+            <x-responsive-nav-link href="{{ route('scm.supplies.index') }}" :active="request()->routeIs('scm.supplies.index')">
+                {{ __('Manajemen Inventori') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('scm.transactions.index') }}" :active="request()->routeIs('scm.transactions.index')">
+                {{ __('Transaksi Inventori') }}
+            </x-responsive-nav-link>
             @endif
         </div>
 

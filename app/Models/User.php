@@ -6,11 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +24,8 @@ class User extends Authenticatable
         'password',
         'usertype',
         'logo',
+        'hotel_id',
+        'resto_id',
     ];
 
 
@@ -50,9 +53,24 @@ class User extends Authenticatable
 
 
     }
-    public function bookings()
+    public function hotel()
     {
-        return $this->hasMany(Booking::class,'user_id');
+        return $this->belongsTo(Hotel::class);
+    }
+
+    public function resto()
+    {
+        return $this->belongsTo(Resto::class);
+    }
+
+    public function hotelBookings()
+    {
+        return $this->hasMany(HotelBooking::class);
+    }
+
+    public function hotelUploadLogs()
+    {
+        return $this->hasMany(HotelUploadLog::class);
     }
 
     public function restoOrders()
@@ -60,19 +78,20 @@ class User extends Authenticatable
         return $this->hasMany(RestoOrder::class);
     }
 
-    public function excelUploads()
+    public function restoUploadLogs()
     {
-        return $this->hasMany(ExcelUpload::class);
+        return $this->hasMany(RestoUploadLog::class);
+    }
+
+    public function hotelRooms()
+    {
+        return $this->hasMany(HotelRoom::class);
     }
 
     public function rooms()
     {
-        return $this->hasMany(\App\Models\Room::class, 'user_id');
+        return $this->hasMany(\App\Models\HotelRoom::class, 'hotel_id', 'hotel_id');
     }
-
-    public function orders()
-    {
-        return $this->hasMany(RestoOrder::class, 'user_id');
-    }
+    
 
 }

@@ -1,168 +1,131 @@
 <?php
 
-namespace App\Http\Controllers\resto;
+namespace App\Http\Controllers\Resto;
 
 use App\Http\Controllers\Controller;
-use App\Models\ExcelUpload;
+use App\Models\RestoUploadLog;
 use App\Models\RestoOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\RestoOrdersImport;
-use Illuminate\Support\Facades\Storage;
 
 class ExcelUploadController extends Controller
 {
-    // Menampilkan daftar file Excel yang telah diupload oleh user
     public function index()
     {
-        $uploads = ExcelUpload::where('user_id', Auth::id())->get();
+        $restoId = auth()->user()->resto_id;
+        $uploads = RestoUploadLog::where('resto_id', $restoId)->orderByDesc('created_at')->get();
+
         return view('resto.dataorders.index', compact('uploads'));
     }
 
-    // Menampilkan halaman upload file
     public function create()
     {
         return view('resto.dataorders.create');
     }
 
-    // Menyimpan file yang diupload dan mengimport data
     public function store(Request $request)
     {
-        
         $request->validate([
             'file' => 'required|mimes:xlsx,xls',
+            'file_name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'file_name' => 'required|string',
         ]);
 
-        // Simpan file ke storage
-        $file = $request->file('file');
-        $filePath = $file->store('uploads/resto_orders', 'public');
-
-        // Simpan informasi upload ke database
-        $upload = ExcelUpload::create([
+        $upload = RestoUploadLog::create([
             'user_id' => Auth::id(),
+            'resto_id' => auth()->user()->resto_id,
             'file_name' => $request->file_name,
             'description' => $request->description,
-            'file_path' => $filePath,
         ]);
 
-        // Import data dari file Excel ke tabel resto_orders
-        Excel::import(new RestoOrdersImport($upload), $file);
+        Excel::import(
+            new RestoOrdersImport($upload->id, $upload->resto_id, $upload->user_id),
+            $request->file('file')
+        );
 
         return redirect()->route('resto.dataorders.index')->with('success', 'File berhasil diupload dan data diimport!');
     }
 
-    // Menampilkan detail data dari file yang diupload (View)
     public function show($uploadId, Request $request)
     {
-        $upload = ExcelUpload::findOrFail($uploadId);
-
-        if ($upload->user_id != Auth::id()) {
-            abort(403, 'Unauthorized access');
-        }
+        $upload = RestoUploadLog::where('id', $uploadId)
+            ->where('resto_id', auth()->user()->resto_id)
+            ->firstOrFail();
 
         $perPage = $request->get('perPage', 10);
 
-        $orders = RestoOrder::where('excel_upload_id', $upload->id)
-            ->where('user_id', Auth::id())
+        $orders = RestoOrder::where('resto_upload_log_id', $upload->id)
             ->when($request->has('search'), function ($query) use ($request) {
-                return $query->where('received_by', 'like', '%' . $request->search . '%')
-                    ->orWhere('order_date', 'like', '%' . $request->search . '%')
-                    ->orWhere('item_name', 'like', '%' . $request->search . '%')
-                    ->orWhere('item_type', 'like', '%' . $request->search . '%')
-                    ->orWhere('time_order', 'like', '%' . $request->search . '%')
-                    ->orWhere('transaction_type', 'like', '%' . $request->search . '%')
-                    ->orWhere('type_of_order', 'like', '%' . $request->search . '%');
+                return $query->where(function ($q) use ($request) {
+                    $q->where('received_by', 'like', '%' . $request->search . '%')
+                        ->orWhere('order_date', 'like', '%' . $request->search . '%')
+                        ->orWhere('item_name', 'like', '%' . $request->search . '%')
+                        ->orWhere('item_type', 'like', '%' . $request->search . '%')
+                        ->orWhere('time_order', 'like', '%' . $request->search . '%')
+                        ->orWhere('transaction_type', 'like', '%' . $request->search . '%')
+                        ->orWhere('type_of_order', 'like', '%' . $request->search . '%');
+                });
             })
             ->paginate($perPage);
 
         return view('resto.dataorders.show', compact('upload', 'orders'));
     }
 
-    // Menampilkan form edit (Edit)
     public function edit($uploadId)
     {
-        $upload = ExcelUpload::findOrFail($uploadId);
-
-        if ($upload->user_id != Auth::id()) {
-            abort(403, 'Unauthorized access');
-        }
+        $upload = RestoUploadLog::where('id', $uploadId)
+            ->where('resto_id', auth()->user()->resto_id)
+            ->firstOrFail();
 
         return view('resto.dataorders.edit', compact('upload'));
     }
 
-    // Memperbarui data yang diupload dan menghapus data lama
     public function update(Request $request, $uploadId)
     {
         $request->validate([
-            'file_name' => 'required|string',
+            'file_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'file' => 'nullable|mimes:xlsx,xls',
         ]);
 
-        $upload = ExcelUpload::findOrFail($uploadId);
+        $upload = RestoUploadLog::where('id', $uploadId)
+            ->where('resto_id', auth()->user()->resto_id)
+            ->firstOrFail();
 
-        if ($upload->user_id != Auth::id()) {
-            abort(403, 'Unauthorized access');
-        }
-
-        // Hapus data lama jika ada file baru yang diunggah
         if ($request->hasFile('file')) {
-            RestoOrder::where('excel_upload_id', $upload->id)->delete();
+            // Hapus data order lama
+            RestoOrder::where('resto_upload_log_id', $upload->id)->delete();
 
-            // Hapus file lama jika ada
-            if (!empty($upload->file_path) && Storage::disk('public')->exists($upload->file_path)) {
-                Storage::disk('public')->delete($upload->file_path);
-            }
-
-            // Simpan file baru
-            $file = $request->file('file');
-            $filePath = $file->store('uploads/resto_orders', 'public');
-
-            // Update data upload dengan file baru
             $upload->update([
                 'file_name' => $request->file_name,
                 'description' => $request->description,
-                'file_path' => $filePath,
             ]);
 
-            // Import data baru dari file yang diupload
-            Excel::import(new RestoOrdersImport($upload), $file);
+            Excel::import(
+                new RestoOrdersImport($upload->id, $upload->resto_id, $upload->user_id),
+                $request->file('file')
+            );
         } else {
-            // Update hanya nama file dan deskripsi tanpa menghapus data lama
             $upload->update([
                 'file_name' => $request->file_name,
                 'description' => $request->description,
             ]);
         }
 
-        return redirect()->route('resto.dataorders.index')->with('success', 'File berhasil diperbarui!');
+        return redirect()->route('resto.dataorders.index')->with('success', 'Data upload berhasil diperbarui.');
     }
 
-
-    // Menghapus file dan data yang terkait (Delete)
     public function destroy($uploadId)
     {
-        $upload = ExcelUpload::findOrFail($uploadId);
+        $upload = RestoUploadLog::where('id', $uploadId)
+            ->where('resto_id', auth()->user()->resto_id)
+            ->firstOrFail();
 
-        if ($upload->user_id != Auth::id()) {
-            abort(403, 'Unauthorized access');
-        }
-
-        // Cek apakah file_path tidak null sebelum menghapus file
-        if (!empty($upload->file_path) && Storage::disk('public')->exists($upload->file_path)) {
-            Storage::disk('public')->delete($upload->file_path);
-        }
-
-        // Hapus semua data pesanan terkait file ini
-        RestoOrder::where('excel_upload_id', $upload->id)->delete();
-
-        // Hapus record upload dari database
+        RestoOrder::where('resto_upload_log_id', $upload->id)->delete();
         $upload->delete();
 
-        return redirect()->route('resto.dataorders.index')->with('success', 'File dan data terkait telah dihapus!');
+        return redirect()->route('resto.dataorders.index')->with('success', 'Upload dan data pesanan berhasil dihapus.');
     }
-
 }
