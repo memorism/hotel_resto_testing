@@ -135,8 +135,7 @@ Route::middleware(['auth', 'adminMiddleware'])->group(function () {
         Route::get('/{id}/edit', [AdminSharedCustomerController::class, 'edit'])->name('edit');
         Route::put('/{id}', [AdminSharedCustomerController::class, 'update'])->name('update');
         Route::delete('/{id}', [AdminSharedCustomerController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/restore', [AdminSharedCustomerController::class, 'restore'])
-            ->name('restore');
+        Route::get('/{id}/restore', [AdminSharedCustomerController::class, 'restore']);
         Route::post('/{id}/restore', [AdminSharedCustomerController::class, 'restore'])->name('restore');
     });
 
