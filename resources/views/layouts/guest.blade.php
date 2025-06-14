@@ -11,6 +11,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('build/assets/app-Hqx0vS2d.css') }}">
+    <script type="module" src="{{ asset('build/assets/app-CxZR5l3I.js') }}"></script>
+
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -19,7 +22,7 @@
 <body class="bg-gray-100 text-gray-900 antialiased font-sans">
     <div class="min-h-screen flex items-center justify-center px-4">
         <div class="bg-white shadow-lg rounded-lg flex flex-col md:flex-row overflow-hidden w-full max-w-4xl">
-            
+
             <!-- Logo -->
             <div class="md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
                 <img src="{{ asset('images/PHRI_LOGO.png') }}" alt="Logo PHRI" class="max-h-64 w-auto">

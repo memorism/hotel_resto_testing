@@ -8,6 +8,10 @@
 
     <title>{{ config('app.name', 'PHRI DASHBOARD') }}</title>
 
+    <link rel="stylesheet" href="{{ asset('build/assets/app-Hqx0vS2d.css') }}">
+    <script type="module" src="{{ asset('build/assets/app-CxZR5l3I.js') }}"></script>
+
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -32,81 +36,88 @@
 
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
 
-    <style>[x-cloak] { display: none !important; }</style>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 
     <style>
-        [x-cloak] { display: none !important; }
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body class="font-sans antialiased">
-<div x-data="{ sidebarOpen: false }" class="relative flex min-h-screen bg-gray-200 overflow-hidden">
+    <div x-data="{ sidebarOpen: false }" class="relative flex min-h-screen bg-gray-200 overflow-hidden">
 
-    <!-- Sidebar -->
-    <aside  
-        class="bg-white w-64 fixed inset-y-0 left-0 z-40 shadow-md transform transition-transform duration-300 ease-in-out -translate-x-full sm:translate-x-0"
-        :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">
-        @include('layouts.sidebar')
-    </aside>
+        <!-- Sidebar -->
+        <aside
+            class="bg-white w-64 fixed inset-y-0 left-0 z-40 shadow-md transform transition-transform duration-300 ease-in-out -translate-x-full sm:translate-x-0"
+            :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }">
+            @include('layouts.sidebar')
+        </aside>
 
-    <!-- Overlay (mobile only) -->
-    <div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-black opacity-50 sm:hidden" @click="sidebarOpen = false"></div>
+        <!-- Overlay (mobile only) -->
+        <div x-show="sidebarOpen" x-cloak class="fixed inset-0 bg-black opacity-50 sm:hidden"
+            @click="sidebarOpen = false"></div>
 
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden pl-0 sm:pl-64 transition-all duration-300">
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden pl-0 sm:pl-64 transition-all duration-300">
 
-        <!-- Topbar -->
-        <div class="bg-white  shadow px-4 h-16 flex items-center justify-between sm:justify-end ">
-            <button @click="sidebarOpen = !sidebarOpen" class="sm:hidden focus:outline-none">
-                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-            @include('layouts.topbar')
+            <!-- Topbar -->
+            <div class="bg-white  shadow px-4 h-16 flex items-center justify-between sm:justify-end ">
+                <button @click="sidebarOpen = !sidebarOpen" class="sm:hidden focus:outline-none">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                @include('layouts.topbar')
+            </div>
+
+            <!-- Header -->
+            @isset($header)
+                <header class="bg-white shadow px-4 py-4 sm:px-6 ">
+                    <div class="max-w-7xl mx-auto">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
+
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 ">
+                {{ $slot }}
+            </main>
         </div>
-
-        <!-- Header -->
-        @isset($header)
-            <header class="bg-white shadow px-4 py-4 sm:px-6 ">
-                <div class="max-w-7xl mx-auto">
-                    {{ $header }}
-                </div>
-            </header>
-        @endisset
-
-
-        <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 ">
-            {{ $slot }}
-        </main>
     </div>
-</div>
 
-<!-- Optional JS to close all Alpine dropdowns -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                document.querySelectorAll('[x-data]').forEach(el => {
-                    if (el.__x && typeof el.__x.$data.open !== 'undefined') {
-                        el.__x.$data.open = false;
-                    }
+    <!-- Optional JS to close all Alpine dropdowns -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    document.querySelectorAll('[x-data]').forEach(el => {
+                        if (el.__x && typeof el.__x.$data.open !== 'undefined') {
+                            el.__x.$data.open = false;
+                        }
+                    });
                 });
             });
         });
-    });
-</script>
+    </script>
 
-<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
-<script>
-    new TomSelect('#customer_id', {
-        placeholder: 'Cari pelanggan...',
-        allowEmptyOption: true,
-    });
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <script>
+        new TomSelect('#customer_id', {
+            placeholder: 'Cari pelanggan...',
+            allowEmptyOption: true,
+        });
+    </script>
 
-<script src="//unpkg.com/alpinejs" defer></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
 
 </body>
 
